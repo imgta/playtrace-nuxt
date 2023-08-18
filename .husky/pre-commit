@@ -4,4 +4,5 @@
 wsl git secret hide
 wsl git add .env.secret
 wsl git add .env.prod.secret
+wsl git add test.http.secret
 wsl git add .gitsecret/paths/mapping.cfg
