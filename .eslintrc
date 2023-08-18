@@ -1,0 +1,52 @@
+{
+    "extends": "@antfu",
+    "rules": {
+        "indent": "off",
+        "@typescript-eslint/indent": [
+            "error",
+            4
+        ],
+        "jsonc/indent": [
+            "error",
+            4
+        ],
+        "vue/html-indent": "off",
+        "@typescript-eslint/semi": [
+            "error",
+            "always"
+        ],
+        "curly": [
+            "error",
+            "all"
+        ],
+        "@typescript-eslint/brace-style": [
+            "error",
+            "1tbs",
+            {
+                "allowSingleLine": true
+            }
+        ],
+        "quote-props": "off",
+        "arrow-parens": [
+            "error",
+            "as-needed"
+        ],
+        "@typescript-eslint/comma-dangle": "off",
+        "vue/comma-dangle": "off",
+        "vue/singleline-html-element-content-newline": "off",
+        "vue/html-self-closing": "off",
+        "vue/multiline-html-element-content-newline": "off",
+        "vue/first-attribute-linebreak": "off",
+        "vue/html-closing-bracket-newline": "off",
+        "vue/no-constant-condition": "off",
+        "spaced-comment": "off",
+        "n/prefer-global/process": "off",
+        "object-shorthand": "off",
+        "max-statements-per-line": [
+            "error",
+            {
+                "max": 2
+            }
+        ]
+    }
+}

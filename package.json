@@ -1,0 +1,31 @@
+{
+    "private": true,
+    "scripts": {
+        "build": "nuxt build",
+        "dev": "nuxt dev",
+        "generate": "nuxt generate",
+        "preview": "nuxt preview",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "lint-staged": "lint-staged"
+    },
+    "dependencies": {
+        "nuxt": "3.6.5",
+        "vue-toastification": "^2.0.0-rc.5"
+    },
+    "devDependencies": {
+        "@antfu/eslint-config": "^0.40.2",
+        "@nuxtjs/tailwindcss": "^6.8.0",
+        "@tailwindcss/typography": "^0.5.9",
+        "daisyui": "^3.5.1",
+        "eslint": "^8.47.0",
+        "lint-staged": "^14.0.0",
+        "simple-git-hooks": "^2.9.0"
+    },
+    "simple-git-hooks": {
+        "pre-commit": "npm run lint-staged && git secret hide && git add .env.secret .env.prod.secret test.http.secret .gitsecret/paths/mapping.cfg"
+    },
+    "lint-staged": {
+        "*": "eslint --fix"
+    }
+}
