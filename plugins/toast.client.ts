@@ -9,10 +9,23 @@ export default defineNuxtPlugin(nuxtApp => {
         draggable: false,
         // icon: false,
         toastDefaults: {
-            [TYPE.ERROR]: { timeout: false, closeOnClick: false, toastClassName: 'alert-base alert-error' },
-            [TYPE.SUCCESS]: { timeout: 2000, toastClassName: 'alert-base alert-success' },
-            [TYPE.INFO]: { timeout: 2000, toastClassName: 'alert-base alert-info' },
-            [TYPE.WARNING]: { timeout: 3000, toastClassName: 'alert-base alert-warning' },
-        },
+            [TYPE.ERROR]: {
+                timeout: false,
+                closeOnClick: false,
+                toastClassName: 'alert-base alert-error'
+            },
+            [TYPE.SUCCESS]: {
+                timeout: 2000,
+                toastClassName: 'alert-base alert-success'
+            },
+            [TYPE.INFO]: {
+                timeout: 2000,
+                toastClassName: 'alert-base alert-info'
+            },
+            [TYPE.WARNING]: {
+                timeout: 3000,
+                toastClassName: 'alert-base alert-warning'
+            }
+        }
     });
 });

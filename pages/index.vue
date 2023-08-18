@@ -69,6 +69,6 @@ toast.info('Success');
                 </div>
             </div>
         </div>
-        <Loading :loading="loading" />
+        <Loading :my-loading="loading" />
     </main>
 </template>

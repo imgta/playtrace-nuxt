@@ -1,21 +1,18 @@
-// example, try going to: localhost:3000/api/hello?blah=hoho
+//note: you cannot use any server functions while you use nuxt generate because that turns your entire website static
+//it only works with nuxt build, and you would need to put in .env in prod: NITRO_PRESET=cloudflare-pages
+// that will convert the /server/ files into /functions/ files in cloudflare pages automatically
 export default defineEventHandler(async e => {
-    if (e.req.method === 'GET') {
-        const query = getQuery(e);
-        // console.log('server/api/hello called:', query.blah)
-
-        return JSON.stringify(query.blah);
+    if (e.node.req.method !== 'POST') {
+        throw createError({
+            statusCode: 400,
+            statusMessage: 'Only allows POST requests'
+        });
     }
-    //  else if (e.req.method === 'POST') {
-    //     const body: { item: string } = await useBody(e);
 
-    //     if (!body.item) { throw new Error() };
+    // const { meiliPublicKey } = useRuntimeConfig().public;
 
-    //     const newTodo = {
-    //         item: body.item,
-    //         completed: false
-    //     }
-
-    //     return newTodo;
-    // }
+    const result = 'hi';
+    return {
+        result
+    };
 });

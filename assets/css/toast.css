@@ -2,23 +2,3 @@
     padding: 15px;
     min-height: unset;
 }
-
-.Vue-Toastification__toast--error.alert-error {
-    background-color: hsl(var(--er) / var(--tw-bg-opacity));
-    color: hsl(var(--erc, var(--nc)) / var(--tw-text-opacity));
-}
-
-.Vue-Toastification__toast--success.alert-success {
-    background-color: hsl(var(--su) / var(--tw-bg-opacity));
-    color: hsl(var(--suc, var(--nc)) / var(--tw-text-opacity));
-}
-
-.Vue-Toastification__toast--success.alert-info {
-    background-color: hsl(var(--in) / var(--tw-bg-opacity));
-    color: hsl(var(--inc, var(--nc)) / var(--tw-text-opacity));
-}
-
-.Vue-Toastification__toast--success.alert-warning {
-    background-color: hsl(var(--wa) / var(--tw-bg-opacity));
-    color: hsl(var(--wac, var(--nc)) / var(--tw-text-opacity));
-}
