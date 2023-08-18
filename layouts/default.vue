@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const isDarkMode = ref(false)
+const isDarkMode = ref(false);
 </script>
 
 <template>

@@ -22,5 +22,8 @@
         "eslint": "^8.47.0",
         "husky": "^8.0.3",
         "lint-staged": "^14.0.0"
+    },
+    "lint-staged": {
+        "*": "eslint --fix"
     }
 }

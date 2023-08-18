@@ -1,7 +1,7 @@
 <script setup lang="ts">
-const { toast, loading } = useMisc()
+const { toast, loading } = useMisc();
 
-toast.info('Success')
+toast.info('Success');
 </script>
 
 <template>
