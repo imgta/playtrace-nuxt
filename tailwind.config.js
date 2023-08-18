@@ -61,4 +61,4 @@ module.exports = {
         ], // , 'business'], /* add to element: data-theme='business' for dark theme*/
         // darkTheme: 'business'
     },
-}
+};

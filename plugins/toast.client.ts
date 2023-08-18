@@ -1,8 +1,8 @@
-import Toast, { POSITION, TYPE } from 'vue-toastification'
-import 'vue-toastification/dist/index.css'
-import '~/assets/css/toast.css'
+import Toast, { POSITION, TYPE } from 'vue-toastification';
+import 'vue-toastification/dist/index.css';
+import '~/assets/css/toast.css';
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(nuxtApp => {
     nuxtApp.vueApp.use(Toast, {
         transition: 'Vue-Toastification__fade',
         position: POSITION.BOTTOM_CENTER,
@@ -14,5 +14,5 @@ export default defineNuxtPlugin((nuxtApp) => {
             [TYPE.INFO]: { timeout: 2000, toastClassName: 'alert-base alert-info' },
             [TYPE.WARNING]: { timeout: 3000, toastClassName: 'alert-base alert-warning' },
         },
-    })
-})
+    });
+});

@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+# wsl npm run lint-staged
+wsl git secret hide
+wsl git add .env.secret
+wsl git add .env.prod.secret
+wsl git add test.http.secret
+wsl git add .gitsecret/paths/mapping.cfg

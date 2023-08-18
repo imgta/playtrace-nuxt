@@ -7,7 +7,8 @@
         "preview": "nuxt preview",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
-        "lint-staged": "lint-staged"
+        "lint-staged": "lint-staged",
+        "prepare": "husky install"
     },
     "dependencies": {
         "nuxt": "3.6.5",
@@ -19,11 +20,8 @@
         "@tailwindcss/typography": "^0.5.9",
         "daisyui": "^3.5.1",
         "eslint": "^8.47.0",
-        "lint-staged": "^14.0.0",
-        "simple-git-hooks": "^2.9.0"
-    },
-    "simple-git-hooks": {
-        "pre-commit": "npm run lint-staged && git secret hide && git add .env.secret .env.prod.secret test.http.secret .gitsecret/paths/mapping.cfg"
+        "husky": "^8.0.3",
+        "lint-staged": "^14.0.0"
     },
     "lint-staged": {
         "*": "eslint --fix"
