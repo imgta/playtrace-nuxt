@@ -14,7 +14,7 @@ toast.info('Success');
                 >
                 <div class="py-4 prose">
                     <p>BASED ON YOUR READING HISTORY</p>
-                    <h1>Designing search for mobile apps</h1>
+                    <h1>A catalyst for electrifying social circles</h1>
                     <p>Jan 7, 2022, 4pm</p>
                     <p>
                         Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
