@@ -14,9 +14,12 @@ export default defineNuxtConfig({
     generate: {
         // routes: ['/profile',] //force generate these routes if they aren't crawled
     },
-    modules: [
-        '@nuxtjs/tailwindcss',
-    ],
+    modules: ['@nuxtjs/tailwindcss', '@nuxtjs/color-mode'],
+    colorMode: {
+        preference: 'system', // default theme
+        dataValue: 'theme', // activate 'data-theme' attribute on <html> tag
+        classSuffix: '',
+    },
     nitro: {
         prerender: {
             // routes: ['/sitemap.xml'],
