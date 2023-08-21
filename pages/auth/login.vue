@@ -26,7 +26,7 @@ async function onSubmit() {
         <input id="password" v-model="userData.password" type="password" name="password" placeholder="password" />
         <br />
         <button @click="onSubmit">
-            Register
+            Login:
         </button>
     </div>
 </template>

@@ -6,7 +6,7 @@ const themeCookie = useCookie('selectedTheme');
 </script>
 
 <template>
-    <div :data-theme="themeCookie" class="theme-container">
+    <div :data-theme="themeCookie" class="bg-base-200 h-screen">
         <div class="navbar bg-base-200 px-4">
             <div class="flex-1">
                 <NuxtLink to="/">
@@ -20,7 +20,7 @@ const themeCookie = useCookie('selectedTheme');
         <slot />
 
         <div class="bg-base-200">
-            <footer class="footer items-center p-4 text-base-content max-w-5xl mx-auto">
+            <footer class="footer items-center p-4 text-base-content max-w-5xl mx-auto pt-64 bottom-0">
                 <div class="items-center grid-flow-col">
                     <svg
                         width="30" height="30" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd"
