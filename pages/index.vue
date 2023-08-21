@@ -15,8 +15,8 @@ const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
                     class="rounded-lg shadow-2xl md:max-w-lg lg:max-w-sm"
                 >
                 <div class="py-4 prose">
-                    <p>BASED ON YOUR READING HISTORY</p>
-                    <h1>A catalyst for electrifying social circles</h1>
+                    <p>BASED ON YOUR INTERESTS</p>
+                    <h1>A catalyst for social gatherings</h1>
                     <p>Jan 7, 2022, 4pm</p>
                     <p>
                         Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
