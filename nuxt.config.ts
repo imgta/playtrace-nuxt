@@ -14,7 +14,14 @@ export default defineNuxtConfig({
     generate: {
         // routes: ['/profile',] //force generate these routes if they aren't crawled
     },
-    modules: ['@nuxtjs/tailwindcss', '@nuxtjs/color-mode'],
+    modules: ['@nuxtjs/tailwindcss', '@nuxtjs/color-mode', '@nuxtjs/strapi'],
+    strapi: {
+        url: process.env.STRAPI_URL || 'http://localhost:1337/',
+        prefix: 'api',
+        version: 'v4',
+        cookie: {},
+        cookieName: 'strapi_jwt'
+    },
     colorMode: {
         preference: 'system', // default theme
         dataValue: 'theme', // activate 'data-theme' attribute on <html> tag
