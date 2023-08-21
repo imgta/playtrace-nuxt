@@ -2,6 +2,8 @@
 const { toast, loading } = useMisc();
 
 toast.info('Success');
+
+const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
 </script>
 
 <template>
@@ -33,35 +35,12 @@ toast.info('Success');
                     Reading List
                 </h3>
                 <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <div class="shadow-xl card card-compact bg-base-100 not-prose">
+                    <div v-for="entry in myArr" :key="entry" class="shadow-xl card card-compact bg-base-100 not-prose">
                         <figure class="overflow-hidden max-h-56">
-                            <img src="https://api.lorem.space/image/shoes" alt="Shoes">
                         </figure>
                         <div class="card-body">
                             <h2 class="card-title">
-                                Shoes!
-                            </h2>
-                            <p>If a dog chews shoes whose shoes does he choose?</p>
-                        </div>
-                    </div>
-                    <div class="shadow-xl card card-compact bg-base-100 not-prose">
-                        <figure class="overflow-hidden max-h-56">
-                            <img src="https://api.lorem.space/image/shoes" alt="Shoes">
-                        </figure>
-                        <div class="card-body">
-                            <h2 class="card-title">
-                                Shoes!
-                            </h2>
-                            <p>If a dog chews shoes whose shoes does he choose?</p>
-                        </div>
-                    </div>
-                    <div class="shadow-xl card card-compact bg-base-100 not-prose">
-                        <figure class="overflow-hidden max-h-56">
-                            <img src="https://api.lorem.space/image/shoes" alt="Shoes">
-                        </figure>
-                        <div class="card-body">
-                            <h2 class="card-title">
-                                Shoes!
+                                {{ entry }}
                             </h2>
                             <p>If a dog chews shoes whose shoes does he choose?</p>
                         </div>
