@@ -3,6 +3,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
 
     // this is just a quick solution. Ideally we would check if the jwt is valid here too.
     // TODO: decode JWT token with header for validation
+    // FIXED
     const hasToken = strapiJwt.value;
 
     if (!hasToken && !isLoginPage(to.path)) {
