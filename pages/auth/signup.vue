@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const { register } = useStrapiAuth();
-const router = useRouter();
 
 const userData = reactive({
     username: '',
@@ -14,7 +13,7 @@ const userData = reactive({
 async function onSubmit() {
     try {
         await register({ username: userData.username, email: userData.email, fullName: userData.fullname, password: userData.password, });
-        navigateTo('/auth/success');
+        navigateTo('/');
     } catch (e) {
         console.error(e);
     }
