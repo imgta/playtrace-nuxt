@@ -1,9 +1,13 @@
 <script setup lang="ts">
 const { toast, loading } = useMisc();
 
-toast.info('Success');
+// definePageMeta({
+//     middleware: 'auth'
+// });
 
 const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
+
+toast.info('Success', { timeout: 1400 });
 </script>
 
 <template>
@@ -23,8 +27,8 @@ const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
                         excepturi
                         exercitationem quasi.
                     </p>
-                    <NuxtLink class="link-primary" href="/api/misc?blah=asdf" external>
-                        Go to /api/misc?blah=asdf
+                    <NuxtLink class="link-primary" to="/" external>
+                        Go to backtab.dev
                     </NuxtLink>
                 </div>
             </div>
