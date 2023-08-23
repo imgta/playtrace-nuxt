@@ -1,0 +1,64 @@
+.bubble {
+    position: relative;
+    padding: 0;
+    transition: all 0.2s ease;
+    border: none;
+    background: none;
+}
+
+.bubble:before {
+    content: "";
+    position: relative;
+    top: 1.8rem;
+    left: 0.48rem;
+    display: flex;
+    border-radius: 100rem;
+    background: hsl(var(--p));
+    max-width: 6.1rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    opacity: 75%;
+    filter: contrast(0.6);
+    transition: all 0.4s ease;
+}
+
+.bubble:hover:before {
+    width: 100%;
+    background: hsl(var(--p));
+    opacity: 95%;
+    filter: contrast(1);
+    transition: all 0.4s ease;
+}
+
+.bubble span {
+    position: relative;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: hsl(var(--nc));
+}
+
+.bubble svg {
+    position: relative;
+    top: -1rem;
+    left: 0.135rem;
+    margin-left: 5rem;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+    stroke: hsl(var(--nc));
+    transform: translateX(-8px);
+    transition: all 0.4s ease;
+}
+
+
+.bubble:hover svg {
+    transform: translateX(-4px);
+    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.4));
+
+}
+
+.bubble:active {
+    transform: scale(0.95);
+}

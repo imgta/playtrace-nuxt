@@ -1,22 +1,108 @@
 <script setup lang="ts">
-import 'assets/css/textFX.css';
+import '@/assets/css/dashboard.css';
+import LoginModal from '@/components/forms/LoginModal.vue';
 
 const targetText = '>backTAB';
 const themeCookie = useCookie('selectedTheme');
+const { toast } = useMisc();
+const token = useStrapiToken();
+const { logout } = useStrapiAuth();
+
+const user = reactive({
+    username: '',
+    fullName: '',
+    initials: '',
+});
+
+// ----------------------------------------------------------------
+async function outClick() {
+    try {
+        logout();
+        navigateTo('/');
+        toast.info('Logged out', { timeout: 1500 });
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+// ----------------------------------------------------------------
+watchEffect(() => {
+    try {
+        const data = useStrapiUser().value;
+        if (token.value && data) {
+            const { username, fullName } = data as any;
+            user.username = username;
+            user.fullName = fullName;
+            user.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
+        }
+    } catch (e) {
+        console.error(e);
+    }
+});
 </script>
 
 <template>
     <div :data-theme="themeCookie" class="bg-base-200 h-screen">
-        <div class="navbar bg-base-200 px-4">
+        <div class="navbar bg-base-200 px-5">
             <div class="flex-1">
                 <NuxtLink to="/">
                     <ScrambleFx :target-text="targetText" />
                 </NuxtLink>
             </div>
-            <div className="flex-2">
-                <ThemeSwitch />
+
+            <ThemeSwitch />
+
+            <div v-if="!token">
+                <LoginModal />
+
+                <NuxtLink to="/auth/signup">
+                    <button class="btn-primary font-normal btn-outline btn-sm normal-case mt-0">
+                        Sign Up
+                    </button>
+                </NuxtLink>
+            </div>
+
+            <div v-if="user && token" class="mt-0">
+                <LazyNuxtLink to="/dashboard">
+                    <button class="btn-primary font-normal btn-outline btn-sm normal-case mt-0">
+                        Dashboard
+                    </button>
+                </LazyNuxtLink>
+                <div class="navbar-center lg:flex">
+                    <ul class="menu menu-horizontal pl-1">
+                        <li tabIndex="{{0}}">
+                            <details>
+                                <summary class="py-0 pl-0 pr-1.5 hover:bg-base-200">
+                                    <div class="avatar placeholder bg-transparent cursor-pointer pl-1">
+                                    <div class="bg-secondary text-md font-normal rounded-full w-8">
+                                        <span class="text-xs text-white">
+                                            {{ user.initials }}
+                                        </span>
+                                    </div>
+                                    <span class="text-base-content pt-1 pl-2 text-md">
+                                        {{ user.username }}
+                                    </span>
+                                    </div>
+                                </summary>
+                                <ul class="p-0 m-0 bg-transparent shadow-none drop-shadow-none right-0 top-6">
+                                    <li>
+                                        <LazyNuxtLink
+                                            class="btn btn-xs sm:btn-sm btn-neutral font-light normal-case bg-neutral border-none hover:opacity-80 hover:bg-neutral/80"
+                                            @click="outClick"
+                                        >
+                                            <span class="text-neutral-content text-md">
+                                                Logout
+                                            </span>
+                                        </LazyNuxtLink>
+                                    </li>
+                                </ul>
+                            </details>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
+
         <slot />
 
         <div class="bg-base-200">

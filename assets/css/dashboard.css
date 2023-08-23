@@ -1,0 +1,101 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@100;200;300;400;500;600;700;800&display=swap");
+
+body {
+    font-family: "DM Sans", sans-serif;
+}
+.sidebar {
+    width: fit-content;
+    position:absolute;
+    background-color: none;
+}
+.dashboard {
+    border-radius: 32px;
+    flex: 2;
+
+    &-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 32px;
+    }
+    &-header {
+        display: flex;
+
+        p {
+        margin: 0;
+        }
+
+        .date {
+        font-size: 20px;
+        }
+    }
+}
+
+.dash-status {
+    display: flex;
+}
+
+.status {
+    display: flex;
+    flex-direction: column;
+    margin-right: 16px;
+
+    &:not(:last-child) .status-type:after {
+        content: "";
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translatey(-50%);
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        border: 1px solid var(--secondary-color);
+    }
+}
+
+.status-amt {
+    font-weight: 600;
+}
+
+.status-type {
+    font-weight: 400;
+    position: relative;
+    padding-right: 24px;
+    color: var(--secondary-color);
+}
+
+.stat-value {
+    grid-column-start: 1;
+    white-space: nowrap;
+    font-size: 2.1rem;
+    line-height: 2.5rem;
+    font-weight: 500;
+}
+
+.shake:hover i,
+.shake:hover svg {
+    animation: shake 1200ms;
+}
+@keyframes shake {
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: rotateZ(-5deg);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: rotateZ(5deg);
+    }
+    100% {
+        transform: rotateZ(0);
+    }
+}
+
+.scramble:hover {
+    text-decoration: none;
+    font-family: monospace, monospace;
+}
