@@ -1,19 +1,30 @@
 <script setup lang="ts">
 import '@/assets/css/dashboard.css';
 import LoginModal from '@/components/forms/LoginModal.vue';
+import SignUpModal from '@/components/forms/SignUpModal.vue';
 
-const targetText = '>backTAB';
-const themeCookie = useCookie('selectedTheme');
 const { toast } = useMisc();
+const targetText = '>backTAB';
 const token = useStrapiToken();
+const config = useRuntimeConfig();
 const { logout } = useStrapiAuth();
+const appHost = config.public.strapi.url;
+const themeCookie = useCookie('selectedTheme');
 
+const isUser = ref(!!token.value);
+const dataFetched = ref(false);
 const user = reactive({
+    id: '',
     username: '',
     fullName: '',
     initials: '',
-});
+    avatar: '',
+}) as any;
 
+const expiry = new Date(Date.now() + 86400000); // expiry set to +1 day
+const userCookie = useCookie('userCookie', { expires: expiry });
+
+;
 // ----------------------------------------------------------------
 async function outClick() {
     try {
@@ -25,18 +36,43 @@ async function outClick() {
     }
 }
 
-// ----------------------------------------------------------------
-watchEffect(() => {
+async function getUser() {
     try {
-        const data = useStrapiUser().value;
-        if (token.value && data) {
-            const { username, fullName } = data as any;
-            user.username = username;
-            user.fullName = fullName;
-            user.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
-        }
+        const { id } = useStrapiUser().value as any;
+        user.id = id;
+        const userRes = await $fetch(`${appHost}api/users/${id}?populate=*`);
+        const userMe = await userRes as unknown | any;
+        const { fullName, username, avatar } = userMe as any;
+        user.username = username;
+        user.fullName = fullName;
+        user.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
+        user.avatar = avatar?.formats?.thumbnail?.url || '';
+        userCookie.value = user as any;
+
+        dataFetched.value = true;
     } catch (e) {
         console.error(e);
+    }
+}
+// ----------------------------------------------------------------
+onBeforeMount(async () => {
+    if (isUser.value === false) {
+        dataFetched.value = false;
+        userCookie.value = null;
+    }
+    if (dataFetched.value === false && isUser.value === true) {
+        await getUser();
+    }
+});
+
+watchEffect(async () => {
+    console.log(user.avatar);
+    if (isUser.value === false) {
+        dataFetched.value = false;
+        userCookie.value = null;
+    }
+    if (isUser.value === true && userCookie.value === null) {
+        await getUser();
     }
 });
 </script>
@@ -54,35 +90,42 @@ watchEffect(() => {
 
             <div v-if="!token">
                 <LoginModal />
-
-                <NuxtLink to="/auth/signup">
-                    <button class="btn-primary font-normal btn-outline btn-sm normal-case mt-0">
-                        Sign Up
-                    </button>
-                </NuxtLink>
+                <SignUpModal />
             </div>
 
-            <div v-if="user && token" class="mt-0">
-                <LazyNuxtLink to="/dashboard">
-                    <button class="btn-primary font-normal btn-outline btn-sm normal-case mt-0">
-                        Dashboard
-                    </button>
-                </LazyNuxtLink>
+            <div v-if="token">
+                <NuxtLink to="/dashboard">
+                    <button class="btn-primary btn-outline btn-sm">
+                        <span class="hover:text-neutral-content w-min h-full flex items-center">
+                            Dashboard
+                        </span>
+                        </button>
+                </NuxtLink>
+
                 <div class="navbar-center lg:flex">
                     <ul class="menu menu-horizontal pl-1">
                         <li tabIndex="{{0}}">
                             <details>
                                 <summary class="py-0 pl-0 pr-1.5 hover:bg-base-200">
-                                    <div class="avatar placeholder bg-transparent cursor-pointer pl-1">
-                                    <div class="bg-secondary text-md font-normal rounded-full w-8">
-                                        <span class="text-xs text-white">
-                                            {{ user.initials }}
-                                        </span>
+
+                                    <div v-if="!!user.avatar === true" v-show="!!user.avatar" class="avatar pl-1">
+                                        <div class="w-8 rounded-full">
+                                            <img :src="user.avatar" />
+                                        </div>
                                     </div>
-                                    <span class="text-base-content pt-1 pl-2 text-md">
+
+                                    <div v-if="!!user.avatar === false" v-show="!!user.avatar" class="avatar placeholder pl-1">
+                                        <div class="bg-secondary text-md font-normal rounded-full w-8">
+                                            <span class="text-xs text-white">
+                                                {{ user.initials }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <span class="text-base-content/80 pl-2 text-md">
                                         {{ user.username }}
                                     </span>
-                                    </div>
+
                                 </summary>
                                 <ul class="p-0 m-0 bg-transparent shadow-none drop-shadow-none right-0 top-6">
                                     <li>

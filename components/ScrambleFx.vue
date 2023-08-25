@@ -73,7 +73,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="relative text-primary font-normal text-2xl normal-case font-mono" @mouseenter="startScramble" @mouseleave="stopScramble">
+    <div class="relative text-primary font-normal text-xl normal-case font-mono" @mouseenter="startScramble" @mouseleave="stopScramble">
         <div class="scrambled-text">
             {{ scrambledText }}
         </div>

@@ -1,4 +1,4 @@
-.bubble {
+.login, .signup, .logincorp, .signupcorp {
     position: relative;
     padding: 0;
     transition: all 0.2s ease;
@@ -6,23 +6,52 @@
     background: none;
 }
 
-.bubble:before {
+/* initial bubble styling and position: Login */
+.login:before, .logincorp:before {
     content: "";
     position: relative;
-    top: 1.8rem;
-    left: 0.48rem;
+    top: 1.83rem;
+    left: 0.58rem;
     display: flex;
     border-radius: 100rem;
     background: hsl(var(--p));
-    max-width: 6.1rem;
+    max-width: 6.2rem;
     width: 2.2rem;
     height: 2.2rem;
     opacity: 75%;
     filter: contrast(0.6);
     transition: all 0.4s ease;
 }
+.logincorp:before {
+    left: 0.53rem;
+    border-radius: 0px;
+}
 
-.bubble:hover:before {
+
+/* initial bubble styling and position: Register */
+.signup:before, .signupcorp:before {
+    content: "";
+    position: relative;
+    top: 1.83rem;
+    left: 0.58rem;
+    display: flex;
+    border-radius: 100rem;
+    background: hsl(var(--p));
+    max-width: 10rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    opacity: 75%;
+    filter: contrast(0.6);
+    transition: all 0.4s ease;
+}
+.signupcorp:before {
+    left: 0.58rem;
+    border-radius: 0px;
+}
+
+
+/* initial bubble coloring */
+.login:hover:before, .signup:hover:before, .logincorp:hover:before, .signupcorp:hover:before {
     width: 100%;
     background: hsl(var(--p));
     opacity: 95%;
@@ -30,19 +59,42 @@
     transition: all 0.4s ease;
 }
 
-.bubble span {
+/* button text */
+.login span, .signup span, .logincorp span, .signupcorp span {
     position: relative;
     font-size: 1rem;
     font-weight: 600;
     letter-spacing: 0.05em;
     color: hsl(var(--nc));
+    transition: all 0.4s ease;
 }
 
-.bubble svg {
+/* button text on hover */
+.login:hover span, .signup:hover span, .logincorp:hover span, .signupcorp:hover span {
+    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.35));
+}
+
+/* Arrow styling and positioning: Login */
+.login svg, .logincorp svg {
     position: relative;
     top: -1rem;
-    left: 0.135rem;
-    margin-left: 5rem;
+    left: 0.1rem;
+    margin-left: 5.3rem;  /* adjusts overall bubble stretch */
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+    stroke: hsl(var(--nc));
+    transform: translateX(-9px);
+    transition: all 0.4s ease;
+}
+
+/* Arrow styling and positioning: Signup */
+.signup svg, .signupcorp svg {
+    position: relative;
+    top: -1rem;
+    left: 0.1rem;
+    margin-left: 6.5rem;  /* adjusts overall bubble stretch */
     fill: none;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -52,13 +104,13 @@
     transition: all 0.4s ease;
 }
 
-
-.bubble:hover svg {
-    transform: translateX(-4px);
-    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.4));
-
+/* Arrow animation on hover */
+.login:hover svg, .signup:hover svg, .logincorp:hover svg, .signupcorp:hover svg {
+    transform: translateX(-5px);
+    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.35));
 }
 
-.bubble:active {
+/* Button hover effects */
+.login:active, .signup:active, .logincorp:active, .signupcorp:active {
     transform: scale(0.95);
 }
