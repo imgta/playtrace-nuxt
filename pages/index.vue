@@ -1,13 +1,11 @@
 <script setup lang="ts">
-const { toast, loading } = useMisc();
-
 // definePageMeta({
 //     middleware: 'auth'
 // });
 
 const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
 
-toast.info('Success', { timeout: 1400 });
+// toast.info('Success', { timeout: 1400 });
 </script>
 
 <template>
@@ -52,6 +50,6 @@ toast.info('Success', { timeout: 1400 });
                 </div>
             </div>
         </div>
-        <Loading :my-loading="loading" />
+        <!-- <Loading :my-loading="loading" /> -->
     </main>
 </template>
