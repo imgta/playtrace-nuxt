@@ -4,6 +4,8 @@ export default defineNuxtConfig({
         // The private keys which are only available within server-side
         // apiSecret: 'this string is only available server side, not client side. you can also put this string in the .env file, which is git ignored. then call it like weatherAppSecret but its config.apiSecret',
         public: {
+            unSplashAPI: process.env.UNSPLASH_KEY,
+            giphyAPI: process.env.GIPHY_KEY,
             // strapiHost: process.env.STRAPI_URL,
             // Keys within public, will be also exposed to the client-side
             // weatherAppSecret: process.env.WEATHER_APP_SECRET, //call this: const config = useRuntimeConfig(); config.public.weatherAppSecret

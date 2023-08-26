@@ -51,16 +51,14 @@ watchEffect(() => {
     }
     console.log(themeCookie);
 });
-
-// console.log(themeCookie);
 </script>
 
 <template>
-<div class="flex flex-col w-full lg:flex-row">
+<div class="flex w-full lg:flex-row">
     <form :class="formBg" class="flex w-auto max-fit shadow-none">
-    <div class="grid flex-grow h-fit card rounded-box place-items-center">
+    <div class="h-fit card rounded-box place-items-center">
         <h1 class="text-primary text-4xl text-center pt-4 pr-1.5 pb-0.5">
-            Link Up!
+            New Event!
         </h1>
         <p class="text-neutral-content/80 text-center text-sm">
             Two's a party, three's a crowd.
@@ -124,14 +122,78 @@ watchEffect(() => {
 <!-- <Bubbles /> -->
     <div class="divider flex-1 lg:divider-horizontal place-items-center">
         <div v-show="themeCookie === 'dracula' || themeCookie === 'night'">
-        <Bubbles />
+            <Bubbles />
+        </div>
+        <div v-show="themeCookie === 'fantasy' || themeCookie === 'corporate'">
+            <BubblesDark />
+        </div>
     </div>
-    <div v-show="themeCookie === 'fantasy' || themeCookie === 'corporate'">
-        <BubblesDark />
-    </div>
-    </div>
-    <div class="grid flex-2 h-fit card rounded-box place-items-center">
 
+    <div class="grid flex-2 h-fit card rounded-box place-items-center">
+        <form :class="formBg" class="flex w-auto max-fit shadow-none">
+    <div class="h-fit card rounded-box place-items-center">
+        <h1 class="text-primary text-4xl text-center pt-4 pr-1.5 pb-0.5">
+            Link Up!
+        </h1>
+        <p class="text-neutral-content/80 text-center text-sm">
+            Two's a party, three's a crowd.
+        </p>
+        <div class="card-body pt-5 pb-1.5 bg-none">
+            <div class="focus:text-base-content bg-none placeholder:text-opacity-75 placeholder:text-neutral focus:placeholder-transparent placeholder:border-inherit">
+                <label class="label-text text-neutral-content/80">Event Title</label>
+                <input
+                    placeholder="Untitled"
+                    required
+                    type="text"
+                    name="fullname"
+                    class="form-control input input-bordered focus:bg-base-100 w-full"
+                />
+                <label class="label-text text-neutral-content/80">Location</label>
+                <input
+                    type="text"
+                    name="location"
+                    class="form-control input input-bordered focus:bg-base-100 w-full"
+                />
+                <label class="label-text text-neutral-content/80">Spots</label>
+                <input
+                    type="text"
+                    name="username"
+                    class="form-control input input-bordered focus:bg-base-100 w-full"
+                />
+                <label class="label-text text-neutral-content/80">Cost</label>
+                <input
+                    type="text"
+                    name="cost"
+                    class="form-control input input-bordered focus:bg-base-100 w-full"
+                />
+                <label class="label-text text-neutral-content/80">Description</label>
+                <textarea
+                    placeholder="Whose birthday is it this time?"
+                    type="text"
+                    name="description"
+                    class="textarea text-bordered textarea-sm textarea-neutral focus:bg-base-100 w-full"
+                />
+            </div>
+
+            <div class="flex justify-center items-center w-full h-14 pr-3.5">
+                <button type="submit" :class="buttonTheme" @click="onSubmit">
+                    <span>Send It</span>
+                    <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
+                        <path d="M1,5 L11,5"></path>
+                        <polyline points="8 1 12 5 8 9"></polyline>
+                    </svg>
+                </button>
+            </div>
+            <label class="label m-0 pt-2 pb-0 justify-center">
+                <NuxtLink to="/" class="link link-hover hover:link-primary">
+                    <span class="label-text-alt text-neutral-content/75 hover:text-neutral-content font-extralight pl-1.5">
+                        Have we met before?
+                    </span>
+                </NuxtLink>
+            </label>
+        </div>
+    </div>
+    </form>
     </div>
 </div>
 </template>

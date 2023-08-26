@@ -1,0 +1,70 @@
+.edit {
+    display: inline-flex;
+    flex-shrink: 0;
+    cursor: pointer;
+    user-select: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    --tw-border-opacity: 1;
+    border: 2px dashed hsl(var(--pf) / var(--tw-border-opacity));
+    text-align: center;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    transition-duration: 175ms;
+    border-radius: var(--rounded-btn, 0.5rem); /* 8px */
+    height: 16rem;
+    width: 20rem;
+    padding-left: 1rem;      /* 16px */;
+    padding-right: 1rem;     /* 16px */;
+    font-size: 0.875rem;     /* 14px */;
+    line-height: 1.25rem;    /* 20px */;
+    line-height: 1em;
+    min-height: 3rem;        /* 48px */;
+    gap: 0.5rem;             /* 8px */;
+    font-weight: 600;
+    text-decoration-line: none;
+    border-width: var(--border-btn, 1px);
+    animation: button-pop var(--animation-btn, 0.25s) ease-out;
+    text-transform: var(--btn-text-case, uppercase);
+    --tw-bg-opacity: 1;
+    background-color: hsl(var(--b2) / var(--tw-bg-opacity));
+    --tw-text-opacity: 1;
+    color: hsl(var(--bc) / var(--tw-text-opacity));
+    outline-color: hsl(var(--bc) / 1);
+}
+
+.edit span:last-child {
+    display: none;
+}
+.edit-primary {
+    border: 2px dashed hsl(var(--bc) / 1);
+    --tw-border-opacity: 1;
+    border-color: hsl(var(--pf) / var(--tw-text-opacity));
+    background-color: transparent;
+    --tw-text-opacity: 1;
+    color: hsl(var(--pf) / var(--tw-text-opacity));
+    font-weight: 600;
+    outline-color: hsl(var(--p) / 1);
+}
+.edit:active {
+    background-color: #fff;
+}
+
+@media (hover: hover) {
+    .edit-primary:hover {
+        border: 2px dashed white;
+        background-image: url('https://i.giphy.com/media/62PP2yEIAZF6g/giphy.gif');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-origin: border-box;
+        background-color: transparent;
+        color: hsl(var(--nc) / var(--tw-border-opacity));
+        /* height: 12rem;
+        width: 12rem; */
+        filter:brightness(1.12);
+        filter:contrast(0.9);
+    }
+}
