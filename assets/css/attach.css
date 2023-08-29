@@ -1,13 +1,14 @@
 .edit {
+    z-index: 2;
     display: inline-flex;
-    flex-shrink: 0;
+    /* flex-shrink: 0; */
     cursor: pointer;
     user-select: none;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     --tw-border-opacity: 1;
-    border: 2px dashed hsl(var(--pf) / var(--tw-border-opacity));
+    border: 2px dashed hsl(var(--p) / var(--tw-border-opacity));
     text-align: center;
     transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -15,9 +16,7 @@
     transition-duration: 175ms;
     border-radius: var(--rounded-btn, 0.5rem); /* 8px */
     height: 16rem;
-    width: 20rem;
-    padding-left: 1rem;      /* 16px */;
-    padding-right: 1rem;     /* 16px */;
+    width: 26rem;
     font-size: 0.875rem;     /* 14px */;
     line-height: 1.25rem;    /* 20px */;
     line-height: 1em;
@@ -39,12 +38,11 @@
     display: none;
 }
 .edit-primary {
-    border: 2px dashed hsl(var(--bc) / 1);
-    --tw-border-opacity: 1;
-    border-color: hsl(var(--pf) / var(--tw-text-opacity));
+    /* border: 2px dashed hsl(var(--p) / 1); */
+    border: 2px dashed hsl(var(--bc));
+    border-color: hsl(var(--bc));
+    color: hsl(var(--bc));
     background-color: transparent;
-    --tw-text-opacity: 1;
-    color: hsl(var(--pf) / var(--tw-text-opacity));
     font-weight: 600;
     outline-color: hsl(var(--p) / 1);
 }
@@ -55,16 +53,82 @@
 @media (hover: hover) {
     .edit-primary:hover {
         border: 2px dashed white;
+        /* border: 2px dashed hsl(var(--p)); */
+        color: hsl(var(--nc));
+        text-shadow: 1px 1px 1px black;
         background-image: url('https://i.giphy.com/media/62PP2yEIAZF6g/giphy.gif');
         background-position: center;
         background-repeat: no-repeat;
         background-size: cover;
         background-origin: border-box;
         background-color: transparent;
-        color: hsl(var(--nc) / var(--tw-border-opacity));
-        /* height: 12rem;
-        width: 12rem; */
         filter:brightness(1.12);
         filter:contrast(0.9);
+        /* height: 12rem;
+        width: 12rem; */
     }
+}
+
+.radio-tile-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.input-container {
+    position: relative;
+    height: 4.5rem;
+    width: 4.5rem;
+    margin: 0.5rem 0.25rem;
+    padding: 0rem;
+}
+
+.radio-button {
+    opacity: 0;
+    position: absolute;
+}
+
+.radio-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    border: transparent;
+    border-radius: var(--rounded-btn, 0.5rem);
+    padding: 1rem;
+    transition: transform 200ms ease;
+}
+.icon svg {
+    fill: hsl(var(--bc) / 0.8);
+    width: 2rem;
+    height: 2rem;
+}
+
+.radio-tile-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.75px;
+    color: hsl(var(--bc) / 0.8);
+    user-select: none;
+}
+.radio-button:checked + .radio-tile {
+    background-color: transparent;
+    border: 2px solid hsl(var(--p) / 1);
+    color: hsl(var(--p) / 1);
+    transform: scale(1.1, 1.1);
+    transition: transform 200ms ease;
+}
+
+.radio-button:checked + .radio-tile .icon svg {
+    fill: hsl(var(--p) / 1);
+    background-color: transparent;
+}
+
+.radio-button:checked + .radio-tile .radio-tile-label {
+    color: hsl(var(--p) / 1);
+    background-color: transparent;
 }

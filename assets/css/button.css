@@ -7,35 +7,12 @@
 }
 
 /* initial bubble styling and position: Login */
-.login:before, .logincorp:before {
+.logincorp:before, .signupcorp:before, .signup:before, .login:before {
     content: "";
     position: relative;
     top: 1.83rem;
-    left: 0.58rem;
+    left: 0.54rem;
     display: flex;
-    border-radius: 100rem;
-    background: hsl(var(--p));
-    max-width: 6.2rem;
-    width: 2.2rem;
-    height: 2.2rem;
-    opacity: 75%;
-    filter: contrast(0.6);
-    transition: all 0.4s ease;
-}
-.logincorp:before {
-    left: 0.53rem;
-    border-radius: 0px;
-}
-
-
-/* initial bubble styling and position: Register */
-.signup:before, .signupcorp:before {
-    content: "";
-    position: relative;
-    top: 1.83rem;
-    left: 0.58rem;
-    display: flex;
-    border-radius: 100rem;
     background: hsl(var(--p));
     max-width: 10rem;
     width: 2.2rem;
@@ -44,9 +21,18 @@
     filter: contrast(0.6);
     transition: all 0.4s ease;
 }
+
+.logincorp:before, .signupcorp:before {
+    border-radius: 0px;
+}
+.logincorp:before {
+    left: 0.53rem;
+}
 .signupcorp:before {
     left: 0.58rem;
-    border-radius: 0px;
+}
+.signup:before, .login:before {
+    border-radius: 100rem;
 }
 
 
@@ -75,33 +61,27 @@
 }
 
 /* Arrow styling and positioning: Login */
-.login svg, .logincorp svg {
+.login svg, .logincorp svg, .signup svg, .signupcorp svg {
     position: relative;
     top: -1rem;
     left: 0.1rem;
-    margin-left: 5.3rem;  /* adjusts overall bubble stretch */
     fill: none;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 1.5;
     stroke: hsl(var(--nc));
-    transform: translateX(-9px);
     transition: all 0.4s ease;
+}
+
+.login svg, .logincorp svg {
+    margin-left: 5.3rem;  /* adjusts overall bubble stretch */
+    transform: translateX(-9px);
 }
 
 /* Arrow styling and positioning: Signup */
 .signup svg, .signupcorp svg {
-    position: relative;
-    top: -1rem;
-    left: 0.1rem;
     margin-left: 6.5rem;  /* adjusts overall bubble stretch */
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 1.5;
-    stroke: hsl(var(--nc));
     transform: translateX(-8px);
-    transition: all 0.4s ease;
 }
 
 /* Arrow animation on hover */

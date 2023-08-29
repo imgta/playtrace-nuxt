@@ -12,7 +12,7 @@ export default defineNuxtConfig({
         },
     },
     build: {
-        transpile: ['vue-toastification'],
+        transpile: ['vue-toastification', 'vue-flatpickr-component', 'v-calendar'],
     },
     // css: ["~/assets/css/global.css"],
     generate: {

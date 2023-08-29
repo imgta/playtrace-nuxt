@@ -94,6 +94,13 @@ watchEffect(async () => {
             </div>
 
             <div v-if="token">
+                <NuxtLink to="/events">
+                    <button class="btn-primary btn-outline btn-sm">
+                        <span class="hover:text-neutral-content w-min h-full flex items-center">
+                            Events
+                        </span>
+                    </button>
+                </NuxtLink>
                 <NuxtLink to="/dashboard">
                     <button class="btn-primary btn-outline btn-sm">
                         <span class="hover:text-neutral-content w-min h-full flex items-center">
@@ -144,6 +151,7 @@ watchEffect(async () => {
                     </ul>
                 </div>
             </div>
+
         </div>
 
         <slot />
