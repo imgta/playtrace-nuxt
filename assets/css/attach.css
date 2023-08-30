@@ -1,36 +1,31 @@
 .edit {
     z-index: 2;
     display: inline-flex;
-    /* flex-shrink: 0; */
     cursor: pointer;
     user-select: none;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    --tw-border-opacity: 1;
-    border: 2px dashed hsl(var(--p) / var(--tw-border-opacity));
     text-align: center;
     transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
     transition-duration: 175ms;
     border-radius: var(--rounded-btn, 0.5rem); /* 8px */
-    height: 16rem;
-    width: 26rem;
+    /* height: 16rem; */
+    /* width: 26rem; */
+    min-height: 16rem;
     font-size: 0.875rem;     /* 14px */;
     line-height: 1.25rem;    /* 20px */;
     line-height: 1em;
-    min-height: 3rem;        /* 48px */;
     gap: 0.5rem;             /* 8px */;
     font-weight: 600;
     text-decoration-line: none;
     border-width: var(--border-btn, 1px);
     animation: button-pop var(--animation-btn, 0.25s) ease-out;
     text-transform: var(--btn-text-case, uppercase);
-    --tw-bg-opacity: 1;
-    background-color: hsl(var(--b2) / var(--tw-bg-opacity));
-    --tw-text-opacity: 1;
-    color: hsl(var(--bc) / var(--tw-text-opacity));
+    background-color: hsl(var(--b2));
+    color: hsl(var(--bc));
     outline-color: hsl(var(--bc) / 1);
 }
 
@@ -39,8 +34,7 @@
 }
 .edit-primary {
     /* border: 2px dashed hsl(var(--p) / 1); */
-    border: 2px dashed hsl(var(--bc));
-    border-color: hsl(var(--bc));
+    border: 2px dashed hsl(var(--bc) / 0.7);
     color: hsl(var(--bc));
     background-color: transparent;
     font-weight: 600;
@@ -53,6 +47,7 @@
 @media (hover: hover) {
     .edit-primary:hover {
         border: 2px dashed white;
+        /* border: 2px dashed hsl(var(--af)); */
         /* border: 2px dashed hsl(var(--p)); */
         color: hsl(var(--nc));
         text-shadow: 1px 1px 1px black;

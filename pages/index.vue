@@ -1,8 +1,4 @@
 <script setup lang="ts">
-// definePageMeta({
-//     middleware: 'auth'
-// });
-
 const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
 
 // toast.info('Success', { timeout: 1400 });

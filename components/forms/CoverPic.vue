@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import '@/assets/css/button.css';
 import '@/assets/css/attach.css';
-import '@/assets/css/input.css';
-import Loader from '@/components/Loader.vue';
 
 const themeCookie = useCookie('selectedTheme');
 const pageTheme = ref(themeCookie).value as any;
@@ -24,10 +21,10 @@ const loadingAPI = ref<boolean>(false);
 let fetchDelay: ReturnType<typeof setTimeout> | null = null;
 
 const giphyOffset = ref<number>(0);
-const giphyLimit = 30; // GIPHY beta key max limit: 50
+const giphyLimit: number = 30; // GIPHY beta key max limit: 50
 
 const splashPage = ref<number>(0);
-const splashPerPage = 30; // Unsplash max limit: 30
+const splashPerPage: number = 30; // Unsplash max limit: 30
 
 const clickAPI = ref<string>('splash');
 const countAPI = ref(0);
@@ -37,19 +34,26 @@ async function getGiphy(query: string, offset: number, limit: number): Promise<s
     try {
         const config = useRuntimeConfig();
         const GIPHY_API = config.public.giphyAPI;
-        const giphyRes: Record<string, any> = await $fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API}&q=${query}&limit=${limit}&offset=${offset}&bundle=clips_grid_picker`);
-        // REGEX transform image URLs to grab raw .webp files
-        const webpUrls: string[] = giphyRes.data.map((gif: any) => {
-            const fullGif = gif.images.original.webp;
-            return fullGif.replace(/https:\/\/media\d\.giphy\.com\/media\/([^\/?]+).*/, 'https://i.giphy.com/media/$1/giphy.webp');
+        const giphyRes: Record<string, any> = await $fetch(`https://api.giphy.com/v1/gifs/search?q=${query}&api_key=${GIPHY_API}&limit=${limit}&offset=${offset}&bundle=clips_grid_picker`);
+
+        // Transform image URLs to remove hover elements
+        // Note: fetching .webp images breaks when query = 'cats'
+        const gifUrls: string[] = giphyRes.data.map((gif: any) => {
+            const fullGif = gif.images.original.url;
+            const imgGif = fullGif.replace(
+                /^https:\/\/media\d\.giphy\.com\/media\/([^\/?]+).*\??.*$/,
+                'https://i.giphy.com/$1/giphy.gif'
+            );
+            return imgGif;
         });
-        return webpUrls;
+        return gifUrls;
     } catch (e: any) {
         console.error(e);
         return e.message;
     } finally {
         giphyOffset.value += 1;
         countAPI.value += 1;
+
         console.log('+API CALL:', countAPI.value);
         console.log('GIPHY Offset:', giphyOffset.value);
     }
@@ -134,6 +138,7 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
                             gifs.value = webpUrls;
                             storedQuery.giphy = userQuery;
 
+                            console.log('cats:', gifs.value);
                             console.log('stored:', storedQuery.giphy);
                         } catch (e) {
                             console.error(e);
@@ -168,19 +173,40 @@ function selectCover(img: string) {
     console.log('COVER PIC:', coverSelect.value);
 }
 
-function openCover() {
+async function openCover() {
     if (popCover.value) {
         popCover.value.showModal();
     }
+    console.log(!!popCover.value);
+    if (pics.value.length === 0) {
+        splashPage.value = 0;
+        try {
+            loadingAPI.value = true;
+            const startQuery = 'party';
+            const imgs = await unSplash(startQuery, splashPage.value, splashPerPage);
+            pics.value = imgs;
+            storedQuery.splash = startQuery;
+            coverQuery.value = startQuery;
+        } catch (e) {
+            console.error(e);
+        } finally {
+            loadingAPI.value = false;
+        }
+    } else {
+        loadingAPI.value = false;
+    }
 }
+
+console.log(pics.value.length);
+console.log(!!popCover.value);
 
 // ----------------------------------------------------------------
 </script>
 
 <template>
-<div>
-    <button v-if="coverSelect === ''" class="edit edit-primary" @click="openCover">Cover Picture</button>
-    <img v-if="coverSelect !== ''" :src="coverSelect" alt="Cover" class="edit edit-primary object-cover" @click="openCover" />
+<div class="justify-center content-center self-center items-center">
+    <button v-if="coverSelect === ''" class="edit edit-primary lg:min-w-[80%] sm:min-w-[100%] max-sm:min-w-[100%] lg:h-[90%] sm:h-full " @click="openCover">Cover Picture</button>
+    <img v-if="coverSelect !== ''" :src="coverSelect" alt="Cover" class="edit edit-primary object-cover h-[24rem] w-[80%] sm:w-[100%] max-sm:w-[100%]" @click="openCover" />
     <dialog id="my_modal_4" ref="popCover" class="modal">
 
         <form method="dialog" class="modal-box max-w-4xl p-10 shadow-none bg-primary-content/95">
@@ -221,32 +247,43 @@ function openCover() {
                 <input v-model="coverQuery" type="search" class="input input-bordered input-primary form-input pl-9" placeholder="Search" />
                 <svg class="fill-base-content w-4" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"><path d="M790.588 1468.235c-373.722 0-677.647-303.924-677.647-677.647 0-373.722 303.925-677.647 677.647-677.647 373.723 0 677.647 303.925 677.647 677.647 0 373.723-303.924 677.647-677.647 677.647Zm596.781-160.715c120.396-138.692 193.807-319.285 193.807-516.932C1581.176 354.748 1226.428 0 790.588 0S0 354.748 0 790.588s354.748 790.588 790.588 790.588c197.647 0 378.24-73.411 516.932-193.807l516.028 516.142 79.963-79.963-516.142-516.028Z" fill-rule="evenodd"></path></svg>
             </div>
-                <!-- <input v-model="coverQuery" type="search" class="input input-bordered input-primary form-input max-w-md" placeholder="Search" /> -->
 
             </div>
 
-            <div v-if="loadingAPI === true" class="flex justify-center items-center">
+            <div v-if="loadingAPI" class="flex justify-center items-center">
                 <Loader />
             </div>
 
-        <div class="pt-8">
-            <div class="flex justify-center items-center">
-                <div v-if="clickAPI === 'splash'" class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1.5">
-                    <div v-for="(pic, index) in pics" :key="index" class="flex justify-center items-center">
-                        <button>
-                            <img :src="pic" alt="PICs" class="h-[250px] object-contain cursor-pointer hover:brightness-110 hover:contrast-75 hover:opacity-90" @click="selectCover(pic)" />
-                        </button>
-                    </div>
+        <div class="pt-6">
+
+                <div v-if="clickAPI === 'splash'">
+                    <MasonryWall :items="pics" :ssr-columns="3" :min-columns="3" :column-width="250" :gap="12">
+                        <template #default="{ item }">
+                            <button>
+                                <img :src="item" alt="PICs" class="object-contain cursor-pointer hover:brightness-110 hover:contrast-75 hover:opacity-90" @click="selectCover(item)" />
+                            </button>
+                        </template>
+                    </MasonryWall>
                 </div>
 
-                <div v-if="clickAPI === 'giphy'" class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1.5">
+                <div v-if="clickAPI === 'giphy'">
+                    <MasonryWall :items="gifs" :ssr-columns="3" :min-columns="3" :column-width="250" :gap="12">
+                        <template #default="{ item }">
+                            <button>
+                                <img :src="item" alt="GIFs" class="object-contain cursor-pointer hover:brightness-110 hover:contrast-75 hover:opacity-90" @click="selectCover(item)" />
+                            </button>
+                        </template>
+                    </MasonryWall>
+                </div>
+
+                <!-- <div v-if="clickAPI === 'giphy'" class="grid grid-flow-row-dense grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1.5">
                     <div v-for="(gif, index) in gifs" :key="index" class="flex justify-center items-center">
                         <button>
                             <img :src="gif" alt="GIFs" class="h-[250px] object-contain cursor-pointer hover:brightness-110 hover:contrast-75 hover:opacity-90" @click="selectCover(gif)" />
                         </button>
                     </div>
-                </div>
-            </div>
+                </div> -->
+
         </div>
 
         </form>

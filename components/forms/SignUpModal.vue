@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import '@/assets/css/button.css';
-
 const { register } = useStrapiAuth();
 const { toast } = useMisc();
 

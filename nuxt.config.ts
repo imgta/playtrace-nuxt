@@ -6,15 +6,16 @@ export default defineNuxtConfig({
         public: {
             unSplashAPI: process.env.UNSPLASH_KEY,
             giphyAPI: process.env.GIPHY_KEY,
+            googleMapsAPI: process.env.GOOGLE_KEY,
             // strapiHost: process.env.STRAPI_URL,
             // Keys within public, will be also exposed to the client-side
             // weatherAppSecret: process.env.WEATHER_APP_SECRET, //call this: const config = useRuntimeConfig(); config.public.weatherAppSecret
         },
     },
     build: {
-        transpile: ['vue-toastification', 'vue-flatpickr-component', 'v-calendar'],
+        transpile: ['vue-toastification', 'v-calendar', '@yeger/vue-masonry-wall', 'vue-google-autocomplete'],
     },
-    // css: ["~/assets/css/global.css"],
+    css: ['@/assets/css/input.css', '@/assets/css/button.css'],
     generate: {
         // routes: ['/profile',] //force generate these routes if they aren't crawled
     },

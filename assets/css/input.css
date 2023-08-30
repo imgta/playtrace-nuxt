@@ -1,3 +1,7 @@
+body {
+    overflow-x: hidden;
+}
+
 .form-input {
     width: 100%;
     color: hsl(var(--bc) / 0.8);
@@ -16,6 +20,7 @@
     background-color: hsl(var(--b1) / 1);
     color: hsl(var(--bc) / var(--tw-text-opacity));
     border-color: hsl(var(--p));
+    caret-color: hsl(var(--pf));
 }
 .form-input:hover {
     background-color: hsl(var(--p) / 0.3);
@@ -25,40 +30,46 @@
 }
 
 
-
-.my-calendar :deep(:is(.vc-time-colon, select.vc-focus.vc-align-right, select.vc-focus.vc-align-left)) {
-    color: hsl(var(--bc));
-    border-color: hsl(var(--p));
+/* AVATAR ICON SLIDER */
+.iconDiv {
+    /* margin-top: 20px; */
+    /* margin-bottom: 20px; */
+    /* margin-left: 4px; */
+    /* padding: 4px; */
+    /* white-space: nowrap; */
+    display: inline-flex;
+    align-items: center;
+    overflow: hidden;
+    height: 34px; width: 34px;
+    border-radius: 9999px;
+    cursor: pointer;
+    color: hsl(var(--nc) / 0.8);
+    transition: width 300ms ease-in-out 0s, background-color 300ms linear 200ms;
 }
-.my-calendar :deep(:is(.vc-highlight-content-solid)) {
-    color: hsl(var(--nc));
-    background-color: hsl(var(--p));
+.iconDiv:hover, .iconDiv:focus-visible {
+    width: 140px;
+    /* background-color: rgb(51 65 85); */
+    background-color: hsl(var(--pf) / 0.45);
+    transition: width 300ms ease-in-out 0s, background-color 100ms linear 0s;
+}
+/* .iconDiv:focus-visible {
+    outline: 1px solid rgb(51 65 85);
+    outline-offset: 4px;
+} */
+.iconDiv:active {
+    opacity: 0.9;
 }
 
-.my-calendar :deep(:is(.vc-light, .vc-attr, .vc-light.vc-attr)) {
-    --vc-bg: hsl(var(--bc) / 0);
-    --vc-border: hsl(var(--p));
-    --vc-header-title-color: hsl(var(--p));
-    --vc-header-arrow-color: hsl(var(--pf));
-    --vc-header-arrow-hover-bg: hsl(var(--bc) / 0.2);
-    --vc-hover-bg: hsl(var(--bc) / 0.2);
-    --vc-weekday-color: hsl(var(--bc));
-    --vc-weeknumber-color: hsl(var(--bc));
-    --vc-white: hsl(var(--bc) / 0.8);
-    --vc-accent-color: hsl(var(--p));
-    --vc-color: hsl(var(--bc)/0.8);
-    --vc-time-month-color: hsl(var(--p));
-    --vc-time-day-color: hsl(var(--p));
-    --vc-time-year-color: hsl(var(--bc) / 0.8);
-    --vc-time-weekday-color: hsl(var(--bc) / 0.8);
-    --vc-time-select-group-icon-color: hsl(var(--p));
-    --vc-time-picker-border: hsl(var(--p));     /* Divider */
-    --vc-time-select-group-bg: hsl(var(--bc) / 0);
-    --vc-time-select-group-border: hsl(var(--pf)/0);
-    --vc-select-color: hsl(var(--p));
-    --vc-select-hover-bg: hsl(var(--bc)/0.2);
-    --vc-content-color: hsl(var(--p));
-    --vc-focus-ring: 0 0 0 2px hsl(var(--p) / 0.4);
-    --vc-select-bg: none;
-    --vc-select-border: none;
+.iconDiv::after {
+    content: attr(tooltip);
+    margin-left: 14px;
+    margin-right: 12px;
+    padding-bottom: 1.5px;
+    animation: fadeIn 600ms linear forwards;
+}
+
+@keyframes fadeIn {
+    0% {opacity: 0;}
+    50% {opacity: 0;}
+    100% {opacity: 1;}
 }

@@ -3,7 +3,7 @@ import '@/assets/css/bubbles.css';
 </script>
 
 <template>
-<div class="container">
+<div class="container z-0">
     <div class="bubble">
         <span></span>
         <span></span>
