@@ -18,7 +18,7 @@ const userData = reactive({
 async function onSubmit() {
     try {
         await login({ identifier: userData.username, password: userData.password });
-        navigateTo('/dashboard');
+        navigateTo('/events');
     } catch (e: any) {
         toast.error((e.error.message as string), { timeout: 2000 });
         console.error(e);
