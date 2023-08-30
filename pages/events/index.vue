@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import '@/assets/css/button.css';
-
 const { toast } = useMisc();
 
 // ----------------------------------------------------------------
@@ -10,6 +8,6 @@ const { toast } = useMisc();
 
 <template>
 <div>
-    <forms-new-event />
+    <FormsNewEvent />
 </div>
 </template>

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import '@/assets/css/button.css';
-
 const { toast } = useMisc();
 
 const themeCookie = useCookie('selectedTheme');
@@ -24,16 +22,6 @@ watchEffect(() => {
         corpoLogin.value = 'signup';
     }
 });
-
-// async function onSubmit() {
-//     try {
-//         await register({ username: userData.username, email: userData.email, fullName: userData.fullname, password: userData.password, });
-//         navigateTo('/');
-//     } catch (e: any) {
-//         toast.error((e.error.message as string), { timeout: 2000 });
-//         console.error(e);
-//     }
-// }
 
 // ----------------------------------------------------------------
 </script>
