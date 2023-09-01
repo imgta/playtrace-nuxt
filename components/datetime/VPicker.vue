@@ -2,11 +2,10 @@
 import { DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';
 
-const date = ref(new Date());
+// ----------------------------------------------------------------
+const emit = defineEmits(['startDateInput']);
+const startDate = ref(new Date());
 const formatDate = ref('');
-const popDate = ref(false);
-
-const inputStyle = ref('');
 
 function format(date: Date | string) {
     const options = {
@@ -23,38 +22,45 @@ function format(date: Date | string) {
     return `${date.toLocaleString('en-US', options)} @ ${formattedTime}`;
 };
 
-function dateInput(newDate: any) {
-    formatDate.value = format(newDate);
+// ----------------------------------------------------------------
+// FOR MODAL ONLY
+// const popDate = ref(false);
+// const inputStyle = ref('');
+// function openDate() {
+//     if (popDate.value) {
+//         popDate.value.showModal();
+//     }
+// }
+// function inputBlur() {
+//     popDate.value = false;
+//     inputStyle.value = '';
+//     dateInput(date.value);
+//     console.log(date.value);
+// }
+
+async function dateInput(startDate: any) {
+    const cleanDateSelect = format(startDate);
+    formatDate.value = cleanDateSelect;
+    emit('startDateInput', startDate);
 }
 
-function openDate() {
-    if (popDate.value) {
-        popDate.value.showModal();
-    }
-}
-
-function inputBlur() {
-    popDate.value = false;
-    inputStyle.value = '';
-    dateInput(date.value);
-    console.log(date.value);
-}
-
-watch(date, newDate => {
-    formatDate.value = format(newDate);
+// ----------------------------------------------------------------
+watch(startDate, newStartDate => {
+    dateInput(newStartDate);
 });
+// ----------------------------------------------------------------
 </script>
 
 <template>
 <div>
-    <input
+<!-- Modal PopUp  -->
+    <!-- <input
         v-model="formatDate"
         placeholder="When were you thinking?"
         class="input input-bordered form-input cursor-pointer"
         @click="openDate"
     />
     <dialog v-show="popDate" id="my_modal_4" ref="popDate" class="modal">
-
         <form method="dialog" class="modal-box shadow-none w-fit m-0 p-0.5">
             <div class="mycalendar">
                 <DatePicker
@@ -65,11 +71,33 @@ watch(date, newDate => {
                 />
             </div>
         </form>
-
         <form method="dialog" class="modal-backdrop">
             <button>close</button>
         </form>
-    </dialog>
+    </dialog> -->
+
+<!-- Collapsable Menu -->
+<div class="collapse">
+    <input type="checkbox" />
+    <div class="collapse-title px-0 py-2">
+        <input
+            v-model="formatDate"
+            placeholder="When were you thinking?"
+            class="input input-bordered form-input"
+        />
+    </div>
+    <div class="collapse-content">
+        <div class="mycalendar">
+            <DatePicker
+            v-model="startDate"
+            mode="dateTime"
+            :min-date="new Date()"
+            @input="dateInput"
+            />
+        </div>
+    </div>
+</div>
+
 </div>
 </template>
 

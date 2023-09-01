@@ -25,8 +25,6 @@ const user = reactive({
 
 const expiry = new Date(Date.now() + 86400000); // expiry set to +1 day
 const userCookie = useCookie('userCookie', { expires: expiry });
-
-const gitHover = ref(false);
 // ----------------------------------------------------------------
 async function outClick() {
     try {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import '@/assets/css/attach.css';
 
-const emit = defineEmits(['coverPicInput']);
+const emit = defineEmits(['coverPicInput', 'modalTrigger']);
 const gifs = ref<string[]>([]);
 const pics = ref<string[]>([]);
 
@@ -161,33 +161,47 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
     console.log('user query:', userQuery);
 });
 // ----------------------------------------------------------------
+async function closeModal() {
+    showModal.value = false;
+    emit('modalTrigger', showModal.value);
+}
 
+async function openModal() {
+    console.log('Before Toggle:', showModal.value);
+    showModal.value = true;
+    console.log('After Toggle:', showModal.value);
+    emit('modalTrigger', showModal.value);
+}
 async function selectCover(img: string) {
     const subString = '&crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=70&w=600';
     const rawImg = img.replace(subString, '');
     coverSelect.value = rawImg;
-    showModal.value = !showModal.value;
     emit('coverPicInput', img);
+    closeModal();
     console.log('COVER PIC:', coverSelect.value);
 }
 
 async function toggleModal() {
-    showModal.value = !showModal.value;
-    if (pics.value.length === 0) {
-        splashPage.value = 0;
-        try {
-            loadingAPI.value = true;
-            const startQuery = 'party';
-            const imgs = await unSplash(startQuery, splashPage.value, splashPerPage);
-            pics.value = imgs;
-            storedQuery.splash = startQuery;
-            coverQuery.value = startQuery;
-        } catch (e) {
-            console.error(e);
-        } finally {
-            loadingAPI.value = false;
+    if (!showModal.value) {
+        // If the modal is currently closed, open it
+        showModal.value = true;
+        if (pics.value.length === 0) {
+            splashPage.value = 0;
+            try {
+                loadingAPI.value = true;
+                const startQuery = 'party';
+                const imgs = await unSplash(startQuery, splashPage.value, splashPerPage);
+                pics.value = imgs;
+                storedQuery.splash = startQuery;
+                coverQuery.value = startQuery;
+            } catch (e) {
+                console.error(e);
+            } finally {
+                loadingAPI.value = false;
+            }
         }
     } else {
+        showModal.value = false;
         loadingAPI.value = false;
     }
 }
@@ -195,24 +209,24 @@ async function toggleModal() {
 
 <template>
 <div class="justify-center content-center self-center items-center">
+
     <div @click="toggleModal">
         <button
-            v-if="!coverSelect"
-            class="edit edit-primary lg:min-w-[80%] sm:min-w-[100%] max-sm:min-w-[100%] lg:h-[90%] sm:h-full "
-            >
-            Cover Picture</button>
+            v-if="!coverSelect" for="my_modal_7"
+            class="edit edit-primary lg:min-w-[80%] sm:min-w-[100%] max-sm:min-w-[100%] lg:h-[90%] sm:h-full">
+            Cover Picture
+        </button>
         <img
-            v-if="coverSelect"
-            :src="coverSelect" alt="Cover"
-            class="edit edit-primary object-cover h-[24rem] w-[80%] sm:w-[100%] max-sm:w-[100%]"
+            v-if="coverSelect" for="my_modal_7"
+            :src="coverSelect"
+            alt="Cover" class="edit edit-primary object-cover h-[24rem] w-[80%] sm:w-[100%] max-sm:w-[100%]"
         />
     </div>
+    <!-- <label htmlFor="my_modal_7" class="btn">open modal</label> -->
 
-    <dialog
-    class="modal"
-    :class="showModal ? 'modal-open' : 'modal'"
-    >
-        <form method="dialog" class="modal-box max-w-4xl p-10 shadow-none bg-primary-content/95">
+    <input id="my_modal_7" type="checkbox" class="modal-toggle" />
+    <div class="modal" :class="{ 'modal-open': showModal }">
+        <div class="modal-box max-w-4xl p-10 shadow-none bg-primary-content/95">
             <div class="flex justify-center items-center pb-5">
                 <span>
                 Select your event cover!
@@ -274,17 +288,10 @@ async function toggleModal() {
                     </MasonryWall>
                 </div>
             </div>
-            <div class="modal-action">
-                <button
-                    class="btn"
-                    @click="toggleModal">
-                    Close modal
-                </button>
-            </div>
-        </form>
-        <form method="dialog" class="modal-backdrop" @click="toggleModal">
-            <button>close</button>
-        </form>
-    </dialog>
+        </div>
+
+        <label class="modal-backdrop" for="my_modal_7">Close</label>
+    </div>
+
 </div>
 </template>

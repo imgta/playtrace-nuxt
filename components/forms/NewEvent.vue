@@ -1,34 +1,81 @@
 <script setup lang="ts">
-const { toast } = useMisc();
-
+// ----------------------------------------------------------------
 const themeCookie = useCookie('selectedTheme');
 const corpoLogin = ref('');
 const eventData = reactive({
     title: '',
-    start: '',
+    startDate: '',
     location: '',
     size: '',
     cost: '',
     info: '',
-    pic: '',
+    img: '',
 });
+const locationType = ref([]);
+const coverSelect = ref('');
+const showModal = ref(false);
 
 // ----------------------------------------------------------------
+async function balanceBlur() {
+    const val = eventData.cost;
+    const floatVal = Number.parseFloat(val).toFixed(2);
+    eventData.cost = floatVal;
+}
 
+async function locationEmit(data: any) {
+    const { name, formatted_address, types } = await data;
+    eventData.location = `${name} ${formatted_address}`;
+    locationType.value = types;
+}
+
+async function startDateEmit(data: any) {
+    eventData.startDate = data;
+}
+
+async function coverPicEmit(data: any) {
+    const subString = '&crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=70&w=600';
+    const rawImg = data.replace(subString, '');
+    eventData.img = rawImg;
+}
+async function coverModalEmit(data: any) {
+    showModal.value = data;
+}
+
+async function toggleModal() {
+    showModal.value = !showModal.value;
+}
+
+// ----------------------------------------------------------------
 watchEffect(() => {
     if (themeCookie.value === 'corporate') {
         corpoLogin.value = 'signupcorp';
     } else {
         corpoLogin.value = 'signup';
     }
+    console.log('Title:', eventData.title);
+    console.log('Start Date:', eventData.startDate);
+    console.log('Location:', eventData.location);
+    console.log('Location Type:', locationType.value);
+    console.log('Party Size:', eventData.size);
+    console.log('Cost:', eventData.cost);
+    console.log('Details:', eventData.info);
+    console.log('Cover Pic:', eventData.img);
 });
 
+watch(eventData, eventInput => {
+    if (eventInput.location) {
+        eventData.location = eventInput.location;
+    }
+    if (eventInput.startDate) {
+        eventData.startDate = eventInput.startDate;
+    }
+});
 // ----------------------------------------------------------------
 </script>
 
 <template>
 <div>
-<div class="sm:pl-24 lg:pl-0">
+<div class="">
     <div class="flex items-center justify-center content-center bg-base-200">
         <h1 class="text-primary text-4xl text-center pt-8">
             New Event!
@@ -47,31 +94,35 @@ watchEffect(() => {
 
         <div class="sm:w-auto lg:min-w-[42%] sm:min-w-[10%]">
             <div class="card-body pb-1.5">
-                    <div class="w-full con-hint top pb-2">
+                    <div class="w-full con-hint top pb-0">
                         <div class="hint ">
                             <p>Event Title</p>
                         </div>
                         <input
+                            v-model="eventData.title"
                             placeholder="Untitled Event"
                             name="title"
                             type="text"
                             class="input input-bordered form-input"
-                            required
                         />
                     </div>
 
-                    <div class="w-full con-hint left pb-2">
+                    <div class="w-full con-hint left pb-0">
                         <div class="hint">
                             <p>Select Date</p>
                         </div>
-                        <DatetimeVPicker />
+                        <DatetimeVPicker
+                            @startDateInput="startDateEmit"
+                        />
                     </div>
 
                     <div class="w-full con-hint left pb-2">
                         <div class="hint ">
                             <p>Location</p>
                         </div>
-                        <GoogleAutoMap />
+                        <GoogleAutoMap
+                            @addressInput="locationEmit"
+                        />
                     </div>
 
                     <div class="w-full con-hint left pb-2">
@@ -79,6 +130,7 @@ watchEffect(() => {
                             <p>Party Size</p>
                         </div>
                         <input
+                            v-model="eventData.size"
                             placeholder="Unlimited"
                             name="capacity"
                             type="text"
@@ -91,10 +143,12 @@ watchEffect(() => {
                             <p>Damage</p>
                         </div>
                             <input
+                                v-model="eventData.cost"
                                 placeholder="Cost of entry"
                                 name="cover"
                                 type="text"
                                 class="input input-bordered form-input"
+                                @focusout="balanceBlur"
                             />
                     </div>
 
@@ -103,6 +157,7 @@ watchEffect(() => {
                             <p>The Deets</p>
                         </div>
                             <textarea
+                                v-model="eventData.info"
                                 placeholder="Whose birthday is it this time?"
                                 type="text"
                                 name="description"
@@ -115,19 +170,38 @@ watchEffect(() => {
 
         <div class="w-full pt-8 lg:pl-0 sm:px-8 max-sm:px-8">
 
-                <FormsCoverPic />
-
-            <!-- <div class="con-hint left pt-2 w-full">
-                <div class="hint">
-                    <p class="leading-4 text-right">The Deets!</p>
-                </div>
-                    <textarea
-                        placeholder="Whose birthday is it this time?"
-                        type="text"
-                        name="description"
-                        class="textarea text-bordered textarea-sm textarea-neutral form-input h-16 lg:max-w-[80%] sm:max-w-[100%] resize"
+            <div class="justify-center content-center self-center items-center">
+                <div @click="toggleModal">
+                    <button
+                        v-if="!showModal && !eventData.img"
+                        class="edit edit-primary lg:min-w-[80%] sm:min-w-[100%] max-sm:min-w-[100%] lg:h-[90%] sm:h-full "
+                        >
+                        Cover Picture</button>
+                    <img
+                        v-if="!showModal && eventData.img"
+                        :src="eventData.img" alt="Cover"
+                        class="edit edit-primary object-cover h-[24rem] w-[80%] sm:w-[100%] max-sm:w-[100%]"
                     />
-            </div> -->
+                </div>
+
+                <div v-if="showModal">
+                    <dialog
+                        class="modal"
+                        :class="{ 'modal-open': showModal }"
+                    >
+                        <div method="dialog" class="modal-box max-w-4xl">
+                            <FormsCoverTest
+                                @coverPicInput="coverPicEmit"
+                                @modalState="coverModalEmit"
+                            />
+                        </div>
+                        <form method="dialog" class="modal-backdrop" @click="toggleModal">
+                            <button>close</button>
+                        </form>
+                    </dialog>
+                </div>
+
+            </div>
 
             <div class="absolute top-[16%] left-[77.5%] pointer-events-none">
                 <StylesBubbles />
@@ -138,7 +212,7 @@ watchEffect(() => {
 
     </form>
 
-    <div class="sm:px-24 lg:pl-0">
+    <div class="sm:px-24 sm:pb-10 lg:pl-0">
         <div class="flex items-center justify-center place-content-center">
             <button :class="corpoLogin" type="submit">
                 <span>Create </span>
@@ -153,86 +227,3 @@ watchEffect(() => {
     </div>
 </div>
 </template>
-
-<style scoped>
-.con-hint {
-    display: inline-block;
-    /* width: 100%; */
-    position: relative;
-    cursor: default;
-    transition: all 0.25s ease-in-out; /* Hint container move speed */
-}
-
-.hint {
-    visibility: hidden;
-    z-index: 1;
-    opacity: 0.8;
-    color: hsl(var(--af));
-    font-weight: 400;
-    font-size: 0.9rem;
-    transition: all 0s ease-in-out; /* Hint fade speed */
-    position: absolute;
-    width: 45%;
-}
-
-.con-hint:hover .hint  {
-    opacity: 1;
-    visibility: visible;
-    animation: nudge 0.45s ease-in-out infinite alternate; /* Hint animation effect speed */
-    position: absolute;
-}
-
-.con-hint:focus-within .hint {
-    opacity: 1;
-    visibility: visible;
-    animation: nudge 0.45s ease-in-out infinite alternate;
-    position: absolute;
-}
-
-@keyframes nudge {
-    0% { transform: translateY(6px); }
-    100% { transform: translateY(1px); }
-}
-
-/* Hover shift direction */
-.left:hover, .top:hover, .bottom:hover {transform: translateX(-12px); }
-.right:hover { transform: translateX(12px); }
-/* .top:hover {transform: translateY(-12px); }
-.bottom:hover {transform: translateY(12px); }
-.right:hover {transform: translateX(12px); } */
-
-.top .hint { top:-49.5%; left:1.5%; }
-.bottom .hint { top:95.5%; left:1.5%; }
-.left .hint { top:21%; left:-46.5%; text-align:right;}
-.right .hint { top:21%; left:46.5%; text-align:left;}
-
-@media (max-width: 640px) {
-    /* Disable animation and reposition for max-sm screens */
-    .con-hint:hover .hint,
-    .con-hint:focus-within .hint {
-        opacity: 1;
-        visibility: visible;
-        animation: none; /* Disable animation */
-        transform: none; /* Remove position adjustments */
-        position: relative; /* Reset position */
-    }
-
-    /* Reset hover shift direction for max-sm screens */
-    .left:hover,
-    .top:hover,
-    .bottom:hover,
-    .right:hover {
-        transform: none;
-    }
-
-    /* Reset hint position for max-sm screens */
-    .top .hint,
-    .bottom .hint,
-    .left .hint,
-    .right .hint {
-        top: auto;
-        left: auto;
-        text-align: left;
-    }
-}
-</style>
