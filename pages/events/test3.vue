@@ -3,6 +3,6 @@
 
 <template>
 <div>
-    <FormsNewEvent />
+    <FormsCoverTest />
 </div>
 </template>

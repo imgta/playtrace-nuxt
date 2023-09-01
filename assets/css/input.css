@@ -1,3 +1,4 @@
+
 body {
     overflow-x: hidden;
 }
@@ -72,4 +73,110 @@ body {
     0% {opacity: 0;}
     50% {opacity: 0;}
     100% {opacity: 1;}
+}
+
+.query-container {
+    position: relative;
+}
+
+.query-container svg {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translate(0, -50%);
+}
+
+.search {
+    width: 10rem;
+    border-radius: var(--rounded-btn, 0.5rem);
+    border-color: hsl(var(--bc));
+    transition: all .2s ease-in-out;
+    outline: none;
+}
+
+.search:focus {
+    opacity: 1;
+    width: 15rem;
+}
+
+
+.con-hint {
+    display: inline-block;
+    /* width: 100%; */
+    position: relative;
+    cursor: default;
+    transition: all 0.25s ease-in-out; /* Hint container move speed */
+}
+
+.hint {
+    visibility: hidden;
+    z-index: 1;
+    opacity: 0.8;
+    color: hsl(var(--af));
+    font-weight: 400;
+    font-size: 0.9rem;
+    transition: all 0s ease-in-out; /* Hint fade speed */
+    position: absolute;
+    width: 45%;
+}
+
+.con-hint:hover .hint  {
+    opacity: 1;
+    visibility: visible;
+    animation: nudge 0.45s ease-in-out infinite alternate; /* Hint animation effect speed */
+    position: absolute;
+}
+
+.con-hint:focus-within .hint {
+    opacity: 1;
+    visibility: visible;
+    animation: nudge 0.45s ease-in-out infinite alternate;
+    position: absolute;
+}
+
+@keyframes nudge {
+    0% { transform: translateY(6px); }
+    100% { transform: translateY(1px); }
+}
+
+/* Hover shift direction */
+.left:hover, .top:hover, .bottom:hover {transform: translateX(-12px); }
+.right:hover { transform: translateX(12px); }
+/* .top:hover {transform: translateY(-12px); }
+.bottom:hover {transform: translateY(12px); }
+.right:hover {transform: translateX(12px); } */
+
+.top .hint { top:-52%; left:1.5%; }
+.bottom .hint { top:95.5%; left:1.5%; }
+.left .hint { top:21%; left:-47%; text-align:right;}
+.right .hint { top:21%; left:46.5%; text-align:left;}
+
+@media (max-width: 640px) {
+    /* Disable animation and reposition for max-sm screens */
+    .con-hint:hover .hint,
+    .con-hint:focus-within .hint {
+        opacity: 1;
+        visibility: visible;
+        animation: none; /* Disable animation */
+        transform: none; /* Remove position adjustments */
+        position: relative; /* Reset position */
+    }
+
+    /* Reset hover shift direction for max-sm screens */
+    .left:hover,
+    .top:hover,
+    .bottom:hover,
+    .right:hover {
+        transform: none;
+    }
+
+    /* Reset hint position for max-sm screens */
+    .top .hint,
+    .bottom .hint,
+    .left .hint,
+    .right .hint {
+        top: auto;
+        left: auto;
+        text-align: left;
+    }
 }
