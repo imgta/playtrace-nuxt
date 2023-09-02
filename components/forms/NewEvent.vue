@@ -12,14 +12,16 @@ const eventData = reactive({
     img: '',
 });
 const locationType = ref([]);
-const coverSelect = ref('');
 const showModal = ref(false);
+const { create } = useStrapi4();
 
 // ----------------------------------------------------------------
 async function balanceBlur() {
-    const val = eventData.cost;
-    const floatVal = Number.parseFloat(val).toFixed(2);
-    eventData.cost = floatVal;
+    if (eventData.cost) {
+        const val = eventData.cost;
+        const floatVal = Number.parseFloat(val).toFixed(2);
+        eventData.cost = floatVal;
+    }
 }
 
 async function locationEmit(data: any) {
@@ -37,14 +39,28 @@ async function coverPicEmit(data: any) {
     const rawImg = data.replace(subString, '');
     eventData.img = rawImg;
 }
+
 async function coverModalEmit(data: any) {
     showModal.value = data;
 }
-
 async function toggleModal() {
     showModal.value = !showModal.value;
 }
 
+async function createEvent() {
+    try {
+        await create('events',
+            {
+                name: eventData.title
+            }
+        );
+        // console.log('eventData.title', eventData.title);
+    } catch (e: any) {
+        console.error(e);
+    } finally {
+        console.log('Event created!');
+    }
+}
 // ----------------------------------------------------------------
 watchEffect(() => {
     if (themeCookie.value === 'corporate') {
@@ -89,7 +105,7 @@ watch(eventData, eventInput => {
 </div>
 
 <div class="bg-base-200">
-    <form class="flex w-full shadow-none justify-center">
+    <div class="flex w-full shadow-none justify-center">
         <div class="flex lg:flex-row sm:flex-col-reverse max-sm:flex-col-reverse w-full justify-center sm:px-20">
 
         <div class="sm:w-auto lg:min-w-[42%] sm:min-w-[10%]">
@@ -210,11 +226,11 @@ watch(eventData, eventInput => {
 
         </div>
 
-    </form>
+    </div>
 
     <div class="sm:px-24 sm:pb-10 lg:pl-0">
         <div class="flex items-center justify-center place-content-center">
-            <button :class="corpoLogin" type="submit">
+            <button :class="corpoLogin" type="submit" @click="createEvent">
                 <span>Create </span>
                 <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
                     <path d="M1,5 L11,5"></path>

@@ -47,6 +47,7 @@
             {
                 "max": 2
             }
-        ]
+        ],
+        "no-console": "warn"
     }
 }

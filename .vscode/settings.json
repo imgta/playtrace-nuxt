@@ -5,6 +5,7 @@
         "source.fixAll.eslint": true, // this allows ESLint to auto fix on save
         "source.organizeImports": false
     },
+    "eslint.run": "onSave",
     "editor.tabSize": 4,
     "editor.formatOnSave": false,
     "editor.find.addExtraSpaceOnTop": false,
