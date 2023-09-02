@@ -9,7 +9,7 @@ const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
         <div class="py-6 bg-base-100">
             <div class="flex-col max-w-5xl mx-auto hero-content lg:flex-row-reverse">
                 <img
-                    src="https://imagesvc.meredithcorp.io/v3/mm/image?url=https%3A%2F%2Fstatic.onecms.io%2Fwp-content%2Fuploads%2Fsites%2F13%2F2015%2F04%2F05%2Ffeatured.jpg&q=60"
+                    src="//images.unsplash.com/photo-1528130723281-f9ffa133d787?ixid=M3w0OTMxOTB8MHwxfHNlYXJjaHwyM3x8bXVzZXVtfGVufDB8fHx8MTY5MzYzMjE5MHww&ixlib=rb-4.0.3"
                     class="rounded-lg shadow-2xl md:max-w-lg lg:max-w-sm"
                 >
                 <div class="py-4 prose">

@@ -7,7 +7,7 @@ const eventData = reactive({
     startDate: '',
     location: '',
     size: '',
-    cost: '',
+    coverCharge: '',
     info: '',
     img: '',
 });
@@ -17,10 +17,10 @@ const { create } = useStrapi4();
 
 // ----------------------------------------------------------------
 async function balanceBlur() {
-    if (eventData.cost) {
-        const val = eventData.cost;
+    if (eventData.coverCharge) {
+        const val = eventData.coverCharge;
         const floatVal = Number.parseFloat(val).toFixed(2);
-        eventData.cost = floatVal;
+        eventData.coverCharge = floatVal;
     }
 }
 
@@ -51,7 +51,13 @@ async function createEvent() {
     try {
         await create('events',
             {
-                name: eventData.title
+                title: eventData.title,
+                startDate: eventData.startDate,
+                location: eventData.location,
+                partySize: eventData.size,
+                coverCharge: eventData.coverCharge,
+                info: eventData.info,
+                eventPic: eventData.img
             }
         );
         // console.log('eventData.title', eventData.title);
@@ -73,7 +79,7 @@ watchEffect(() => {
     console.log('Location:', eventData.location);
     console.log('Location Type:', locationType.value);
     console.log('Party Size:', eventData.size);
-    console.log('Cost:', eventData.cost);
+    console.log('Cost:', eventData.coverCharge);
     console.log('Details:', eventData.info);
     console.log('Cover Pic:', eventData.img);
 });
@@ -127,7 +133,7 @@ watch(eventData, eventInput => {
                         <div class="hint">
                             <p>Select Date</p>
                         </div>
-                        <DatetimeVPicker
+                        <VPicker
                             @startDateInput="startDateEmit"
                         />
                     </div>
@@ -159,7 +165,7 @@ watch(eventData, eventInput => {
                             <p>Damage</p>
                         </div>
                             <input
-                                v-model="eventData.cost"
+                                v-model="eventData.coverCharge"
                                 placeholder="Cost of entry"
                                 name="cover"
                                 type="text"
@@ -206,7 +212,7 @@ watch(eventData, eventInput => {
                         :class="{ 'modal-open': showModal }"
                     >
                         <div method="dialog" class="modal-box max-w-4xl">
-                            <FormsCoverTest
+                            <CoverPicSelect
                                 @coverPicInput="coverPicEmit"
                                 @modalState="coverModalEmit"
                             />
@@ -220,7 +226,7 @@ watch(eventData, eventInput => {
             </div>
 
             <div class="absolute top-[16%] left-[77.5%] pointer-events-none">
-                <StylesBubbles />
+                <Bubbles />
             </div>
         </div>
 

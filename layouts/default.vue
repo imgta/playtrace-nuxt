@@ -88,8 +88,9 @@ watchEffect(async () => {
             <ThemeSwitch />
 
             <div v-if="!token">
-                <FormsLoginModal />
-                <FormsSignUpModal />
+
+                <AuthModal />
+
             </div>
 
             <div v-if="token">

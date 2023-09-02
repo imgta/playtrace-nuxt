@@ -76,6 +76,7 @@ async function unSplash(query: string, page: number, perPage: number): Promise<s
     }
 }
 // ----------------------------------------------------------------
+// Change onMounted to watch to prevent loading 'party' query after open/close
 onMounted(async () => {
     if (!pics.value.length) {
         splashPage.value = 0;
