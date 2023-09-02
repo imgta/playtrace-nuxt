@@ -19,15 +19,15 @@ const userLoc = reactive({
     lat: 0,
     long: 0,
 });
-const userGeometry = ref('');
-const userPlace = ref('');
 const userAddress = ref('');
-const address = reactive({
-    name: '',
-    venue: '',
-    street: '',
-    types: [],
-});
+// const userGeometry = ref('');
+// const userPlace = ref('');
+// const address = reactive({
+//     name: '',
+//     venue: '',
+//     street: '',
+//     types: [],
+// });
 // ----------------------------------------------------------------
 
 async function locateUser() {

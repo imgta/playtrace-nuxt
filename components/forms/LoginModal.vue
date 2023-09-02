@@ -13,7 +13,7 @@ const userData = reactive({
 
 // ----------------------------------------------------------------
 
-async function onSubmit() {
+async function onLogin() {
     try {
         await login({ identifier: userData.username, password: userData.password });
         navigateTo('/events');
@@ -94,7 +94,7 @@ watchEffect(() => {
             </div>
 
             <div class="flex justify-center items-center w-full h-14 pr-3.5">
-                <button type="submit" :class="corpoLogin" @click="onSubmit">
+                <button type="submit" :class="corpoLogin" @click="onLogin">
                     <span>Log in</span>
                     <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
                         <path d="M1,5 L11,5"></path>

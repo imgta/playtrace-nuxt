@@ -2,12 +2,12 @@
 const { register } = useStrapiAuth();
 const { toast } = useMisc();
 
-const popForm = ref<any | null>(null);
+const popSignUp = ref<any | null>(null);
 const themeCookie = useCookie('selectedTheme');
 const pageTheme = ref(themeCookie.value) as any;
-const buttonTheme = ref('');
+const signupTheme = ref('');
 
-const userData = reactive({
+const signupData = reactive({
     fullname: '',
     email: '',
     username: '',
@@ -15,9 +15,9 @@ const userData = reactive({
 });
 
 // ----------------------------------------------------------------
-async function onSubmit() {
+async function onRegister() {
     try {
-        await register({ username: userData.username, email: userData.email, fullName: userData.fullname, password: userData.password, });
+        await register({ username: signupData.username, email: signupData.email, fullName: signupData.fullname, password: signupData.password, });
         navigateTo('/');
     } catch (e: any) {
         toast.error((e.error.message as string), { timeout: 2000 });
@@ -26,8 +26,8 @@ async function onSubmit() {
 }
 
 function openSignup() {
-    if (popForm.value) {
-        popForm.value.showModal();
+    if (popSignUp.value) {
+        popSignUp.value.showModal();
     }
 }
 
@@ -41,9 +41,9 @@ const formBg = computed(() => {
 
 watchEffect(() => {
     if (themeCookie.value === 'corporate') {
-        buttonTheme.value = 'signupcorp';
+        signupTheme.value = 'signupcorp';
     } else {
-        buttonTheme.value = 'signup';
+        signupTheme.value = 'signup';
     }
 });
 </script>
@@ -55,8 +55,7 @@ watchEffect(() => {
     </div>
 </button>
 
-<dialog ref="popForm" class="modal">
-
+<dialog ref="popSignUp" class="modal">
     <form :class="formBg" method="dialog" class="modal-box w-auto max-fit px-9 pb-3 shadow-none">
         <h1 class="text-primary text-4xl text-center pt-4 pr-1.5 pb-0.5">
             Register.
@@ -69,7 +68,7 @@ watchEffect(() => {
             <div class="focus:text-base-content bg-none">
                 <label class="label-text text-neutral-content/80">Full Name</label>
                 <input
-                    v-model="userData.fullname"
+                    v-model="signupData.fullname"
                     required
                     type="text"
                     name="fullname"
@@ -77,7 +76,7 @@ watchEffect(() => {
                 />
                 <label class="label-text text-neutral-content/80">Email</label>
                 <input
-                    v-model="userData.email"
+                    v-model="signupData.email"
                     required
                     type="email"
                     name="email"
@@ -85,7 +84,7 @@ watchEffect(() => {
                 />
                 <label class="label-text text-neutral-content/80">Username</label>
                 <input
-                    v-model="userData.username"
+                    v-model="signupData.username"
                     required
                     type="text"
                     name="username"
@@ -93,7 +92,7 @@ watchEffect(() => {
                 />
                 <label class="label-text text-neutral-content/80">Password</label>
                 <input
-                    v-model="userData.password"
+                    v-model="signupData.password"
                     required
                     type="password"
                     name="password"
@@ -102,7 +101,7 @@ watchEffect(() => {
             </div>
 
             <div class="flex justify-center items-center w-full h-14 pr-3.5">
-                <button type="submit" :class="buttonTheme" @click="onSubmit">
+                <button type="submit" :class="signupTheme" @click="onRegister">
                     <span>Register</span>
                     <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
                         <path d="M1,5 L11,5"></path>
