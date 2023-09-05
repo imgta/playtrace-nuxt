@@ -44,19 +44,22 @@ onMounted(() => {
 <div class="w-full h-full">
     <div class="grid grid-cols-3 gap-4">
 
-        <div v-if="!user.avatar" v-show="!user.avatar" class="avatar placeholder items-center">
-            <div class="bg-secondary text-md font-normal rounded-full w-8" @click="openAvatar">
-                <span class="text-xs text-white">{{ user.initials }}</span>
-            </div>
-            <span class="text-base-content/80 pl-2 text-md">{{ user.username }}</span>
-        </div>
+        <div class="col-start-2 col-span-1">
 
-        <div v-if="user.avatar" v-show="user.avatar" class="avatar col-start-2">
-            <div class="w-64 h-56 rounded-full hover:opacity-70 cursor-pointer" @click="openAvatar">
-                <img :src="user.avatar" />
+            <div v-if="!user.avatar" v-show="!user.avatar" class="avatar placeholder items-center">
+                    <div class="bg-secondary text-md font-normal rounded-full w-8" @click="openAvatar">
+                        <span class="text-xs text-white">{{ user.initials }}</span>
+                    </div>
+                <span class="text-base-content/80 pl-2 text-md">{{ user.username }}</span>
             </div>
-            <div class="pl-6 pt-5">
-                <p class="text-2xl">>{{ user.username }}</p>
+
+            <div v-if="user.avatar" v-show="user.avatar" class="avatar col-start-2">
+                <div class="w-56 h-56 rounded-full hover:opacity-70 cursor-pointer" @click="openAvatar">
+                        <img :src="user.avatar" />
+                </div>
+                <div class="pl-4 pt-5">
+                    <p class="text-2xl">>{{ user.username }}</p>
+                </div>
             </div>
         </div>
 

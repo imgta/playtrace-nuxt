@@ -1,4 +1,7 @@
+// import VueGoogleAutocomplete from 'vue-google-autocomplete';
+
 export default defineNuxtPlugin(nuxtApp => {
+    nuxtApp.vueApp.use();
     const config = useRuntimeConfig();
     useHead({
         script: [

@@ -61,7 +61,7 @@ async function getAddressData(place: any, geometry: any) {
 <template>
 <div>
     <VueGoogleAutocomplete
-        id="map2"
+        id="map"
         type="text"
         class="input input-bordered form-input"
         placeholder="Where at?"

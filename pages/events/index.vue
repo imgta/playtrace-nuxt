@@ -3,7 +3,7 @@ import { cardDate } from '~/utils/misc';
 
 const client = useStrapiClient();
 const myCookie = useCookie('userCookie');
-const myId = myCookie.value.id;
+const myId = myCookie?.value?.id;
 const userEvents: any = ref([]);
 
 const eventArr: any = ref([]);

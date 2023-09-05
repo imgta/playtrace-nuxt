@@ -9,17 +9,15 @@ const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
         <div class="py-6 bg-base-100">
             <div class="flex-col max-w-5xl mx-auto hero-content lg:flex-row-reverse">
                 <img
-                    src="//images.unsplash.com/photo-1528130723281-f9ffa133d787?ixid=M3w0OTMxOTB8MHwxfHNlYXJjaHwyM3x8bXVzZXVtfGVufDB8fHx8MTY5MzYzMjE5MHww&ixlib=rb-4.0.3"
+                    src="https://images.unsplash.com/photo-1528130723281-f9ffa133d787"
                     class="rounded-lg shadow-2xl md:max-w-lg lg:max-w-sm"
                 >
                 <div class="py-4 prose">
                     <p>BASED ON YOUR INTERESTS</p>
-                    <h1>A catalyst for social gatherings</h1>
+                    <h1>A New Social Catalyst</h1>
                     <p>Jan 7, 2022, 4pm</p>
                     <p>
-                        Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
-                        excepturi
-                        exercitationem quasi.
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Lorem ipsum dolor sit amet, consectetur adipisicing elit.
                     </p>
                     <NuxtLink class="link-primary" to="/" external>
                         Go to backtab.dev
