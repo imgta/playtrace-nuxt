@@ -94,43 +94,44 @@ watchEffect(async () => {
             </div>
 
             <div v-if="token">
+                <NuxtLink to="/events/new">
+                    <button class="btn-primary btn-outline btn-sm">
+                        <span class="hover:text-neutral-content w-full h-full flex items-center">
+                            Create
+                        </span>
+                    </button>
+                </NuxtLink>
                 <NuxtLink to="/events">
                     <button class="btn-primary btn-outline btn-sm">
-                        <span class="hover:text-neutral-content w-min h-full flex items-center">
+                        <span class="hover:text-neutral-content w-full h-full flex items-center">
                             Events
                         </span>
                     </button>
                 </NuxtLink>
-                <NuxtLink to="/dashboard">
+                <!-- <NuxtLink to="/dashboard">
                     <button class="btn-primary btn-outline btn-sm">
                         <span class="hover:text-neutral-content w-min h-full flex items-center">
                             Dashboard
                         </span>
                         </button>
-                </NuxtLink>
+                </NuxtLink> -->
 
                 <div class="navbar-center lg:flex">
-                    <ul class="menu menu-horizontal pl-1 bg-transparent">
+                    <ul class="menu menu-horizontal pl-1.5 bg-transparent">
                         <li tabIndex="{{0}}">
                             <details>
                                 <summary class="bg-transparent py-0 pl-0 pr-1.5 hover:bg-transparent">
 
-                                    <div v-if="!!user.avatar === true" v-show="!!user.avatar" class="avatar iconDiv bg-transparent" :tooltip="user.username">
+                                    <div v-if="user.avatar" v-show="user.avatar" class="avatar iconDiv bg-transparent" :tooltip="user.username">
                                         <img :src="user.avatar" />
-
                                     </div>
 
-                                    <div v-if="!!user.avatar === false" v-show="!!user.avatar" class="avatar placeholder pl-1">
+                                    <div v-if="!user.avatar" v-show="!user.avatar" class="avatar placeholder items-center">
                                         <div class="bg-secondary text-md font-normal rounded-full w-8">
-                                            <span class="text-xs text-white">
-                                                {{ user.initials }}
-                                            </span>
+                                            <span class="text-xs text-white">{{ user.initials }}</span>
                                         </div>
+                                        <span class="text-base-content/80 pl-2 text-md">{{ user.username }}</span>
                                     </div>
-
-                                    <!-- <span class="text-base-content/80 pl-2 text-md">
-                                        {{ user.username }}
-                                    </span> -->
 
                                 </summary>
                                 <ul class="p-0 m-0 bg-transparent shadow-none drop-shadow-none right-0 top-6">

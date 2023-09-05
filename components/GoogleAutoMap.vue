@@ -59,6 +59,7 @@ async function getAddressData(place: any, geometry: any) {
 </script>
 
 <template>
+<div>
 <VueGoogleAutocomplete
     id="map2"
     type="text"
@@ -68,4 +69,5 @@ async function getAddressData(place: any, geometry: any) {
     types=""
     @placechanged="getAddressData"
     />
+</div>
 </template>

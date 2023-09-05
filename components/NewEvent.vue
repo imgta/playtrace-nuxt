@@ -1,5 +1,9 @@
 <script setup lang="ts">
 // ----------------------------------------------------------------
+const client = useStrapiClient();
+const { create } = useStrapi4();
+
+const myCookie: any = useCookie('userCookie').value;
 const themeCookie = useCookie('selectedTheme');
 const corpoLogin = ref('');
 const eventData = reactive({
@@ -10,10 +14,10 @@ const eventData = reactive({
     coverCharge: '',
     info: '',
     img: '',
+    categories: '',
 });
-const locationType = ref([]);
+
 const showModal = ref(false);
-const { create } = useStrapi4();
 
 // ----------------------------------------------------------------
 async function balanceBlur() {
@@ -22,12 +26,28 @@ async function balanceBlur() {
         const floatVal = Number.parseFloat(val).toFixed(2);
         eventData.coverCharge = floatVal;
     }
+    if (!eventData.coverCharge) {
+        const zeroCharge = '0';
+        const zeroFloat = Number.parseFloat(zeroCharge).toFixed(2);
+        eventData.coverCharge = zeroFloat;
+    }
 }
 
 async function locationEmit(data: any) {
-    const { name, formatted_address, types } = await data;
-    eventData.location = `${name} ${formatted_address}`;
-    locationType.value = types;
+    console.log('zip', data.address_components[7].long_name);
+    const { name, formatted_address, types, address_components } = await data;
+    const address = formatted_address.replace(', USA', '');
+    console.log(address);
+    const zipcode = address_components[7].long_name;
+
+    eventData.location = `${name} ${address}`;
+
+    console.log(eventData.location);
+    // Filter out irrelevant types from the types array
+    const categories = types.filter((type: string) => !['tourist_attraction', 'point_of_interest', 'establishment'].includes(type));
+    console.log('categories', categories[0]);
+    eventData.categories = categories[0];
+    console.log('eventData.categories', eventData.categories);
 }
 
 async function startDateEmit(data: any) {
@@ -47,24 +67,54 @@ async function toggleModal() {
     showModal.value = !showModal.value;
 }
 
-async function createEvent() {
+async function createEvent(e: Event) {
+    e.preventDefault();
     try {
-        await create('events',
-            {
-                title: eventData.title,
-                startDate: eventData.startDate,
-                location: eventData.location,
-                partySize: eventData.size,
-                coverCharge: eventData.coverCharge,
-                info: eventData.info,
-                eventPic: eventData.img
-            }
-        );
-        // console.log('eventData.title', eventData.title);
+        const formData = new FormData();
+        const form = {
+            initiator: myCookie,
+            title: eventData.title,
+            startDate: eventData.startDate,
+            location: eventData.location,
+            partySize: eventData.size,
+            coverCharge: eventData.coverCharge,
+            info: eventData.info,
+            categories: eventData.categories
+        };
+        // Fetch img URL, convert response to blob
+        const imgRes = await (fetch(eventData.img));
+        const imgBlob = await imgRes.blob();
+        const imgName = `${eventData.title}-eventPic`;
+
+        // Append field data
+        formData.append('data', JSON.stringify(form));
+        // Append file image
+        formData.append('files.eventPic', imgBlob, imgName);
+
+        const eventRes: Record<string, any> = await client('http://localhost:1337/api/events', {
+            method: 'POST',
+            body: formData,
+        });
+        const result = await eventRes.data;
+        console.log(result);
+
+        // UPDATE EVENT COVER PICTURE:
+        // const formData = new FormData();
+        // formData.append('ref', 'api::event.event');
+        // formData.append('refId', result.id);
+        // formData.append('field', 'eventPic');
+        // formData.append('files', imgBlob, imgName);
+
+        // const postRes: Record<string, any> = await client('http://localhost:1337/api/upload', {
+        //     method: 'POST',
+        //     body: formData,
+        // });
+        // console.log('postRes', postRes);
     } catch (e: any) {
         console.error(e);
     } finally {
         console.log('Event created!');
+        navigateTo('/events');
     }
 }
 // ----------------------------------------------------------------
@@ -74,14 +124,6 @@ watchEffect(() => {
     } else {
         corpoLogin.value = 'signup';
     }
-    console.log('Title:', eventData.title);
-    console.log('Start Date:', eventData.startDate);
-    console.log('Location:', eventData.location);
-    console.log('Location Type:', locationType.value);
-    console.log('Party Size:', eventData.size);
-    console.log('Cost:', eventData.coverCharge);
-    console.log('Details:', eventData.info);
-    console.log('Cover Pic:', eventData.img);
 });
 
 watch(eventData, eventInput => {
@@ -96,8 +138,7 @@ watch(eventData, eventInput => {
 </script>
 
 <template>
-<div>
-<div class="">
+<div class="max-h-full max-w-full">
     <div class="flex items-center justify-center content-center bg-base-200">
         <h1 class="text-primary text-4xl text-center pt-8">
             New Event!
@@ -116,7 +157,7 @@ watch(eventData, eventInput => {
 
         <div class="sm:w-auto lg:min-w-[42%] sm:min-w-[10%]">
             <div class="card-body pb-1.5">
-                    <div class="w-full con-hint top pb-0">
+                    <div class="w-full con-hint top pb-2">
                         <div class="hint ">
                             <p>Event Title</p>
                         </div>
@@ -129,21 +170,21 @@ watch(eventData, eventInput => {
                         />
                     </div>
 
-                    <div class="w-full con-hint left pb-0">
-                        <div class="hint">
-                            <p>Select Date</p>
-                        </div>
-                        <VPicker
-                            @startDateInput="startDateEmit"
-                        />
-                    </div>
-
-                    <div class="w-full con-hint left pb-2">
+                    <div class="w-full con-hint left">
                         <div class="hint ">
                             <p>Location</p>
                         </div>
                         <GoogleAutoMap
                             @addressInput="locationEmit"
+                        />
+                    </div>
+
+                    <div class="w-full con-hint left py-0">
+                        <div class="hint">
+                            <p>Select Date</p>
+                        </div>
+                        <VPicker
+                            @startDateInput="startDateEmit"
                         />
                     </div>
 
@@ -190,7 +231,7 @@ watch(eventData, eventInput => {
             </div>
         </div>
 
-        <div class="w-full pt-8 lg:pl-0 sm:px-8 max-sm:px-8">
+        <div class="w-full h-full pt-8 lg:pl-0 sm:px-8 max-sm:px-8">
 
             <div class="justify-center content-center self-center items-center">
                 <div @click="toggleModal">
@@ -225,7 +266,7 @@ watch(eventData, eventInput => {
 
             </div>
 
-            <div class="absolute top-[16%] left-[77.5%] pointer-events-none">
+            <div class="absolute top-60 lg:right-36 md:right-32 sm:right-32 max-sm:-translate-x-full max-sm:left-14 max-sm:top-32 pointer-events-none z-0">
                 <Bubbles />
             </div>
         </div>
@@ -247,5 +288,4 @@ watch(eventData, eventInput => {
     </div>
 
     </div>
-</div>
 </template>
