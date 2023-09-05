@@ -2,7 +2,8 @@
 import { cardDate } from '~/utils/misc';
 
 const client = useStrapiClient();
-const myId = (useCookie('userCookie').value.id);
+const myCookie = useCookie('userCookie');
+const myId = myCookie.value.id;
 const userEvents: any = ref([]);
 
 const eventArr: any = ref([]);
@@ -112,7 +113,7 @@ onMounted(() => {
 
 <template>
 <div>
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 px-8">
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 px-8 pt-24">
         <div v-for="ev in eventArr" :key="ev" class="card card-compact bg-base-100 not-prose">
             <figure>
                 <img :src="getInfo(ev, 'eventPic')" class="h-[250px] w-full object-cover" />
@@ -120,7 +121,6 @@ onMounted(() => {
             <div class="card-body">
                 <h1 class="card-title self-center">{{ getInfo(ev, 'title') }}</h1>
                 <span class="text-xs">{{ getInfo(ev, 'location') }}</span>
-                <span class="text-xs">{{ getInfo(ev, 'zip') }}</span>
                 <span class="text-xs">{{ getInfo(ev, 'cardDate') }}</span>
                 <span class="text-xs">{{ getInfo(ev, 'info') }}</span>
 

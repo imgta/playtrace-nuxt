@@ -2,32 +2,32 @@
 import VueGoogleAutocomplete from 'vue-google-autocomplete';
 
 const emit = defineEmits(['addressInput']);
-const config = useRuntimeConfig();
-const GOOGLE_API = config.public.googleMapsAPI;
+
 // ----------------------------------------------------------------
-// Might need to setup &callback= function
-useHead({
-    script: [
-        {
-            async: true,
-            src: `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API}&libraries=places`
-        },
-    ],
-});
+// onMounted(async () => {
+//     const config = useRuntimeConfig();
+//     const GOOGLE_API = config.public.googleMapsAPI;
+//     try {
+//         // Might need to setup &callback= function
+//         useHead({
+//             script: [
+//                 {
+//                     async: true,
+//                     src: `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API}&libraries=places&callback=initMap`
+//                 },
+//             ],
+//         });
+//     } catch (error) {
+//         console.error(error);
+//     }
+// });
 
 const userLoc = reactive({
     lat: 0,
     long: 0,
 });
 const userAddress = ref('');
-// const userGeometry = ref('');
-// const userPlace = ref('');
-// const address = reactive({
-//     name: '',
-//     venue: '',
-//     street: '',
-//     types: [],
-// });
+
 // ----------------------------------------------------------------
 
 async function locateUser() {
@@ -60,14 +60,14 @@ async function getAddressData(place: any, geometry: any) {
 
 <template>
 <div>
-<VueGoogleAutocomplete
-    id="map2"
-    type="text"
-    class="input input-bordered form-input"
-    placeholder="Where at?"
-    country="us"
-    types=""
-    @placechanged="getAddressData"
-    />
+    <VueGoogleAutocomplete
+        id="map2"
+        type="text"
+        class="input input-bordered form-input"
+        placeholder="Where at?"
+        country="us"
+        types=""
+        @placechanged="getAddressData"
+        />
 </div>
 </template>

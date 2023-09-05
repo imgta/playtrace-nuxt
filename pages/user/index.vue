@@ -2,5 +2,7 @@
 </script>
 
 <template>
-<ProfileModal />
+<div>
+
+</div>
 </template>
