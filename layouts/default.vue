@@ -6,7 +6,7 @@ import '@/assets/css/dashboard.css';
 // });
 
 const { toast } = useMisc();
-const targetText = '>backTAB';
+const targetText = '▶_trace.';
 const token = useStrapiToken();
 const config = useRuntimeConfig();
 const { logout } = useStrapiAuth();
@@ -31,6 +31,22 @@ async function outClick() {
         logout();
         navigateTo('/');
         toast.info('Logged out', { timeout: 1500 });
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function toProfile() {
+    try {
+        navigateTo(`/user/${user.username}`);
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function toEvents() {
+    try {
+        navigateTo('/events');
     } catch (e) {
         console.error(e);
     }
@@ -101,8 +117,8 @@ watchEffect(async () => {
                         </span>
                     </button>
                 </NuxtLink>
-                <NuxtLink to="/events">
-                    <button class="btn-primary btn-outline btn-sm">
+                <NuxtLink>
+                    <button class="btn-primary btn-outline btn-sm" @click="toEvents">
                         <span class="hover:text-neutral-content w-full h-full flex items-center">
                             Events
                         </span>
@@ -119,22 +135,36 @@ watchEffect(async () => {
                 <div class="navbar-center lg:flex">
                     <ul class="menu menu-horizontal pl-1.5 bg-transparent">
                         <li tabIndex="{{0}}">
-                            <details>
-                                <summary class="bg-transparent py-0 pl-0 pr-1.5 hover:bg-transparent">
 
-                                    <div v-if="user.avatar" v-show="user.avatar" class="avatar iconDiv bg-transparent" :tooltip="user.username">
+                            <!-- <details> -->
+                                <!-- <summary class="bg-transparent py-0 pl-0 pr-1.5 hover:bg-transparent"> -->
+
+                                <div class="dropdown dropdown-hover bg-transparent py-0 pl-0 pr-1.5 hover:bg-transparent">
+
+                                    <div v-if="user.avatar" v-show="user.avatar" class="avatar iconDiv bg-transparent" :tooltip="user.username" @click="toProfile">
                                         <img :src="user.avatar" />
                                     </div>
 
-                                    <div v-if="!user.avatar" v-show="!user.avatar" class="avatar placeholder items-center">
+                                    <div v-if="!user.avatar" v-show="!user.avatar" class="avatar placeholder items-center" @click="toProfile">
                                         <div class="bg-secondary text-md font-normal rounded-full w-8">
                                             <span class="text-xs text-white">{{ user.initials }}</span>
                                         </div>
                                         <span class="text-base-content/80 pl-2 text-md">{{ user.username }}</span>
                                     </div>
 
-                                </summary>
-                                <ul class="p-0 m-0 bg-transparent shadow-none drop-shadow-none right-0 top-6">
+                                <!-- </summary> -->
+
+                                <ul class="dropdown-content z-[1] menu p-2.5 m-0 bg-transparent border-none shadow-none drop-shadow-none right-0 top-6">
+                                    <!-- <li>
+                                        <LazyNuxtLink
+                                            class="btn btn-xs sm:btn-sm btn-neutral font-light normal-case bg-neutral border-none hover:opacity-80 hover:bg-neutral/80"
+                                            @click="toProfile"
+                                        >
+                                            <span class="text-neutral-content text-md">
+                                                Profile
+                                            </span>
+                                        </LazyNuxtLink>
+                                    </li> -->
                                     <li>
                                         <LazyNuxtLink
                                             class="btn btn-xs sm:btn-sm btn-neutral font-light normal-case bg-neutral border-none hover:opacity-80 hover:bg-neutral/80"
@@ -146,7 +176,9 @@ watchEffect(async () => {
                                         </LazyNuxtLink>
                                     </li>
                                 </ul>
-                            </details>
+
+                                </div>
+                            <!-- </details> -->
                         </li>
                     </ul>
                 </div>
