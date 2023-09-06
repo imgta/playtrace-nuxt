@@ -1,26 +1,20 @@
 <script setup lang="ts">
-import VueGoogleAutocomplete from 'vue-google-autocomplete';
+// import VueGoogleAutocomplete from 'vue-google-autocomplete';
 
 const emit = defineEmits(['addressInput']);
 
 // ----------------------------------------------------------------
-// onMounted(async () => {
-//     const config = useRuntimeConfig();
-//     const GOOGLE_API = config.public.googleMapsAPI;
-//     try {
-//         // Might need to setup &callback= function
-//         useHead({
-//             script: [
-//                 {
-//                     async: true,
-//                     src: `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API}&libraries=places&callback=initMap`
-//                 },
-//             ],
-//         });
-//     } catch (error) {
-//         console.error(error);
-//     }
-// });
+
+const { googleMapsAPI } = useRuntimeConfig().public;
+// Might need to setup &callback= function
+useHead({
+    script: [
+        {
+            async: true,
+            src: `https://maps.googleapis.com/maps/api/js?key=${googleMapsAPI}&libraries=places&callback=initMap`
+        },
+    ],
+});
 
 const userLoc = reactive({
     lat: 0,
