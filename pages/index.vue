@@ -9,13 +9,13 @@ const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
         <div class="py-6 bg-base-100">
             <div class="flex-col max-w-5xl mx-auto hero-content lg:flex-row-reverse">
                 <img
-                    src="https://images.unsplash.com/photo-1528130723281-f9ffa133d787"
-                    class="rounded-lg shadow-2xl md:max-w-lg lg:max-w-sm"
+                    src="https://images.unsplash.com/photo-1518281053204-48de9654fb37"
+                    class="rounded-lg shadow-2xl md:max-w-lg lg:max-w-md ml-2"
                 >
                 <div class="py-4 prose">
-                    <p>BASED ON YOUR INTERESTS</p>
-                    <h1>A New Social Catalyst</h1>
-                    <p>Jan 7, 2022, 4pm</p>
+                    <h1 class="pb-0 mb-0">Your New Social Catalyst</h1>
+                    <p class="pl-1 m-0">Make trace.</p>
+                    <p>Jan 7, 2022, 4:10 PM</p>
                     <p>
                         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Lorem ipsum dolor sit amet, consectetur adipisicing elit.
                     </p>

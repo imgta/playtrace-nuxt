@@ -2,13 +2,16 @@
 import { DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';
 
-// ----------------------------------------------------------------
 const emit = defineEmits(['startDateInput']);
 const startDate = ref(new Date());
 const formatDate = ref('');
-
+// ----------------------------------------------------------------
+watch(startDate, newStartDate => {
+    dateInput(newStartDate);
+});
+// ----------------------------------------------------------------
 function format(date: Date | string) {
-    const options = {
+    const options: any = {
         weekday: 'long',
         month: 'short',
         day: 'numeric',
@@ -22,83 +25,28 @@ function format(date: Date | string) {
     return `${date.toLocaleString('en-US', options)} @ ${formattedTime}`;
 };
 
-// ----------------------------------------------------------------
-// FOR MODAL ONLY
-// const popDate = ref(false);
-// const inputStyle = ref('');
-// function openDate() {
-//     if (popDate.value) {
-//         popDate.value.showModal();
-//     }
-// }
-// function inputBlur() {
-//     popDate.value = false;
-//     inputStyle.value = '';
-//     dateInput(date.value);
-//     console.log(date.value);
-// }
-
 async function dateInput(startDate: any) {
     const cleanDateSelect = format(startDate);
     formatDate.value = cleanDateSelect;
     emit('startDateInput', startDate);
 }
-
-// ----------------------------------------------------------------
-watch(startDate, newStartDate => {
-    dateInput(newStartDate);
-});
 // ----------------------------------------------------------------
 </script>
 
 <template>
-<div>
-<!-- Modal PopUp  -->
-    <!-- <input
-        v-model="formatDate"
-        placeholder="When were you thinking?"
-        class="input input-bordered form-input cursor-pointer"
-        @click="openDate"
-    />
-    <dialog v-show="popDate" id="my_modal_4" ref="popDate" class="modal">
-        <form method="dialog" class="modal-box shadow-none w-fit m-0 p-0.5">
-            <div class="mycalendar">
-                <DatePicker
-                v-model="date"
-                mode="dateTime"
-                :min-date="new Date()"
-                @input="dateInput"
-                />
+    <div>
+        <div class="collapse">
+            <input type="checkbox" />
+            <div class="collapse-title px-0 py-2">
+                <input v-model="formatDate" placeholder="When were you thinking?" class="input input-bordered form-input" />
             </div>
-        </form>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
-        </form>
-    </dialog> -->
-
-<!-- Collapsable Menu -->
-<div class="collapse">
-    <input type="checkbox" />
-    <div class="collapse-title px-0 py-2">
-        <input
-            v-model="formatDate"
-            placeholder="When were you thinking?"
-            class="input input-bordered form-input"
-        />
-    </div>
-    <div class="collapse-content">
-        <div class="mycalendar">
-            <DatePicker
-            v-model="startDate"
-            mode="dateTime"
-            :min-date="new Date()"
-            @input="dateInput"
-            />
+            <div class="collapse-content">
+                <div class="mycalendar grid justify-center">
+                    <DatePicker v-model="startDate" mode="dateTime" :min-date="new Date()" @input="dateInput" />
+                </div>
+            </div>
         </div>
     </div>
-</div>
-
-</div>
 </template>
 
 <style scoped lang="css">
@@ -107,12 +55,14 @@ watch(startDate, newStartDate => {
     border-color: hsl(var(--p));
     border-radius: var(--rounded-btn, 0.5rem);
 }
+
 .mycalendar :deep(:is(select.vc-focus.vc-align-right option, select.vc-focus.vc-align-left option, select.vc-focus option)) {
     background-color: hsl(var(--b2) / 1);
     border-color: hsl(var(--p));
     border-radius: var(--rounded-btn, 0.5rem);
     color: hsl(var(--p) / 0.8);
 }
+
 .mycalendar :deep(:is(.vc-highlight-content-solid)) {
     color: hsl(var(--nc));
     background-color: hsl(var(--p));
@@ -140,7 +90,8 @@ watch(startDate, newStartDate => {
     --vc-time-year-color: hsl(var(--bc) / 0.8);
     --vc-time-weekday-color: hsl(var(--bc) / 0.8);
     --vc-time-select-group-icon-color: hsl(var(--p));
-    --vc-time-picker-border: hsl(var(--p));     /* Divider */
+    --vc-time-picker-border: hsl(var(--p));
+    /* Divider */
     --vc-time-select-group-bg: hsl(var(--bc) / 0);
     --vc-time-select-group-border: hsl(var(--pf)/0);
     --vc-select-color: hsl(var(--p));

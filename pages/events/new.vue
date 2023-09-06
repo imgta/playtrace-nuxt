@@ -1,27 +1,35 @@
 <script setup lang="ts">
+const { toast } = useMisc();
 const client = useStrapiClient();
+const { url: appHost } = useRuntimeConfig().public.strapi;
 const myCookie: any = useCookie('userCookie').value;
 const themeCookie = useCookie('selectedTheme');
+
 const corpoLogin = ref('');
+const showModal = ref(false);
+
+const autoResult: any = ref(null);
 const eventData = reactive({
     title: '',
     startDate: '',
-    location: '',
+    location: [],
     size: '',
     coverCharge: '',
     info: '',
     img: '',
-    categories: '',
-});
-const showModal = ref(false);
+}) as any;
+
+const user = useStrapiUser().value;
+const myId = (user?.id) as number;
+console.log('user', user);
 // ----------------------------------------------------------------
 onMounted(() => {
     // @ts-expect-error idk
     const autocomplete = new google.maps.places.Autocomplete(document.getElementById('autocomplete'));
     autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
-        console.log('place', place);
-        eventData.location = place.formatted_address;
+        autoResult.value = place;
+        locationInput();
     });
 });
 
@@ -31,10 +39,35 @@ watchEffect(() => {
     } else {
         corpoLogin.value = 'signup';
     }
-    console.log('eventData.location', eventData.location);
-    console.log('eventData.startDate', eventData.startDate);
+    console.log('autoResult.value', autoResult.value);
 });
 // ----------------------------------------------------------------
+async function locationInput() {
+    if (autoResult.value) {
+        try {
+            const address = await autoResult.value.formatted_address.replace(', USA', '');
+
+            // Filter out irrelevant/redundant types from the types array
+            const categories = autoResult.value.types.filter((type: string) => !['tourist_attraction', 'point_of_interest', 'establishment', 'meal_delivery', 'meal_takeaway'].includes(type));
+            // Join the categories into a single string
+            const categoryStr = categories.join(', ');
+            // Find last index of address_components (zipcode component)
+            const zipcode = autoResult.value.address_components[autoResult.value.address_components.length - 1].long_name;
+            console.log('zipcode', zipcode);
+            const locationObj = {
+                fullAddress: `${autoResult.value.name} - ${address}`,
+                address: address,
+                venue: autoResult.value.name,
+                zipcode: zipcode,
+                category: categoryStr,
+            };
+            eventData.location.push(locationObj);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+}
+
 async function balanceBlur() {
     if (eventData.coverCharge) {
         const val = eventData.coverCharge;
@@ -48,33 +81,14 @@ async function balanceBlur() {
     }
 }
 
-async function locationEmit(data: any) {
-    console.log('zip', data.address_components[7].long_name);
-    const { name, formatted_address, types, address_components } = await data;
-    const address = formatted_address.replace(', USA', '');
-    console.log(address);
-    const zipcode = address_components[7].long_name;
-
-    eventData.location = `${name} ${address}`;
-
-    console.log(eventData.location);
-    // Filter out irrelevant types from the types array
-    const categories = types.filter((type: string) => !['tourist_attraction', 'point_of_interest', 'establishment'].includes(type));
-    console.log('categories', categories[0]);
-    eventData.categories = categories[0];
-    console.log('eventData.categories', eventData.categories);
-}
-
 async function startDateEmit(data: any) {
     eventData.startDate = data;
 }
-
 async function coverPicEmit(data: any) {
     const subString = '&crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=70&w=600';
     const rawImg = data.replace(subString, '');
     eventData.img = rawImg;
 }
-
 async function coverModalEmit(data: any) {
     showModal.value = data;
 }
@@ -99,19 +113,35 @@ async function createEvent(e: Event) {
         // Fetch img URL, convert response to blob
         const imgRes = await (fetch(eventData.img));
         const imgBlob = await imgRes.blob();
-        const imgName = `${eventData.title}-eventPic`;
+        const imgName = `${eventData.title}_eventPic`;
 
         // Append field data
         formData.append('data', JSON.stringify(form));
         // Append file image
         formData.append('files.eventPic', imgBlob, imgName);
 
-        const eventRes: Record<string, any> = await client('http://localhost:1337/api/events', {
+        const eventRes: Record<string, any> = await client(`${appHost}api/events`, {
             method: 'POST',
             body: formData,
         });
-        const result = await eventRes.data;
-        console.log(result);
+        const eventResult = await eventRes.data;
+        console.log('eventResult', eventResult);
+
+        // Create an 'accepted' event invitation for event host (initiator)
+        const inviteForm = new FormData();
+        const inviteObj = {
+            collection: 'event',
+            eventStatus: 'going',
+            users_permissions_user: user,
+            event: eventResult,
+        };
+        inviteForm.append('data', JSON.stringify(inviteObj));
+        const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
+            method: 'POST',
+            body: inviteForm,
+        });
+        const inviteData = await inviteRes.data;
+        console.log('inviteData', inviteData);
 
         // UPDATE EVENT COVER PICTURE:
         // const formData = new FormData();
@@ -120,15 +150,15 @@ async function createEvent(e: Event) {
         // formData.append('field', 'eventPic');
         // formData.append('files', imgBlob, imgName);
 
-        // const postRes: Record<string, any> = await client('http://localhost:1337/api/upload', {
+        // const postRes: Record<string, any> = await client(`${appHost}api/upload`, {
         //     method: 'POST',
         //     body: formData,
         // });
         // console.log('postRes', postRes);
-    } catch (e: any) {
-        console.error(e);
+    } catch (error: any) {
+        console.error(error);
     } finally {
-        console.log('Event created!');
+        toast.info('New event created!', { timeout: 1500 });
         navigateTo('/events');
     }
 }
@@ -152,9 +182,9 @@ async function createEvent(e: Event) {
     <div class="bg-base-200">
         <div class="flex w-full shadow-none justify-center">
             <div class="flex lg:flex-row sm:flex-col-reverse max-sm:flex-col-reverse w-full justify-center sm:px-20">
-
                 <div class="sm:w-auto lg:min-w-[42%] sm:min-w-[10%]">
                     <div class="card-body pb-1.5">
+
                         <div class="w-full con-hint top pb-2">
                             <div class="hint ">
                                 <p>Event Title</p>
@@ -167,17 +197,13 @@ async function createEvent(e: Event) {
                             <div class="hint ">
                                 <p>Location</p>
                             </div>
-
-                            <input id="autocomplete" v-model="eventData.location" type="text"
-                                placeholder="Enter your address" class="input input-bordered form-input">
-
-                            <!-- <GoogleAutoMap @addressInput="locationEmit" /> -->
-
+                            <input id="autocomplete" v-model="eventData.location.full_address" type="text"
+                                placeholder="Enter your address" class="input input-bordered form-input" />
                         </div>
 
                         <div class="w-full con-hint left py-0">
                             <div class="hint">
-                                <p>Select Date</p>
+                                <p>Start Date</p>
                             </div>
                             <VPicker @startDateInput="startDateEmit" />
                         </div>
@@ -211,12 +237,12 @@ async function createEvent(e: Event) {
                 </div>
 
                 <div class="w-full h-full pt-8 lg:pl-0 sm:px-8 max-sm:px-8">
-
                     <div class="justify-center content-center self-center items-center">
+
                         <div @click="toggleModal">
                             <button v-if="!showModal && !eventData.img"
-                                class="edit edit-primary lg:min-w-[80%] sm:min-w-[100%] max-sm:min-w-[100%] lg:h-[90%] sm:h-full ">
-                                Cover Picture</button>
+                                class="edit edit-primary lg:min-w-[80%] sm:min-w-[100%] max-sm:min-w-[100%] lg:h-[90%] sm:h-full ">Cover
+                                Picture</button>
                             <img v-if="!showModal && eventData.img" :src="eventData.img" alt="Cover"
                                 class="edit edit-primary object-cover h-[24rem] w-[80%] sm:w-[100%] max-sm:w-[100%]" />
                         </div>
@@ -238,10 +264,9 @@ async function createEvent(e: Event) {
                         class="absolute top-60 lg:right-36 md:right-32 sm:right-32 max-sm:-translate-x-full max-sm:left-14 max-sm:top-32 pointer-events-none z-0">
                         <Bubbles />
                     </div>
+
                 </div>
-
             </div>
-
         </div>
 
         <div class="sm:px-24 sm:pb-10 lg:pl-0">
