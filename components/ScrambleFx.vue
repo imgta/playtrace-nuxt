@@ -9,16 +9,26 @@ const isHovered = ref(false);
 const cyclesPerLetter = 3;
 const shuffleTime = 55;
 const shuffleChars = '01~-=+_@#$%^&*.,:{};<>?';
-
 const scrambledText = ref(props.targetText);
 let intervalRef: ReturnType<typeof setInterval> | null = null;
 let pos = 0;
+// ----------------------------------------------------------------
+watchEffect(() => {
+    if (!isHovered.value) {
+        stopScramble();
+    } else {
+        startScramble();
+    }
+});
 
+onUnmounted(() => {
+    stopScramble();
+});
+// ----------------------------------------------------------------
 function stopScramble() {
     isHovered.value = false;
     scrambledText.value = props.targetText;
 }
-
 function startScramble() {
     isHovered.value = true;
     pos = 0;
@@ -28,7 +38,6 @@ function startScramble() {
     }
     scramble();
 }
-
 function scramble() {
     intervalRef = setInterval(() => {
         if (!isHovered.value) {
@@ -58,22 +67,12 @@ function scramble() {
         }
     }, shuffleTime);
 }
-
-watchEffect(() => {
-    if (!isHovered.value) {
-        stopScramble();
-    } else {
-        startScramble();
-    }
-});
-
-onUnmounted(() => {
-    stopScramble();
-});
+// ----------------------------------------------------------------
 </script>
 
 <template>
-    <div class="relative text-primary font-normal text-xl normal-case font-mono" @mouseenter="startScramble" @mouseleave="stopScramble">
+    <div class="relative text-primary font-normal text-xl normal-case font-mono" @mouseenter="startScramble"
+        @mouseleave="stopScramble">
         <div class="scrambled-text">
             {{ scrambledText }}
         </div>
