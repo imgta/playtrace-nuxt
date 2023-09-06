@@ -14,7 +14,7 @@ export default defineNuxtConfig({
         },
     },
     build: {
-        transpile: ['vue-toastification', 'v-calendar', '@yeger/vue-masonry-wall', 'vue-google-autocomplete'],
+        transpile: ['vue-toastification', 'v-calendar', '@yeger/vue-masonry-wall'],
     },
     css: ['@/assets/css/input.css', '@/assets/css/button.css'],
     generate: {
@@ -38,4 +38,11 @@ export default defineNuxtConfig({
             // routes: ['/sitemap.xml'],
         },
     },
+    app: {
+        head: {
+            script: [
+                { src: `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_KEY}&libraries=places` }
+            ]
+        },
+    }
 });
