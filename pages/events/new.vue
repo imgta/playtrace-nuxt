@@ -2,7 +2,6 @@
 const { toast } = useMisc();
 const client = useStrapiClient();
 const { url: appHost } = useRuntimeConfig().public.strapi;
-const myCookie: any = useCookie('userCookie').value;
 const themeCookie = useCookie('selectedTheme');
 
 const corpoLogin = ref('');
@@ -116,7 +115,7 @@ async function createEvent(e: Event) {
         // (1) Create new event
         const formData = new FormData();
         const form = {
-            initiator: myCookie,
+            initiator: user,
             title: eventData.title,
             startDate: eventData.startDate,
             location: eventData.location,
