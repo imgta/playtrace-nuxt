@@ -30,6 +30,24 @@ html, body {
     filter:brightness(1.2);
 }
 
+.inputshake {
+    animation: justshake 0.3s forwards;
+}
+@keyframes justshake {
+    25% {
+    transform: translateX(5px);
+    }
+    50% {
+    transform: translateX(-5px);
+    }
+    75% {
+    transform: translateX(5px);
+    }
+    100% {
+    transform: translateX-(5px);
+    }
+}
+
 
 /* AVATAR ICON SLIDER */
 .iconDiv {
@@ -147,9 +165,9 @@ html, body {
 .right:hover {transform: translateX(12px); } */
 
 .top .hint { top:-52%; left:1.5%; }
-.bottom .hint { top:95.5%; left:1.5%; }
+.bottom .hint { bottom: 52%; left:1.5%; }
 .left .hint { top:21%; left:-47%; text-align:right;}
-.right .hint { top:21%; left:46.5%; text-align:left;}
+.right .hint { top:21%; right:-47%; text-align:left;}
 
 @media (max-width: 640px) {
     /* Disable animation and reposition for max-sm screens */
@@ -183,4 +201,9 @@ html, body {
 
 .menu :where(li ul):before {
     width: 0px;
+}
+
+
+.categorytext {
+    font-size: 0.6rem;
 }
