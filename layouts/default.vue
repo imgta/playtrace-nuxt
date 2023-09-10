@@ -63,14 +63,6 @@ async function toProfile() {
     }
 }
 
-async function toEvents() {
-    try {
-        navigateTo('/events');
-    } catch (e) {
-        console.error(e);
-    }
-}
-
 async function getUser() {
     try {
         const { id } = useStrapiUser().value as any;
@@ -113,8 +105,8 @@ async function getUser() {
                         </span>
                     </button>
                 </NuxtLink>
-                <NuxtLink>
-                    <button class="btn-primary btn-outline btn-sm" @click="toEvents">
+                <NuxtLink to="/events">
+                    <button class="btn-primary btn-outline btn-sm">
                         <span class="hover:text-neutral-content w-full h-full flex items-center">
                             Events
                         </span>
@@ -134,18 +126,21 @@ async function getUser() {
 
                             <div class="dropdown dropdown-hover bg-transparent py-0 pl-0 pr-1.5 hover:bg-transparent">
 
-                                <div v-if="user.avatar" v-show="user.avatar" class="avatar iconDiv bg-transparent"
-                                    :tooltip="user.username" @click="toProfile">
-                                    <img :src="user.avatar" />
-                                </div>
-
-                                <div v-if="!user.avatar" v-show="!user.avatar" class="avatar placeholder items-center"
-                                    @click="toProfile">
-                                    <div class="bg-secondary text-md font-normal rounded-full w-8">
-                                        <span class="text-xs text-white">{{ user.initials }}</span>
+                                <NuxtLink v-if="user.avatar" v-show="user.avatar" to="/user/{{user.username}}">
+                                    <div v-if="user.avatar" v-show="user.avatar" class="avatar iconDiv bg-transparent"
+                                        :tooltip="user.username">
+                                        <img :src="user.avatar" />
                                     </div>
-                                    <span class="text-base-content/80 pl-2 text-md">{{ user.username }}</span>
-                                </div>
+                                </NuxtLink>
+
+                                <NuxtLink v-if="!user.avatar" v-show="!user.avatar" to="/user/{{user.username}}">
+                                    <div v-if="!user.avatar" v-show="!user.avatar" class="avatar placeholder items-center">
+                                        <div class="bg-secondary text-md font-normal rounded-full w-8">
+                                            <span class="text-xs text-white">{{ user.initials }}</span>
+                                        </div>
+                                        <span class="text-base-content/80 pl-2 text-md">{{ user.username }}</span>
+                                    </div>
+                                </NuxtLink>
 
                                 <ul
                                     class="dropdown-content z-[1] menu p-2.5 m-0 bg-transparent border-none shadow-none drop-shadow-none right-0 top-6">

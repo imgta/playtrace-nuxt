@@ -2,6 +2,7 @@
 import { cardDate } from '~/utils/misc';
 
 const client = useStrapiClient();
+const { toast } = useMisc();
 const { url: appHost } = useRuntimeConfig().public.strapi;
 
 const myInvites: any = ref([]);
@@ -80,16 +81,26 @@ async function getMyInvites(userId: number) {
         console.error(error);
     }
 }
+
+async function deleteEvent() {
+    try {
+        console.log('test');
+    } catch (error) {
+        console.error(error);
+    } finally {
+        toast.info('Event deleted!', { timeout: 1500 });
+    }
+}
 // ----------------------------------------------------------------
 </script>
 
 <template>
-                <h1 class="text-primary text-4xl text-center pt-4 pr-1.5 pb-0.5">
-                Your Events
-            </h1>
-            <p class="text-base-content/80 text-center text-sm">
-                Someone's popular.
-            </p>
+    <h1 class="text-primary text-4xl text-center pt-4 pr-1.5 pb-0.5">
+        Your Events
+    </h1>
+    <p class="text-base-content/80 text-center text-sm">
+        Someone's popular.
+    </p>
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 px-8 pt-8">
         <div v-for="(ev, idx) in myInvites" :key="idx" class="card card-compact bg-base-100 not-prose">
             <figure>
@@ -130,8 +141,9 @@ async function getMyInvites(userId: number) {
                 </div>
 
                 <span class="pt-3">{{ ev.attributes.event.data?.attributes?.info }}</span>
+                <!-- <span class="pt-3">ID: {{ ev.attributes.event.data?.id }}</span> -->
 
-                <div class="flex flex-wrap gap-1.5 pt-6">
+                <div class="flex flex-wrap gap-1.5 pt-6 items-end">
                     <span v-for="category in ev.attributes.event.data?.attributes?.location[0]?.category.split(', ')"
                         :key="category" class="badge badge-outline badge-xs categorytext font-semibold">{{ category
                         }}</span>
@@ -141,14 +153,14 @@ async function getMyInvites(userId: number) {
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="fill-base-content/70 w-4 hover:fill-error hover:cursor-pointer" viewBox="0 0 256 256">
                             <path
-                            d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z">
-                        </path>
-                    </svg>
+                                d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z">
+                            </path>
+                        </svg>
+                    </div>
                 </div>
+
             </div>
 
         </div>
-
     </div>
-</div>
 </template>
