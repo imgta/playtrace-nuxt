@@ -50,7 +50,7 @@ function openAvatar() {
                 </div>
 
                 <div v-if="user.avatar" v-show="user.avatar" class="avatar w-full pl-10 pt-5">
-                    <div class="w-56 h-48 rounded-full hover:opacity-70 cursor-pointer" @click="openAvatar">
+                    <div class="rounded-full hover:opacity-70 cursor-pointer lg:h-48 lg:w-56 sm:h-40 sm:w-52 max-sm:h-32 max-sm:w-44" @click="openAvatar">
                         <img :src="user.avatar" class="object-cover" />
                     </div>
                     <div class="pl-4 pt-4 w-full">
