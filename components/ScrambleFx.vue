@@ -71,7 +71,8 @@ function scramble() {
 </script>
 
 <template>
-    <div class="relative text-primary font-normal text-xl normal-case font-mono" @mouseenter="startScramble"
+    <div class="text-primary font-normal normal-case font-mono lg:text-xl md:text-xl sm:text-lg sm:font-medium max-sm:text-lg max-sm:font-medium"
+        @mouseenter="startScramble"
         @mouseleave="stopScramble">
         <div class="scrambled-text">
             {{ scrambledText }}
