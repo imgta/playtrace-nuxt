@@ -9,8 +9,13 @@ const refId: any = (user?.id);
 const imgUrl = ref('');
 const file = ref(null);
 const imgFile: any = ref(null);
+const avatarRes: any = ref(null);
+const oldAvatarId: any = ref(null);
 // ----------------------------------------------------------------
-
+// watchEffect(() => {
+//     console.log('user', user);
+//     console.log('refId', refId);
+// });
 // ----------------------------------------------------------------
 function handleUploadFile() {
     const fileInput: any = file.value;
@@ -28,41 +33,78 @@ function handleImgUrl() {
 async function updateAvatar(event: Event) {
     event.preventDefault();
     try {
-        // IMAGE URLS
-        if (imgUrl.value !== '') {
-            const imgRes: any = await (fetch(imgUrl.value));
-            const imgName = `${user.username}_avatar`;
-            // Convert fetch response to blob
-            const imgBlob = await imgRes.blob();
-
-            const formData = new FormData();
-            formData.append('ref', 'plugin::users-permissions.user');
-            formData.append('refId', refId);
-            formData.append('field', 'avatar');
-            formData.append('files', imgBlob, imgName);
-
-            const postRes = await client(`${appHost}api/upload`, {
-                method: 'POST',
-                body: formData,
-            });
-            console.log(postRes);
+        // (1) Find and delete old avatar by id if it exists
+        const userRes: Record<string, any> = await client(`${appHost}api/users?populate=deep,2&filters[id][$eq]=${refId}`, {
+            method: 'GET',
+        });
+        console.log('userRes', userRes);
+        if (userRes[0].avatar) {
+            try {
+                oldAvatarId.value = userRes[0].avatar.id;
+                const delAvatarRes: any = await client(`${appHost}api/upload/files/${oldAvatarId.value}`, {
+                    method: 'DELETE',
+                });
+                const delResult = await delAvatarRes;
+                console.log('delResult', delResult);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                toast.info('Old avatar deleted!', { timeout: 1500 });
+            }
         }
 
-        // IMAGE FILE ATTACHMENT
+        // (2a) Handle IMAGE URL
+        if (imgUrl.value !== '') {
+            try {
+                const imgName = `${user.username}_avatar`;
+                const imgRes: any = await client(imgUrl.value, {
+                    method: 'GET',
+                    headers: {
+                        'Access-Control-Allow-Origin': `${appHost}`,
+                    }
+                });
+                console.log('imgRes', imgRes);
+                // Convert fetch response to blob
+                const imgBlob = await imgRes.blob();
+
+                const formData = new FormData();
+                formData.append('ref', 'plugin::users-permissions.user');
+                formData.append('refId', refId);
+                formData.append('field', 'avatar');
+                formData.append('files', imgBlob, imgName);
+
+                const postRes: Record<string, any> = await client(`${appHost}api/upload`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                avatarRes.value = await postRes.data;
+                console.log('avatarRes.value', avatarRes.value);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // (2b) Handle IMAGE FILE ATTACHMENT
         if (imgUrl.value === '' && imgFile.value !== null) {
-            const imgName = `${user.username}_avatar`;
+            try {
+                const imgName = `${user.username}_avatar`;
 
-            const formData = new FormData();
-            formData.append('ref', 'plugin::users-permissions.user');
-            formData.append('refId', refId);
-            formData.append('field', 'avatar');
-            formData.append('files', imgFile.value, imgName);
+                const formData = new FormData();
+                formData.append('ref', 'plugin::users-permissions.user');
+                formData.append('refId', refId);
+                formData.append('field', 'avatar');
+                formData.append('files', imgFile.value, imgName);
 
-            const postRes = await client(`${appHost}api/upload`, {
-                method: 'POST',
-                body: formData,
-            });
-            console.log(postRes);
+                const postRes: Record<string, any> = await client(`${appHost}api/upload`, {
+                    method: 'POST',
+                    body: formData,
+                });
+                avatarRes.value = await postRes.data;
+                console.log('avatarRes.value', avatarRes.value);
+            } catch (error) {
+                console.error(error);
+            }
         }
     } catch (error) {
         console.error(error);
