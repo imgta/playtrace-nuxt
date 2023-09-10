@@ -49,13 +49,13 @@ function openAvatar() {
                     <span class="text-base-content/80 pl-2 text-md">{{ user.username }}</span>
                 </div>
 
-                <div v-if="user.avatar" v-show="user.avatar" class="avatar w-full pl-5 pt-5">
+                <div v-if="user.avatar" v-show="user.avatar" class="avatar w-full pl-10 pt-5">
                     <div class="w-56 h-48 rounded-full hover:opacity-70 cursor-pointer" @click="openAvatar">
                         <img :src="user.avatar" class="object-cover" />
                     </div>
                     <div class="pl-4 pt-4 w-full">
                         <p class="text-xl">@{{ user.username }}</p>
-                        <p class="text-md pl-1.5">{{ user.fullName }}</p>
+                        <p class="text-sm pl-1.5">{{ user.fullName }}</p>
                     </div>
                 </div>
             </div>

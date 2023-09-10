@@ -6,6 +6,8 @@ const themeCookie = useCookie('selectedTheme');
 
 const corpoLogin = ref('');
 const showModal = ref(false);
+const createEventAPI = ref<boolean>(false);
+const createInviteAPI = ref<boolean>(false);
 
 const autoResult: any = ref(null);
 const locationAddress = ref('');
@@ -112,6 +114,8 @@ async function toggleModal() {
 async function createEvent(e: Event) {
     e.preventDefault();
     try {
+        createEventAPI.value = true;
+
         // (1) Create new event
         const formData = new FormData();
         const form = {
@@ -153,13 +157,14 @@ async function createEvent(e: Event) {
         });
         const hostInviteData = await hostInviteRes.data;
         console.log('hostInviteData', hostInviteData);
+        createEventAPI.value = false;
 
         // (3) Create 'invited' event invitation for each user in userInvites array
         createInvites(await eventResult);
     } catch (error: any) {
         console.error(error);
     } finally {
-        toast.info('New event created!', { timeout: 1500 });
+        toast.success('New event created!', { timeout: 1500 });
         navigateTo('/events');
     }
 }
@@ -175,6 +180,7 @@ async function createInvites(eventRes: any) {
         };
         inviteForm.append('data', JSON.stringify(inviteObj));
         try {
+            createInviteAPI.value = true;
             const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
                 method: 'POST',
                 body: inviteForm,
@@ -183,6 +189,8 @@ async function createInvites(eventRes: any) {
             console.log('inviteData', inviteData);
         } catch (error) {
             console.error(error);
+        } finally {
+            createInviteAPI.value = false;
         }
     }
 }
@@ -352,15 +360,23 @@ function removeUser(index: any) {
         </div>
 
         <div class="sm:px-24 sm:pb-10 lg:pl-0">
+
             <div class="flex items-center justify-center place-content-center">
-                <button :class="corpoLogin" type="submit" @click="createEvent">
-                    <span>Create </span>
+                <button v-if="!createEventAPI && !createInviteAPI" :class="corpoLogin" type="submit" @click="createEvent">
+                    <span>Create</span>
                     <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
                         <path d="M1,5 L11,5"></path>
                         <polyline points="8 1 12 5 8 9"></polyline>
                     </svg>
                 </button>
             </div>
+
+            <div class="flex justify-center items-center pt-2">
+                <span v-if="createEventAPI" class="px-3 duration-75 ease-in-out animate-pulse font-medium">Creating</span>
+                <span v-if="createInviteAPI" class="px-3 duration-75 ease-in-out animate-pulse font-medium">Inviting</span>
+                <Loader v-if="createEventAPI || createInviteAPI" />
+            </div>
+
         </div>
 
     </div>

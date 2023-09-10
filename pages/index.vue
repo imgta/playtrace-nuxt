@@ -1,7 +1,5 @@
 <script setup lang="ts">
 const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
-
-// toast.info('Success', { timeout: 1400 });
 </script>
 
 <template>
@@ -19,9 +17,10 @@ const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
                     <p>
                         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Lorem ipsum dolor sit amet, consectetur adipisicing elit.
                     </p>
-                    <NuxtLink class="link-primary" to="/" external>
-                        Go to backtab.dev
-                    </NuxtLink>
+                    Leave your
+                    <a class="link-primary" href="https://playtrace.app">
+                        trace.
+                    </a>
                 </div>
             </div>
         </div>
@@ -44,6 +43,5 @@ const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
                 </div>
             </div>
         </div>
-        <!-- <Loading :my-loading="loading" /> -->
     </main>
 </template>
