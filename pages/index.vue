@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { articleDate } from '~/utils/misc';
+
 const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
 </script>
 
@@ -11,9 +13,8 @@ const myArr = ['Clothes', 'Elecontronics', 'Groceries'];
                     class="rounded-lg shadow-2xl md:max-w-lg lg:max-w-md ml-2"
                 >
                 <div class="py-4 prose">
-                    <h1 class="pb-0 mb-0">Your New Social Catalyst</h1>
-                    <p class="pl-1 m-0">Make trace.</p>
-                    <p>Jan 7, 2022, 4:10 PM</p>
+                    <span class="mb-0 font-bold text-2xl text-base-content">Your New Social Catalyst</span>
+                    <p class="pl-1 m-0">{{ articleDate(new Date()) }}</p>
                     <p>
                         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Lorem ipsum dolor sit amet, consectetur adipisicing elit.
                     </p>

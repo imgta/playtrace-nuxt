@@ -26,3 +26,13 @@ export function cardDate(datetimeInput: string): string {
 
     return formattedDate;
 }
+
+export function articleDate(datetime: any) {
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    };
+
+    return datetime.toLocaleDateString('en-US', options);
+}

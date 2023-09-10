@@ -297,7 +297,7 @@ function removeUser(index: any) {
                             </div>
                             <textarea v-model="eventData.info" placeholder="Whose birthday is it this time?" type="text"
                                 name="description"
-                                class="textarea text-bordered textarea-sm textarea-neutral form-input h-20 lg:max-w-[100%] sm:max-w-[100%] resize" />
+                                class="textarea text-bordered textarea-sm textarea-neutral form-input h-20 lg:max-w-[100%] sm:max-w-[100%] resize leading-normal" />
                         </div>
 
                     </div>
@@ -336,9 +336,9 @@ function removeUser(index: any) {
                         </div>
 
                         <div v-if="eventData.userInvites.length > 0" class="pt-2">
-                            <span class="text-sm font-medium">Event Invites:</span>
+                            <span class="text-sm font-medium">Invites:</span>
                             <div v-for="(user, index) in eventData.userInvites" :key="index"
-                                class="inline-block whitespace-nowrap pl-0.5">
+                                class="inline-block whitespace-nowrap pl-1">
                                 <span class="badge badge-lg gap-1 text-xs text-primary/90 font-medium pl-3 pr-2">
                                     {{ user.username }}
                                     <span
