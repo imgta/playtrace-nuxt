@@ -87,6 +87,7 @@ async function getUser() {
 <template>
     <div :data-theme="themeCookie" class="flex flex-col min-h-screen bg-base-200">
         <div class="navbar bg-base-200 px-5">
+
             <div class="flex-1">
                 <NuxtLink to="/">
                     <ScrambleFx :target-text="targetText" />
@@ -99,14 +100,14 @@ async function getUser() {
 
             <div v-if="token">
                 <NuxtLink to="/events/new">
-                    <button class="btn-primary btn-outline btn-sm">
+                    <button class="btn-primary btn-outline lg:btn-sm md:btn-sm sm:btn-xs max-sm:btn-xs max-sm:px-1">
                         <span class="hover:text-neutral-content w-full h-full flex items-center">
                             Create
                         </span>
                     </button>
                 </NuxtLink>
                 <NuxtLink to="/events">
-                    <button class="btn-primary btn-outline btn-sm">
+                    <button class="btn-primary btn-outline lg:btn-sm md:btn-sm sm:btn-xs max-sm:btn-xs max-sm:px-1">
                         <span class="hover:text-neutral-content w-full h-full flex items-center">
                             Events
                         </span>
@@ -120,7 +121,7 @@ async function getUser() {
                         </button>
                 </NuxtLink> -->
 
-                <div class="navbar-center lg:flex">
+                <div class="navbar-center flex">
                     <ul class="menu menu-horizontal pl-1.5 bg-transparent">
                         <li tabIndex="{{0}}">
 
