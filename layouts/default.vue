@@ -10,77 +10,70 @@ const targetText = '▶_trace.';
 const token = useStrapiToken();
 const { logout } = useStrapiAuth();
 const { url: appHost } = useRuntimeConfig().public.strapi;
-
 const themeCookie = useCookie('selectedTheme');
 const expiry = new Date(Date.now() + 86400000); // expiry set to +1 day
-const userCookie = useCookie('userCookie', { expires: expiry });
+const userCookie: any = useCookie('userCookie', { expires: expiry });
 
-const isUser = ref(!!token.value);
-const dataFetched = ref(false);
-const user = reactive({
-    id: '',
+const client = useStrapiClient();
+const user = useStrapiUser().value;
+const myId = (user?.id) as number;
+const userData = reactive({
+    id: myId,
     username: '',
     fullName: '',
     initials: '',
     avatar: '',
 }) as any;
-// ----------------------------------------------------------------
-onBeforeMount(async () => {
-    if (isUser.value === false) {
-        dataFetched.value = false;
-        userCookie.value = null;
-    }
-    if (dataFetched.value === false && isUser.value === true) {
-        await getUser();
-    }
-});
 
-watchEffect(async () => {
-    if (isUser.value === false) {
-        dataFetched.value = false;
-        userCookie.value = null;
-    }
-    if (isUser.value === true && userCookie.value === null) {
-        await getUser();
-    }
+// ----------------------------------------------------------------
+onMounted(() => {
+    getUser(myId);
 });
 // ----------------------------------------------------------------
 async function outClick() {
     try {
         logout();
         navigateTo('/');
-        toast.info('Logged out', { timeout: 1500 });
-    } catch (e) {
-        console.error(e);
+    } catch (error) {
+        console.error(error);
+    } finally {
+        toast.info('User logged out.', { timeout: 1500 });
     }
 }
 
-async function toProfile() {
+async function getUser(userId: number) {
+    // if (userCookie.value.id === myId) {
+    //     userData.username = userCookie.value.username;
+    //     userData.fullName = userCookie.value.fullName;
+    //     userData.initials = userData.fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
+    //     if (userCookie.value.avatar) {
+    //         userData.avatar = userCookie.value.avatar;
+    //     }
+    // }
+
     try {
-        navigateTo(`/user/${user.username}`);
-    } catch (e) {
-        console.error(e);
+        const userRes: Record<string, any> = await client(`${appHost}api/users/${userId}?populate=*`, {
+            method: 'GET'
+        });
+        const {
+            username,
+            fullName,
+            avatar: { formats: { thumbnail: { url: avatarUrl } } },
+        } = userRes;
+        console.log('userRes', userRes);
+        userData.username = username;
+        userData.fullName = fullName;
+        userData.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
+        if (avatarUrl) {
+            userData.avatar = avatarUrl;
+        }
+    } catch (error) {
+        console.error(error);
+    } finally {
+        userCookie.value = userData;
     }
 }
 
-async function getUser() {
-    try {
-        const { id } = useStrapiUser().value as any;
-        user.id = id;
-        const userRes = await $fetch(`${appHost}api/users/${id}?populate=*`);
-        const userMe = await userRes as unknown | any;
-        const { fullName, username, avatar } = userMe as any;
-        user.username = username;
-        user.fullName = fullName;
-        user.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
-        user.avatar = avatar?.formats?.thumbnail?.url || '';
-        userCookie.value = user as any;
-
-        dataFetched.value = true;
-    } catch (e) {
-        console.error(e);
-    }
-}
 // ----------------------------------------------------------------
 </script>
 
@@ -127,19 +120,19 @@ async function getUser() {
 
                             <div class="dropdown dropdown-hover bg-transparent py-0 pl-0 pr-1.5 hover:bg-transparent">
 
-                                <NuxtLink v-if="user.avatar" v-show="user.avatar" to="/user/{{user.username}}">
-                                    <div v-if="user.avatar" v-show="user.avatar" class="avatar iconDiv bg-transparent"
-                                        :tooltip="user.username">
-                                        <img :src="user.avatar" />
+                                <NuxtLink v-if="userData.avatar" v-show="userData.avatar" to="/user/me">
+                                    <div v-if="userData.avatar" v-show="userData.avatar" class="avatar iconDiv bg-transparent"
+                                        :tooltip="userData.username">
+                                        <img :src="userData.avatar" />
                                     </div>
                                 </NuxtLink>
 
-                                <NuxtLink v-if="!user.avatar" v-show="!user.avatar" to="/user/{{user.username}}">
-                                    <div v-if="!user.avatar" v-show="!user.avatar" class="avatar placeholder items-center">
+                                <NuxtLink v-if="!userData.avatar" v-show="!userData.avatar" to="/user/me">
+                                    <div v-if="!userData.avatar" v-show="!userData.avatar" class="avatar placeholder items-center">
                                         <div class="bg-secondary text-md font-normal rounded-full w-8">
-                                            <span class="text-xs text-white">{{ user.initials }}</span>
+                                            <span class="text-xs text-white">{{ userData.initials }}</span>
                                         </div>
-                                        <span class="text-base-content/80 pl-2 text-md">{{ user.username }}</span>
+                                        <span class="text-base-content/80 pl-2 text-md">{{ userData.username }}</span>
                                     </div>
                                 </NuxtLink>
 

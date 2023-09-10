@@ -44,5 +44,7 @@ export default defineNuxtConfig({
                 { src: `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_KEY}&libraries=places` }
             ]
         },
-    }
+    },
+    // routeRules: {
+    // }
 });

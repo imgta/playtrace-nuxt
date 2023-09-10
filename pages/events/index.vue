@@ -6,7 +6,6 @@ const { toast } = useMisc();
 const { url: appHost } = useRuntimeConfig().public.strapi;
 
 const myInvites: any = ref([]);
-
 const user = useStrapiUser().value;
 const myId = (user?.id) as number;
 console.log('user', user);
@@ -14,7 +13,6 @@ console.log('user', user);
 // ----------------------------------------------------------------
 onMounted(() => {
     getMyInvites(myId);
-    // getMyEvents(myId);
 });
 // ----------------------------------------------------------------
 // async function getHostedEvents(userId: number) {
@@ -58,17 +56,6 @@ onMounted(() => {
 //         console.error(error);
 //     }
 // }
-// async function getMyEvents(userId: number) {
-//     try {
-//         const allEventsRes: Record<string, any> = await client(`${appHost}api/events?populate=deep,4&filters[$and][0][invited_users][collection][$eq]=event&filters[$and][1][invited_users][users_permissions_user][id][$eq]=${userId}`, {
-//             method: 'GET'
-//         });
-//         myEvents.value = await allEventsRes.data;
-//         console.log('allEvents.value', myEvents.value);
-//     } catch (error) {
-//         console.error(error);
-//     }
-// }
 
 async function getMyInvites(userId: number) {
     try {
@@ -82,9 +69,56 @@ async function getMyInvites(userId: number) {
     }
 }
 
-async function deleteEvent() {
+async function deleteEvent(eventId: number) {
     try {
-        console.log('test');
+        // (1) Fetch and isolate target event data for cascade deletion
+        const delEventRes: Record<string, any> = await client(`${appHost}api/events?populate=deep,3&filters[id][$eq]=${eventId}`, {
+            method: 'GET'
+        });
+        const {
+            id: delEventId,
+            attributes: { eventPic: { data: { id: delEventPicId } } },
+        } = await delEventRes.data[0];
+        const delInviteIds = delEventRes.data[0].attributes.invited_users.data.map((invite: any) => invite.id);
+
+        // (2a) Delete upload media file for eventPic (Strapi + AWS S3)
+        try {
+            const delEventPicRes: any = await client(`${appHost}api/upload/files/${delEventPicId}`, {
+                method: 'DELETE',
+            });
+            console.log('delEventPicRes', await delEventPicRes);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            toast.info('Event picture deleted!', { timeout: 1500 });
+        }
+
+        // (2b) Delete each invitedUser relational instance for target event
+        try {
+            const delInviteRequests = delInviteIds.map(async (id: number) => {
+                const delInvitesRes: any = await client(`${appHost}api/invited-users/${id}`, {
+                    method: 'DELETE',
+                });
+                const delInviteResult = await delInvitesRes.data;
+                console.log('delInviteResult', delInviteResult);
+            });
+            await Promise.all(delInviteRequests);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            toast.info('All associated invites deleted!', { timeout: 1500 });
+        }
+
+        // (2c) Finally, delete target event
+        try {
+            const delEventRes: any = await client(`${appHost}api/events/${delEventId}`, {
+                method: 'DELETE',
+            });
+            const delEventResult = await delEventRes.data;
+            console.log('delEventResult', delEventResult);
+        } catch (error) {
+            console.error(error);
+        }
     } catch (error) {
         console.error(error);
     } finally {
@@ -140,8 +174,13 @@ async function deleteEvent() {
                     <span class="pl-1">{{ cardDate(ev.attributes.event.data?.attributes?.startDate) }}</span>
                 </div>
 
+                <div class="flex text-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="fill-base-content w-4" viewBox="0 0 256 256"><path d="M164.38,181.1a52,52,0,1,0-72.76,0,75.89,75.89,0,0,0-30,28.89,12,12,0,0,0,20.78,12,53,53,0,0,1,91.22,0,12,12,0,1,0,20.78-12A75.89,75.89,0,0,0,164.38,181.1ZM100,144a28,28,0,1,1,28,28A28,28,0,0,1,100,144Zm147.21,9.59a12,12,0,0,1-16.81-2.39c-8.33-11.09-19.85-19.59-29.33-21.64a12,12,0,0,1-1.82-22.91,20,20,0,1,0-24.78-28.3,12,12,0,1,1-21-11.6,44,44,0,1,1,73.28,48.35,92.18,92.18,0,0,1,22.85,21.69A12,12,0,0,1,247.21,153.59Zm-192.28-24c-9.48,2.05-21,10.55-29.33,21.65A12,12,0,0,1,6.41,136.79,92.37,92.37,0,0,1,29.26,115.1a44,44,0,1,1,73.28-48.35,12,12,0,1,1-21,11.6,20,20,0,1,0-24.78,28.3,12,12,0,0,1-1.82,22.91Z"></path></svg>
+                    <span class="pl-1">{{ ev.attributes.event.data?.attributes?.partySize }}</span>
+                </div>
+
                 <span class="pt-3">{{ ev.attributes.event.data?.attributes?.info }}</span>
-                <!-- <span class="pt-3">ID: {{ ev.attributes.event.data?.id }}</span> -->
+                <!-- <span class="pt-3">EVENT ID: {{ ev.attributes.event.data?.id }}</span> -->
 
                 <div class="flex flex-wrap gap-1.5 pt-6 items-end">
                     <span v-for="category in ev.attributes.event.data?.attributes?.location[0]?.category.split(', ')"
@@ -149,12 +188,10 @@ async function deleteEvent() {
                         }}</span>
 
                     <div v-if="myId === ev.attributes.event.data?.attributes?.initiator?.data?.id"
-                        class="ml-auto text-xs tooltip tooltip-error" data-tip="delete?">
+                        class="ml-auto text-xs tooltip tooltip-error" data-tip="delete?" @click="deleteEvent(ev.attributes.event.data?.id)">
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="fill-base-content/70 w-4 hover:fill-error hover:cursor-pointer" viewBox="0 0 256 256">
-                            <path
-                                d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z">
-                            </path>
+                            <path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"></path>
                         </svg>
                     </div>
                 </div>
