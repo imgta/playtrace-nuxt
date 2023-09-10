@@ -87,7 +87,7 @@ async function getMyInvites(userId: number) {
                 <h1 class="text-primary text-4xl text-center pt-4 pr-1.5 pb-0.5">
                 Your Events
             </h1>
-            <p class="text-neutral-content/80 text-center text-sm">
+            <p class="text-base-content/80 text-center text-sm">
                 Someone's popular.
             </p>
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 px-8 pt-8">
