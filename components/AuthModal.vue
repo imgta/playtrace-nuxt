@@ -37,34 +37,56 @@ watchEffect(() => {
         loginTheme.value = 'login';
         signupTheme.value = 'signup';
     }
-    console.log('popSwitch.value', popSwitch.value);
 });
 
 // ----------------------------------------------------------------
-// TODO: modal switching leaves dialog overlay residuals
 async function onLogin() {
+    if (!loginData.username) {
+        toast.error('Username required!', { timeout: 1700 });
+        return;
+    } else if (!loginData.password) {
+        toast.error('Password required!', { timeout: 1700 });
+        return;
+    }
     try {
         await login({ identifier: loginData.username, password: loginData.password });
         navigateTo('/events');
-    } catch (e: any) {
-        toast.error((e.error.message as string), { timeout: 2000 });
-        console.error(e);
+    } catch (error: any) {
+        toast.error((error.error.message as string), { timeout: 2000 });
+        console.error(error);
     }
 }
 
 async function onRegister() {
+    if (!signupData.fullname) {
+        toast.error('Full Name required!', { timeout: 1700 });
+        return;
+    } else if (!signupData.email) {
+        toast.error('Email required!', { timeout: 1700 });
+        return;
+    } else if (!signupData.username) {
+        toast.error('Username required!', { timeout: 1700 });
+        return;
+    } else if (!signupData.password) {
+        toast.error('Password required!', { timeout: 1700 });
+        return;
+    }
     try {
         await register({ username: signupData.username, email: signupData.email, fullName: signupData.fullname, password: signupData.password, });
         navigateTo('/events');
-    } catch (e: any) {
-        toast.error((e.error.message as string), { timeout: 2000 });
-        console.error(e);
+    } catch (error: any) {
+        toast.error((error.error.message as string), { timeout: 2000 });
+        console.error(error);
     }
 }
 
 function closeLogin() {
     loginData.username = '';
     loginData.password = '';
+    popLogin.value.close();
+}
+function closeSignup() {
+    popSignUp.value.close();
 }
 function openLogin() {
     if (popLogin.value) {
@@ -79,12 +101,17 @@ function openSignup() {
     popSwitch.value = 'signup';
 }
 
-async function formSwitch() {
-    if (popSwitch.value === 'signup') {
-        openLogin();
-    } else if (popSwitch.value !== 'signup') {
-        closeLogin();
-        openSignup();
+function formSwitch() {
+    try {
+        if (popSwitch.value === 'signup') {
+            openLogin();
+            closeSignup();
+        } else if (popSwitch.value === 'login') {
+            openSignup();
+            closeLogin();
+        }
+    } catch (error) {
+        console.error(error);
     }
 }
 // ----------------------------------------------------------------
@@ -113,19 +140,19 @@ async function formSwitch() {
 
                     <label class="label-text text-neutral-content/80">Username</label>
                     <input v-model="loginData.username" type="text" name="username"
-                        class="form-control input input-bordered focus:bg-base-100 w-full" @keyup.enter="onLogin" />
+                        class="form-control input input-bordered auth-input" @keyup.enter="onLogin" />
 
                     <label class="label-text text-neutral-content/80">Password</label>
                     <input v-model="loginData.password" type="password" name="password"
-                        class="form-control input input-bordered focus:bg-base-100 w-full" @keyup.enter="onLogin" />
+                        class="form-control input input-bordered auth-input" @keyup.enter="onLogin" />
 
-                    <label class="label m-0 pt-0">
+                    <!-- <label class="label pt-0">
                         <NuxtLink to="/" class="link link-hover hover:link-primary">
                             <span class="label-text-alt text-neutral-content/75 hover:text-neutral-content font-extralight">
                                 Forgot password?
                             </span>
                         </NuxtLink>
-                    </label>
+                    </label> -->
                 </div>
 
                 <div class="flex justify-center items-center w-full h-14 pr-3.5">
@@ -139,7 +166,7 @@ async function formSwitch() {
                 </div>
 
                 <button
-                    class="modal-action justify-center label-text-alt text-neutral-content/75 hover:text-neutral-content font-extralight link link-hover mx-0 px-0"
+                    class="modal-action justify-center label-text-alt text-neutral-content/80 hover:text-neutral-content font-extralight link link-hover mx-0 px-0"
                     @click="formSwitch">
                     C'mon, sign up already!
                 </button>
@@ -171,19 +198,19 @@ async function formSwitch() {
                 <div class="focus:text-base-content bg-none">
                     <label class="label-text text-neutral-content/80">Full Name</label>
                     <input v-model="signupData.fullname" required type="text" name="fullname"
-                        class="form-control input input-bordered focus:bg-base-100 w-full" />
+                        class="form-control input input-bordered auth-input" />
 
                     <label class="label-text text-neutral-content/80">Email</label>
                     <input v-model="signupData.email" required type="email" name="email"
-                        class="form-control input input-bordered focus:bg-base-100 w-full" />
+                        class="form-control input input-bordered auth-input" />
 
                     <label class="label-text text-neutral-content/80">Username</label>
                     <input v-model="signupData.username" required type="text" name="username"
-                        class="form-control input input-bordered focus:bg-base-100 w-full" />
+                        class="form-control input input-bordered auth-input" />
 
                     <label class="label-text text-neutral-content/80">Password</label>
                     <input v-model="signupData.password" required type="password" name="password"
-                        class="form-control input input-bordered focus:bg-base-100 w-full" @keyup.enter="onRegister" />
+                        class="form-control input input-bordered auth-input" @keyup.enter="onRegister" />
 
                 </div>
 

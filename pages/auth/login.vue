@@ -44,7 +44,7 @@ async function onSubmit() {
                                 class="form-control input input-bordered text-base-content focus:bg-base-100 focus:text-base-content w-full" />
                         </div>
                         <div>
-                            <label className="label-text">Password</label>
+                            <label class="label-text">Password</label>
                             <input v-model="userData.password" type="password" name="password"
                                 class="form-control input input-bordered text-base-content focus:bg-base-100 focus:text-base-content w-full" />
                             <label class="label mt-0">
@@ -53,7 +53,7 @@ async function onSubmit() {
                                 </NuxtLink>
                             </label>
                         </div>
-                        <div className="mt-1 bg-base-200 flex justify-center">
+                        <div class="mt-1 bg-base-200 flex justify-center">
                             <button type="submit" class="btn btn-primary btn-wide text-neutral-content" @click="onSubmit">
                                 Login
                             </button>

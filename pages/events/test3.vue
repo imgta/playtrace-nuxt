@@ -3,5 +3,5 @@
 </script>
 
 <template>
-Test
+    Test
 </template>
