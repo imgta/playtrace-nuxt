@@ -1,14 +1,18 @@
-
 html, body {
     overflow-x: hidden;
 }
 
-.form-input {
+.form-input, .auth-input {
     width: 100%;
-    color: hsl(var(--bc) / 0.8);
+    color: hsl(var(--bc) / 0.9);
+    border-radius: var(--rounded-btn, 0.5rem);
+}
+.form-input {
     background-color: transparent;
     border-color: hsl(var(--bc));
-    border-radius: var(--rounded-btn, 0.5rem);
+}
+.auth-input {
+    background-color: hsl(var(--b1));
 }
 .form-input:focus::placeholder {
     color: transparent;
@@ -17,17 +21,24 @@ html, body {
     color: hsl(var(--bc) / 0.8);
     font-size: small;
 }
-.form-input:focus {
-    background-color: hsl(var(--b1) / 1);
+.form-input:focus, .auth-input:focus {
+    background-color: hsl(var(--b1));
     color: hsl(var(--bc) / var(--tw-text-opacity));
     border-color: hsl(var(--p));
-    caret-color: hsl(var(--pf));
 }
-.form-input:hover {
-    background-color: hsl(var(--p) / 0.3);
+.form-input:focus {
+    caret-color: hsl(var(--af)/0.85);
+}
+.auth-input:focus {
+    caret-color: hsl(var(--pf)/0.85);
+}
+.form-input:hover, .auth-input:hover {
     color: hsl(var(--bc) / var(--tw-text-opacity));
     border-color: hsl(var(--p));
     filter:brightness(1.2);
+}
+.form-input:hover {
+    background-color: hsl(var(--p) / 0.3);
 }
 
 .inputshake {
@@ -61,15 +72,18 @@ html, body {
     overflow: hidden;
     height: 34px; width: 34px;
     border-radius: 9999px;
+    /* border-radius: var(--rounded-btn, 0.5rem); */
     cursor: pointer;
-    color: hsl(var(--nc) / 0.8);
-    transition: width 300ms ease-in-out 0s, background-color 300ms linear 200ms;
+    color: hsl(var(--nc));
+    transition: width 150ms ease-in-out 0s
+        /* , background-color 300ms linear 200ms; */
 }
 .iconDiv:hover, .iconDiv:focus-visible {
     width: 140px;
     /* background-color: rgb(51 65 85); */
-    background-color: hsl(var(--pf) / 0.45);
-    transition: width 300ms ease-in-out 0s, background-color 100ms linear 0s;
+    background-color: hsl(var(--p));
+    transition: width 150ms ease-in-out 0s
+        /* , background-color 100ms linear 0s; */
 }
 /* .iconDiv:focus-visible {
     outline: 1px solid rgb(51 65 85);
@@ -81,10 +95,11 @@ html, body {
 
 .iconDiv::after {
     content: attr(tooltip);
+    font-weight: 550;
     margin-left: 14px;
     margin-right: 12px;
     padding-bottom: 1.5px;
-    animation: fadeIn 600ms linear forwards;
+    animation: fadeIn 150ms linear forwards;
 }
 
 @keyframes fadeIn {
@@ -168,6 +183,15 @@ html, body {
 .bottom .hint { bottom: 52%; left:1.5%; }
 .left .hint { top:21%; left:-47%; text-align:right;}
 .right .hint { top:21%; right:-47%; text-align:left;}
+
+.event-card .hint, .event-delete .hint {
+    top: -175%; left:-80%;
+    font-size: 0.75rem;
+}
+.event-delete .hint {
+    color: hsl(var(--er));
+}
+
 
 @media (max-width: 640px) {
     /* Disable animation and reposition for max-sm screens */

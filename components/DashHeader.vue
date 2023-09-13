@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import '@/assets/css/dashboard.css';
 import { dashDate } from '@/composables/useDateTime';
 import { bolt, heart, infocon } from '@/utils/svgPack';
 

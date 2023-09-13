@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import '@/assets/css/dashboard.css';
-
 // definePageMeta({
 //     middleware: ['auth'],
 // });
-
 const { toast } = useMisc();
 const targetText = '▶_trace.';
 const token = useStrapiToken();
@@ -29,15 +26,19 @@ const userData = reactive({
 onMounted(() => {
     getUser(myId);
 });
+
+// watchEffect(() => {
+//     console.log('userData', userData);
+// });
 // ----------------------------------------------------------------
 async function outClick() {
     try {
         logout();
-        navigateTo('/');
     } catch (error) {
         console.error(error);
     } finally {
         toast.info('User logged out.', { timeout: 1500 });
+        await navigateTo('/');
     }
 }
 
@@ -106,13 +107,6 @@ async function getUser(userId: number) {
                         </span>
                     </button>
                 </NuxtLink>
-                <!-- <NuxtLink to="/dashboard">
-                    <button class="btn-primary btn-outline btn-sm">
-                        <span class="hover:text-neutral-content w-min h-full flex items-center">
-                            Dashboard
-                        </span>
-                        </button>
-                </NuxtLink> -->
 
                 <div class="navbar-center flex">
                     <ul class="menu menu-horizontal pl-1.5 bg-transparent">
@@ -123,7 +117,7 @@ async function getUser(userId: number) {
                                 <NuxtLink v-if="userData.avatar" v-show="userData.avatar" to="/user/me">
                                     <div v-if="userData.avatar" v-show="userData.avatar" class="avatar iconDiv bg-transparent"
                                         :tooltip="userData.username">
-                                        <img :src="userData.avatar" />
+                                        <img :src="userData.avatar" class="object-contain" />
                                     </div>
                                 </NuxtLink>
 
@@ -132,19 +126,18 @@ async function getUser(userId: number) {
                                         <div class="bg-secondary text-md font-normal rounded-full w-8">
                                             <span class="text-xs text-white">{{ userData.initials }}</span>
                                         </div>
-                                        <span class="text-base-content/80 pl-2 text-md">{{ userData.username }}</span>
+                                        <span class="text-base-content/80 pl-2 text-md font-medium">{{ userData.username }}</span>
                                     </div>
                                 </NuxtLink>
 
                                 <ul
-                                    class="dropdown-content z-[1] menu p-2.5 m-0 bg-transparent border-none shadow-none drop-shadow-none right-0 top-6">
-
+                                    class="dropdown-content z-[1] menu px-1 pt-3 m-0 bg-transparent border-none shadow-none drop-shadow-none right-0.5 top-6">
                                     <li>
                                         <LazyNuxtLink
-                                            class="btn btn-xs sm:btn-sm btn-neutral font-light normal-case bg-neutral border-none hover:opacity-80 hover:bg-neutral/80"
+                                            class="btn btn-xs btn-primary font-normal normal-case border-none hover:bg-primary px-2 pb-[1.2rem] pt-0.5"
                                             @click="outClick">
-                                            <span class="text-neutral-content text-md">
-                                                Logout?
+                                            <span class="text-neutral-content/90 text-sm link-hover">
+                                                logout.
                                             </span>
                                         </LazyNuxtLink>
                                     </li>

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import '@/assets/css/attach.css';
-
 const emit = defineEmits(['coverPicInput', 'modalState']);
 const gifs = ref<string[]>([]);
 const pics = ref<string[]>([]);
@@ -187,7 +185,7 @@ async function selectCover(img: string, pop: boolean) {
 </script>
 
 <template>
-    <div class="justify-center content-center self-center items-center">
+    <div class="justify-center content-center self-center items-center px-2">
 
         <div class="flex justify-center items-center">
             <div class="pb-9 pl-2">
@@ -253,7 +251,7 @@ async function selectCover(img: string, pop: boolean) {
                     <template #default="{ item }">
                         <button>
                             <img :src="item" alt="PICs"
-                                class="object-contain cursor-pointer hover:brightness-110 hover:contrast-75 hover:opacity-90"
+                                class="object-contain cursor-pointer hover:brightness-125 hover:contrast-75 hover:opacity-80"
                                 @click="selectCover(item, false)" />
                         </button>
                     </template>

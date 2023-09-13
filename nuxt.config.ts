@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     build: {
         transpile: ['vue-toastification', 'v-calendar', '@yeger/vue-masonry-wall'],
     },
-    css: ['@/assets/css/input.css', '@/assets/css/button.css'],
+    css: ['@/assets/css/input.css', '@/assets/css/button.css', '@/assets/css/attach.css', '@/assets/css/bubbles.css', '@/assets/css/dashboard.css'],
     generate: {
         // routes: ['/profile',] //force generate these routes if they aren't crawled
     },

@@ -31,19 +31,18 @@ async function dateInput(startDate: any) {
     emit('startDateInput', startDate);
 }
 // ----------------------------------------------------------------
+// TODO: Input field for Start Date does not have .form-input CSS styling applied (no color change on hover)
 </script>
 
 <template>
-    <div>
-        <div class="collapse">
-            <input type="checkbox" />
-            <div class="collapse-title px-0 py-2">
-                <input v-model="formatDate" placeholder="When were you thinking?" class="input input-bordered form-input" />
-            </div>
-            <div class="collapse-content">
-                <div class="mycalendar grid justify-center">
-                    <DatePicker v-model="startDate" mode="dateTime" :min-date="new Date()" @input="dateInput" />
-                </div>
+    <div class="collapse">
+        <input type="checkbox" />
+        <div class="collapse-title px-0 py-1.5">
+            <input v-model="formatDate" placeholder="When were you thinking?" class="input input-bordered form-input" />
+        </div>
+        <div class="collapse-content">
+            <div class="mycalendar grid justify-center">
+                <DatePicker v-model="startDate" mode="dateTime" :min-date="new Date()" @input="dateInput" />
             </div>
         </div>
     </div>

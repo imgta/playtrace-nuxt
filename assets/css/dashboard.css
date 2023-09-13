@@ -74,20 +74,13 @@ body {
 
 .shake:hover i,
 .shake:hover svg {
-    animation: shake 1200ms;
+    animation: shake 1200ms infinite;
 }
 @keyframes shake {
-    10%,
-    30%,
-    50%,
-    70%,
-    90% {
+    10%, 30%, 50%, 70%, 90% {
         transform: rotateZ(-5deg);
     }
-    20%,
-    40%,
-    60%,
-    80% {
+    20%, 40%, 60%, 80% {
         transform: rotateZ(5deg);
     }
     100% {

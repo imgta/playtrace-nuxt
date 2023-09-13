@@ -11,6 +11,9 @@ const createInviteAPI = ref<boolean>(false);
 
 const autoResult: any = ref(null);
 const locationAddress = ref('');
+
+const partyCap: any = ref(null);
+const coverDmg: any = ref(null);
 const eventData = reactive({
     title: '',
     startDate: '',
@@ -83,16 +86,28 @@ async function locationInput() {
     }
 }
 
-function balanceBlur() {
-    if (eventData.coverCharge) {
-        const val = eventData.coverCharge;
-        const floatVal = Number.parseFloat(val).toFixed(2);
+function chargeBlur() {
+    if (coverDmg.value.includes('$')) {
+        return `Cover charge: ${coverDmg.value}`;
+    } else if (coverDmg.value) {
+        const dmg = coverDmg.value;
+        const floatVal = Number.parseFloat(dmg).toFixed(2);
         eventData.coverCharge = floatVal;
-    }
-    if (!eventData.coverCharge) {
-        const zeroCharge = '0';
-        const zeroFloat = Number.parseFloat(zeroCharge).toFixed(2);
+        coverDmg.value = `$${floatVal}`;
+    } else if (!coverDmg.value) {
+        const zeroDmg = '0';
+        const zeroFloat = Number.parseFloat(zeroDmg).toFixed(2);
         eventData.coverCharge = zeroFloat;
+        coverDmg.value = `$${zeroFloat}`;
+    }
+}
+
+function partyBlur() {
+    if (partyCap.value) {
+        const cap = partyCap.value;
+        eventData.size = cap;
+        const capUnit = `${cap} spots`;
+        partyCap.value = capUnit;
     }
 }
 
@@ -113,6 +128,30 @@ async function toggleModal() {
 
 async function createEvent(e: Event) {
     e.preventDefault();
+    try {
+        if (!eventData.coverCharge) {
+            const zeroDmg = '0';
+            const zeroFloat = Number.parseFloat(zeroDmg).toFixed(2);
+            eventData.coverCharge = zeroFloat;
+            coverDmg.value = `$${zeroFloat}`;
+        }
+        if (!eventData.size) {
+            eventData.size = 0;
+            partyCap.value = 'Unlimited spots';
+        }
+        if (!eventData.title) {
+            toast.error('Title required!', { timeout: 1500 });
+            return;
+        } else if (!eventData.startDate) {
+            toast.error('Start Date required!', { timeout: 1500 });
+            return;
+        } else if (!eventData.img) {
+            toast.error('Cover Picture required!', { timeout: 1500 });
+            return;
+        }
+    } catch (error) {
+        console.error(error);
+    }
     try {
         createEventAPI.value = true;
 
@@ -272,23 +311,25 @@ function removeUser(index: any) {
                             <div class="hint">
                                 <p>Start Date</p>
                             </div>
-                            <VPicker @startDateInput="startDateEmit" />
+                            <div class="">
+                                <VPicker @startDateInput="startDateEmit" />
+                            </div>
                         </div>
 
                         <div class="w-full con-hint left pb-2">
                             <div class="hint">
                                 <p>Party Size</p>
                             </div>
-                            <input v-model="eventData.size" placeholder="Unlimited" name="capacity" type="text"
-                                class="input input-bordered form-input" />
+                            <input v-model="partyCap" placeholder="Unlimited" name="capacity" type="text"
+                                class="input input-bordered form-input" @blur="partyBlur" />
                         </div>
 
                         <div class="w-full con-hint left pb-2">
                             <div class="hint">
                                 <p>Damage</p>
                             </div>
-                            <input id="cover" v-model="eventData.coverCharge" placeholder="Cost of entry" name="cover" type="text"
-                                class="input input-bordered form-input" @blur="balanceBlur" />
+                            <input id="cover" v-model="coverDmg" placeholder="Cover charge" name="cover" type="text"
+                                class="input input-bordered form-input" @blur="chargeBlur" />
                         </div>
 
                         <div class="con-hint left w-full">
