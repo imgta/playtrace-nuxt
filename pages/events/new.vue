@@ -4,7 +4,7 @@ const client = useStrapiClient();
 const { url: appHost } = useRuntimeConfig().public.strapi;
 const themeCookie = useCookie('selectedTheme');
 
-const corpoLogin = ref('');
+const eventBtnClass = ref('');
 const showModal = ref(false);
 const createEventAPI = ref<boolean>(false);
 const createInviteAPI = ref<boolean>(false);
@@ -43,9 +43,9 @@ onMounted(() => {
 
 watchEffect(() => {
     if (themeCookie.value === 'corporate') {
-        corpoLogin.value = 'signupcorp';
+        eventBtnClass.value = 'before:rounded-none';
     } else {
-        corpoLogin.value = 'signup';
+        eventBtnClass.value = 'before:rounded-[100rem]';
     }
     console.log('eventData.userInvites', eventData.userInvites);
 });
@@ -287,8 +287,8 @@ function removeUser(index: any) {
 
     <div class="bg-base-200">
         <div class="flex w-full shadow-none justify-center">
-            <div class="flex lg:flex-row sm:flex-col-reverse max-sm:flex-col-reverse w-full justify-center sm:px-20">
-                <div class="sm:w-auto lg:min-w-[42%] sm:min-w-[10%]">
+            <div class="flex flex-col-reverse lg:flex-row w-full justify-center sm:px-20">
+                <div class="sm:w-auto min-w-[10%] lg:min-w-[42%]">
                     <div class="card-body pb-1.5">
 
                         <div class="w-full con-hint top pb-2">
@@ -350,10 +350,10 @@ function removeUser(index: any) {
 
                         <div @click="toggleModal">
                             <button v-if="!showModal && !eventData.img"
-                                class="edit edit-primary lg:min-w-[80%] sm:min-w-[100%] max-sm:min-w-[100%] lg:h-[90%] sm:h-full">
+                                class="edit edit-primary min-w-[100%] lg:min-w-[80%] h-full lg:h-[90%]">
                                 Cover Picture</button>
                             <img v-if="!showModal && eventData.img" :src="eventData.img" alt="Cover"
-                                class="edit edit-primary object-cover h-[19rem] lg:w-[80%] sm:w-[100%] max-sm:w-[100%]" />
+                                class="edit edit-primary object-cover h-[19rem] w-[100%] lg:w-[80%]" />
                         </div>
 
                         <div v-if="showModal">
@@ -368,7 +368,7 @@ function removeUser(index: any) {
                         </div>
 
                         <div
-                            class="lg:min-w-[80%] sm:min-w-[100%] max-sm:min-w-[100%] lg:h-[90%] sm:h-full con-hint right pt-4">
+                            class="min-w-[100%] lg:min-w-[80%] h-full lg:h-[90%] con-hint right pt-4">
                             <div class="hint lg:pt-3">
                                 <p>Invite Friends</p>
                             </div>
@@ -392,7 +392,7 @@ function removeUser(index: any) {
                     </div>
 
                     <div
-                        class="absolute top-60 lg:right-36 md:right-32 sm:right-32 max-sm:-translate-x-full max-sm:left-14 max-sm:top-32 pointer-events-none z-0">
+                        class="absolute top-32 sm:top-60 lg:right-36 md:right-32 sm:right-32 max-sm:-translate-x-full max-sm:left-14 pointer-events-none z-0">
                         <Bubbles />
                     </div>
 
@@ -403,7 +403,7 @@ function removeUser(index: any) {
         <div class="sm:px-24 sm:pb-10 lg:pl-0">
 
             <div class="flex items-center justify-center place-content-center">
-                <button v-if="!createEventAPI && !createInviteAPI" :class="corpoLogin" type="submit" @click="createEvent">
+                <button v-if="!createEventAPI && !createInviteAPI" class="event-create" :class="eventBtnClass" type="submit" @click="createEvent">
                     <span>Create</span>
                     <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
                         <path d="M1,5 L11,5"></path>

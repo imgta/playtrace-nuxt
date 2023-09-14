@@ -26,7 +26,16 @@ module.exports = {
         },
     },
     daisyui: {
-        themes: ['fantasy', 'dracula', 'bumblebee', 'night', 'corporate'],
+        themes: ['dracula', 'night', 'corporate',
+            {
+                fantasy: {
+                    ...require('daisyui/src/theming/themes')['[data-theme=fantasy]'],
+                    'primary': '#7e22ce',
+                    'primary-focus': '#6b21a8',
+                }
+            }
+        ],
+
         // themes: [
         //     {
         //         corporate: {
