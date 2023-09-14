@@ -135,18 +135,28 @@ html, body {
 
 .con-hint {
     display: inline-block;
+    vertical-align: bottom;
+    color: hsl(var(--af));
+    font-weight: 400;
     /* width: 100%; */
     position: relative;
     cursor: default;
     transition: all 0.25s ease-in-out; /* Hint container move speed */
 }
 
+.con-hint span {
+    align-items: end;
+    color: hsl(var(--bc)/0.8);
+    font-weight: 600;
+    padding: 0; margin: 0;
+}
+
 .hint {
     visibility: hidden;
     z-index: 1;
     opacity: 0.8;
-    color: hsl(var(--af));
-    font-weight: 400;
+    /* color: hsl(var(--af)); */
+    /* font-weight: 400; */
     font-size: 0.9rem;
     transition: all 0s ease-in-out; /* Hint fade speed */
     position: absolute;
@@ -188,9 +198,9 @@ html, body {
     top: -175%; left:-80%;
     font-size: 0.75rem;
 }
-.event-delete .hint {
+/* .event-delete .hint {
     color: hsl(var(--er));
-}
+} */
 
 
 @media (max-width: 640px) {
