@@ -3,6 +3,7 @@ const { toast } = useMisc();
 const client = useStrapiClient();
 const { url: appHost } = useRuntimeConfig().public.strapi;
 const themeCookie = useCookie('selectedTheme');
+const pageTheme = ref(themeCookie).value as any;
 
 const eventBtnClass = ref('');
 const showModal = ref(false);
@@ -25,11 +26,11 @@ const eventData = reactive({
     userInvites: [],
 }) as any;
 const userSearch = ref('');
-
 const user = useStrapiUser().value;
 const myUsername = user?.username;
 const myId = (user?.id) as number;
 console.log('user', user);
+
 // ----------------------------------------------------------------
 onMounted(() => {
     // @ts-expect-error idk
@@ -40,7 +41,12 @@ onMounted(() => {
         locationInput();
     });
 });
-
+const formBg = computed(() => {
+    return {
+        'bg-base-200/95': pageTheme === 'dracula' || 'night',
+        'bg-slate-800/95 brightness-150': pageTheme === 'corporate' || 'fantasy',
+    };
+});
 watchEffect(() => {
     if (themeCookie.value === 'corporate') {
         eventBtnClass.value = 'before:rounded-none';

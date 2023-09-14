@@ -25,7 +25,7 @@ onMounted(() => {
 const formBg = computed(() => {
     return {
         'bg-base-200/95': pageTheme === 'dracula' || 'night',
-        'bg-neutral/95 brightness-125': pageTheme === 'corporate' || 'fantasy',
+        'bg-slate-800/95 brightness-150': pageTheme === 'corporate' || 'fantasy',
     };
 });
 watchEffect(() => {
