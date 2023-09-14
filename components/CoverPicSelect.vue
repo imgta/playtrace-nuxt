@@ -192,7 +192,7 @@ async function selectCover(img: string, pop: boolean) {
                 <h1 class="text-primary text-3xl text-center pt-4 pr-1.5">
                     Select your event cover!
                 </h1>
-                <p class="text-base-content/80 text-center text-sm">
+                <p class="text-base-content font-medium text-center text-sm">
                     Feeling GIPHY?
                 </p>
             </div>
