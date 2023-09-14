@@ -1,4 +1,7 @@
 <script setup lang="ts">
+definePageMeta({
+    middleware: ['auth'],
+});
 const { url: appHost } = useRuntimeConfig().public.strapi;
 const userData = useStrapiUser().value;
 const myId = (userData?.id) as number;

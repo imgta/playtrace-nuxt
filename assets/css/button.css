@@ -35,7 +35,7 @@
 }
 
 
-.login, .signup, .logincorp, .signupcorp {
+.login, .signup, .logincorp, .signupcorp, .event-create {
     position: relative;
     padding: 0;
     transition: all 0.2s ease;
@@ -44,7 +44,7 @@
 }
 
 /* initial bubble styling and position: Login */
-.logincorp:before, .signupcorp:before, .signup:before, .login:before {
+.logincorp:before, .signupcorp:before, .signup:before, .login:before, .event-create:before {
     content: "";
     position: relative;
     top: 1.83rem;
@@ -65,16 +65,16 @@
 .logincorp:before {
     left: 0.53rem;
 }
-.signupcorp:before {
-    left: 0.58rem;
-}
 .signup:before, .login:before {
     border-radius: 100rem;
+}
+.signupcorp:before {
+    left: 0.58rem;
 }
 
 
 /* initial bubble coloring */
-.login:hover:before, .signup:hover:before, .logincorp:hover:before, .signupcorp:hover:before {
+.login:hover:before, .signup:hover:before, .logincorp:hover:before, .signupcorp:hover:before, .event-create:hover:before {
     width: 100%;
     background: hsl(var(--p));
     opacity: 95%;
@@ -83,23 +83,28 @@
 }
 
 /* button text before hover */
-.login span, .signup span, .logincorp span, .signupcorp span {
+.login span, .signup span, .logincorp span, .signupcorp span, .event-create span {
     position: relative;
     font-size: 1rem;
     font-weight: 600;
     letter-spacing: 0.05em;
     transition: all 0.35s ease;
+}
+.login span, .signup span, .logincorp span, .signupcorp span {
     color: hsl(var(--nc) / 0.8);
+}
+.event-create span {
+    color: hsl(var(--bc) / 0.8)
 }
 
 /* button text on hover */
-.login:hover span, .signup:hover span, .logincorp:hover span, .signupcorp:hover span {
+.login:hover span, .signup:hover span, .logincorp:hover span, .signupcorp:hover span, .event-create:hover span {
     filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.35));
-    color: hsl(var(--nc));
+    color: whitesmoke;
 }
 
 /* Arrow styling and positioning: Login */
-.login svg, .logincorp svg, .signup svg, .signupcorp svg {
+.login svg, .logincorp svg, .signup svg, .signupcorp svg, .event-create svg {
     position: relative;
     top: -1rem;
     left: 0.1rem;
@@ -108,32 +113,40 @@
     stroke-linejoin: round;
     stroke-width: 1.5;
     transition: all 0.35s ease;
+}
+.login svg, .logincorp svg, .signup svg, .signupcorp svg {
     stroke: hsl(var(--nc) / 0.8);
 }
+.event-create svg {
+    stroke: hsl(var(--bc) / 0.8);
+}
 
+
+/* Arrow styling and positioning: Signup */
 .login svg, .logincorp svg {
     margin-left: 5.3rem;  /* adjusts overall bubble stretch */
     transform: translateX(-9px);
 }
-
-/* Arrow styling and positioning: Signup */
 .signup svg, .signupcorp svg {
     margin-left: 6.5rem;  /* adjusts overall bubble stretch */
     transform: translateX(-8px);
 }
+.event-create svg {
+    margin-left: 6.1rem;
+    transform: translateX(-9px);
+}
 
 /* Arrow animation on hover */
-.login:hover svg, .signup:hover svg, .logincorp:hover svg, .signupcorp:hover svg {
+.login:hover svg, .signup:hover svg, .logincorp:hover svg, .signupcorp:hover svg, .event-create:hover svg {
     transform: translateX(-5px);
     filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.35));
-    stroke: hsl(var(--nc));
+    stroke: whitesmoke;
 }
 
 /* Button hover effects */
-.login:active, .signup:active, .logincorp:active, .signupcorp:active {
+.login:active, .signup:active, .logincorp:active, .signupcorp:active, .event-create:active {
     transform: scale(0.95);
 }
-
 
 
 

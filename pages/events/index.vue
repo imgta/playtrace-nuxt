@@ -25,7 +25,7 @@ onMounted(() => {
 const formBg = computed(() => {
     return {
         'bg-base-200/95': pageTheme === 'dracula' || 'night',
-        'bg-neutral/95': pageTheme === 'fantasy' || 'corporate',
+        'bg-neutral/95 brightness-125': pageTheme === 'corporate' || 'fantasy',
     };
 });
 watchEffect(() => {
@@ -340,7 +340,7 @@ async function deleteEvent(eventId: number, eventIdx: number) {
 
                     <dialog ref="popDelete" class="modal">
                         <div :class="formBg" method="dialog" class="modal-box w-auto max-fit px-9 py-3 pb-8 shadow-none">
-                            <h1 class="text-primary text-3xl text-center pt-4 pb-0">
+                            <h1 class="text-primary text-2xl text-center pt-4 pb-0">
                                 {{ ev.attributes.event.data?.attributes?.title }}
                             </h1>
                             <div class="flex justify-center items-center w-full pb-5">

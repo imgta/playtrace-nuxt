@@ -94,15 +94,15 @@ async function getUser(userId: number) {
 
             <div v-if="token">
                 <NuxtLink to="/events/new">
-                    <button class="btn-primary btn-outline lg:btn-sm md:btn-sm sm:btn-xs max-sm:btn-xs max-sm:px-1">
-                        <span class="hover:text-neutral-content w-full h-full flex items-center">
-                            Create
-                        </span>
-                    </button>
+                        <button class="btn btn-primary text-primary bg-transparent hover:text-neutral-content border-none font-normal normal-case flex items-center btn-xs md:btn-sm">
+                            <span>
+                                Create
+                            </span>
+                        </button>
                 </NuxtLink>
                 <NuxtLink to="/events">
-                    <button class="btn-primary btn-outline lg:btn-sm md:btn-sm sm:btn-xs max-sm:btn-xs max-sm:px-1">
-                        <span class="hover:text-neutral-content w-full h-full flex items-center">
+                    <button class="btn btn-primary text-primary bg-transparent hover:text-neutral-content border-none font-normal normal-case flex items-center btn-xs md:btn-sm">
+                        <span>
                             Events
                         </span>
                     </button>
