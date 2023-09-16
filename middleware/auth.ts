@@ -14,11 +14,9 @@ export default defineNuxtRouteMiddleware((to, from) => {
     }
 
     if (token && isLoginPage(to.path) && from.query.redirect) {
-        toast.error('Please login.', { timeout: 1500 });
         // we just finished logging in and the page was refreshed
         return navigateTo(<string>from.query.redirect);
     }
-    toast.error('Please login.', { timeout: 1500 });
 });
 
 function isLoginPage(path: string) {
