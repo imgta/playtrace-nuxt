@@ -36,7 +36,7 @@ export function shortDate(datetimeInput: string): string {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     const padZero = (num: number) => (num < 10 ? `0${num}` : num);
-    const getAmPm = (hours: number) => (hours >= 12 ? 'pm' : 'am');
+    const getAmPm = (hours: number) => (hours >= 12 ? 'PM' : 'AM');
     const hours12 = (hours: number) => (hours % 12 || 12);
 
     const dayName = dayNames[date.getUTCDay()];
@@ -56,7 +56,7 @@ export function shortDate(datetimeInput: string): string {
 
     if (dayDifference === 0 && date.getUTCDay() === currentDate.getUTCDay()) {
         dayLabel = 'This';
-    } else if (dayDifference > 0 && dayDifference < 7 - (currentDayIdx - selectDayIdx)) {
+    } else if (dayDifference > 0 && dayDifference <= 7 - (currentDayIdx - selectDayIdx)) {
         dayLabel = 'Next';
     } else if (dayDifference < 0 && dayDifference > -7 - (currentDayIdx - selectDayIdx)) {
         dayLabel = 'Last';
@@ -65,7 +65,7 @@ export function shortDate(datetimeInput: string): string {
     if (dayLabel) {
         return `${dayLabel} ${shortDayName} > ${hours12(hours)}:${padZero(minutes)}${amOrPm}`;
     } else {
-        return `${shortDayName}, ${monthName} ${dateNum} > ${hours12(hours)}:${padZero(minutes)}${amOrPm}`;
+        return `${shortDayName}, ${monthName} ${dateNum} @ ${hours12(hours)}:${padZero(minutes)}${amOrPm}`;
     }
 }
 

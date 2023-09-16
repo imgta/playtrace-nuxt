@@ -2,6 +2,7 @@
 // definePageMeta({
 //     middleware: ['auth'],
 // });
+const route = useRoute();
 const { toast } = useMisc();
 const targetText = '▶_trace.';
 const token = useStrapiToken();
@@ -26,6 +27,8 @@ const userData = reactive({
     avatar: '',
 }) as any;
 
+const drawerOpen = ref(false);
+
 // ----------------------------------------------------------------
 onMounted(() => {
     watchEffect(() => {
@@ -33,14 +36,24 @@ onMounted(() => {
         console.log('myId.value', myId.value);
     });
 });
-
+watch(() => route.path, path => {
+    drawerOpen.value = false;
+    console.log('userData.avatar', userData.avatar);
+});
 // ----------------------------------------------------------------
-async function outClick() {
+function toggleSide() {
+    drawerOpen.value = !drawerOpen.value;
+}
+async function logoutClick() {
     try {
         logout();
     } catch (error) {
         console.error(error);
     } finally {
+        userData.username = '';
+        userData.fullName = '';
+        userData.initials = '';
+        userData.avatar = '';
         toast.info('User logged out.', { timeout: 1500 });
         await navigateTo('/');
     }
@@ -51,15 +64,12 @@ async function getUser(userId: number) {
         const userRes: Record<string, any> = await client(`${appHost}api/users/${userId}?populate=*`, {
             method: 'GET'
         });
-        const {
-            username,
-            fullName,
-            avatar: { formats: { thumbnail: { url: avatarUrl } } },
-        } = userRes;
-
+        const { username, fullName } = userRes;
+        const avatarUrl = userRes.avatar?.formats?.thumbnail?.url;
         userData.username = username;
         userData.fullName = fullName;
         userData.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
+        console.log('userData.initials', userData.initials);
         if (avatarUrl) {
             userData.avatar = avatarUrl;
         }
@@ -68,6 +78,16 @@ async function getUser(userId: number) {
     } finally {
         userCookie.value = userData;
     }
+}
+
+function navHome() {
+    navigateTo('/');
+}
+function navEvents() {
+    navigateTo('/events');
+}
+function navNewEvent() {
+    navigateTo('/events/new');
 }
 
 // ----------------------------------------------------------------
@@ -88,59 +108,78 @@ async function getUser(userId: number) {
             </div>
 
             <div v-if="token">
-                <NuxtLink to="/events/new">
-                        <button class="btn btn-primary text-primary bg-transparent hover:text-neutral-content border-none font-normal normal-case flex items-center btn-xs md:btn-sm">
-                            <span>
-                                Create
-                            </span>
+                <div class="hidden md:inline-flex">
+                    <NuxtLink to="/events/new">
+                        <button
+                            class="btn btn-primary btn-xs text-primary bg-transparent hover:text-neutral-content border-none font-normal normal-case md:btn-sm">
+                            <span>Create</span>
                         </button>
-                </NuxtLink>
-                <NuxtLink to="/events">
-                    <button class="btn btn-primary text-primary bg-transparent hover:text-neutral-content border-none font-normal normal-case flex items-center btn-xs md:btn-sm">
-                        <span>
-                            Events
-                        </span>
-                    </button>
-                </NuxtLink>
+                    </NuxtLink>
+
+                    <NuxtLink to="/events">
+                        <button
+                            class="btn btn-primary btn-xs text-primary bg-transparent hover:text-neutral-content border-none font-normal normal-case md:btn-sm">
+                            <span>Events</span>
+                        </button>
+                    </NuxtLink>
+                </div>
 
                 <div class="navbar-center flex">
-                    <ul class="menu menu-horizontal pl-1.5 bg-transparent">
-                        <li tabIndex="{{0}}">
+                    <div class="drawer drawer-end">
+                        <input id="my-drawer-4" type="checkbox" class="drawer-toggle" :checked="drawerOpen"
+                            @click="toggleSide()" />
+                        <div class="drawer-content px-1">
+                            <label for="my-drawer-4"
+                                class="btn bg-transparent drawer-button normal-case border-none hover:bg-transparent hover:border-none px-0 pl-1">
 
-                            <div class="dropdown dropdown-hover bg-transparent py-0 px-0 hover:bg-transparent">
-
-                                <NuxtLink v-if="userData.avatar" to="/user/me">
-                                    <div class="avatar iconDiv bg-transparent"
-                                        :tooltip="userData.username">
-                                        <img :src="userData.avatar" class="object-contain" />
-                                    </div>
-                                </NuxtLink>
-
-                                <NuxtLink v-if="!userData.avatar" to="/user/me">
-                                    <div class="avatar placeholder items-center">
-                                        <div class="bg-secondary text-md font-normal rounded-full w-8">
-                                            <span class="text-xs text-white">{{ userData.initials }}</span>
+                                <div v-if="userData.avatar" class="flex">
+                                    <div class="avatar">
+                                        <div class="max-h-[34px]"
+                                            :class="drawerOpen ? 'rounded-l-full w-[3.65rem]' : 'w-8 rounded-full'">
+                                            <img :src="userData.avatar" class="object-contain" />
                                         </div>
-                                        <span class="text-base-content/80 pl-2 text-md font-medium">{{ userData.username }}</span>
                                     </div>
-                                </NuxtLink>
+                                    <div class="flex bg-transparent font-medium text-primary text-xs md:text-sm">
+                                        <span v-if="drawerOpen" class="self-center pl-3">{{ userData.username }}</span>
+                                    </div>
+                                </div>
 
-                                <ul
-                                    class="dropdown-content z-[1] menu px-1 pt-3 m-0 bg-transparent border-none shadow-none drop-shadow-none right-0.5 top-6">
-                                    <li>
-                                        <LazyNuxtLink
-                                            class="btn btn-xs btn-primary font-normal normal-case border-none hover:bg-primary px-2 pb-[1.2rem] pt-0.5"
-                                            @click="outClick">
-                                            <span class="text-neutral-content/90 text-sm link-hover">
-                                                logout.
-                                            </span>
-                                        </LazyNuxtLink>
-                                    </li>
-                                </ul>
+                                <div v-if="!userData.avatar" class="flex">
+                                    <div class="avatar placeholder max-h-[34px]">
+                                        <div class="bg-secondary"
+                                            :class="drawerOpen ? 'rounded-l-full min-w-[3.65rem] text-sm' : 'rounded-full w-8 text-xs'">
+                                            <span class="text-white self-center justify-center">{{ userData.initials
+                                            }}</span>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="flex bg-transparent font-medium text-primary text-xs md:text-sm max-h-[34px] w-full">
+                                        <span v-if="drawerOpen" class="self-center pl-3 w-full">{{
+                                            `${userData.username}nametest` }} </span>
+                                    </div>
+                                </div>
 
-                            </div>
-                        </li>
-                    </ul>
+                            </label>
+
+                        </div>
+                        <div class="drawer-side mt-16 z-10">
+                            <label for="my-drawer-4" class="drawer-overlay"></label>
+                            <ul
+                                class="menu p-2 w-36 min-h-full bg-base-200 text-primary/80 content-center text-xs md:text-sm">
+                                <!-- Sidebar content here -->
+                                <li>
+                                    <NuxtLink to="/user/me" class="hover:text-primary link link-hover hover:bg-transparent">
+                                        Profile
+                                    </NuxtLink>
+                                </li>
+                                <li><span class="hover:text-primary link link-hover hover:bg-transparent"
+                                        @click="logoutClick">
+                                        Logout
+                                    </span></li>
+
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -149,7 +188,7 @@ async function getUser(userId: number) {
         <slot />
 
         <div class="bg-base-200 place-items-end mt-auto">
-            <footer class="flex flex-nowrap pb-4 px-5 text-base-content max-w-none items-end">
+            <footer class="flex flex-nowrap pb-[4.5rem] md:pb-4 px-5 text-base-content max-w-none items-end">
                 <div class="flex-initial pr-2">
                     <svg class="fill-current w-6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd"
                         clip-rule="evenodd">
@@ -172,6 +211,41 @@ async function getUser(userId: number) {
                     </div>
                 </a>
             </footer>
+
         </div>
+    </div>
+
+    <!-- BOTTOM NAV BAR -->
+    <div class="btm-nav text-sm font-medium md:invisible">
+        <button
+            :class="(route.path === '/') ? 'fill-primary text-primary active' : 'fill-neutral-content/80 text-neutral-content/80 hover:fill-primary hover:text-primary hover:active'"
+            @click="navHome">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
+                <path
+                    d="M221.56,100.85,141.61,25.38l-.16-.15a19.93,19.93,0,0,0-26.91,0l-.17.15L34.44,100.85A20.07,20.07,0,0,0,28,115.55V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V164h24v44a20,20,0,0,0,20,20h48a20,20,0,0,0,20-20V115.55A20.07,20.07,0,0,0,221.56,100.85ZM204,204H164V160a20,20,0,0,0-20-20H112a20,20,0,0,0-20,20v44H52V117.28l76-71.75,76,71.75Z" />
+            </svg>
+            <span class="btm-nav-label">Home</span>
+        </button>
+
+        <button
+            :class="(route.path === '/events/new') ? 'fill-primary text-primary active' : 'fill-neutral-content/80 text-neutral-content/80 hover:fill-primary hover:text-primary hover:active'"
+            @click="navNewEvent">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
+                <path
+                    d="M208,28H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28Zm-4,176H52V52H204ZM76,128a12,12,0,0,1,12-12h28V88a12,12,0,0,1,24,0v28h28a12,12,0,0,1,0,24H140v28a12,12,0,0,1-24,0V140H88A12,12,0,0,1,76,128Z" />
+            </svg>
+            <span class="btm-nav-label">New Event</span>
+        </button>
+
+        <button
+            :class="(route.path === '/events') ? 'fill-primary text-primary active' : 'fill-neutral-content/80 text-neutral-content/80 hover:fill-primary hover:text-primary hover:active'"
+            @click="navEvents">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
+                <path
+                    d="M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM68,52a12,12,0,0,0,24,0h72a12,12,0,0,0,24,0h16V76H52V52ZM52,204V100H204V204Zm120.49-84.49a12,12,0,0,1,0,17l-48,48a12,12,0,0,1-17,0l-24-24a12,12,0,0,1,17-17L116,159l39.51-39.52A12,12,0,0,1,172.49,119.51Z" />
+            </svg>
+            <span class="btm-nav-label">Your Events</span>
+        </button>
+
     </div>
 </template>

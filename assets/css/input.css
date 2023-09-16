@@ -62,35 +62,19 @@ html, body {
 
 /* AVATAR ICON SLIDER */
 .iconDiv {
-    /* margin-top: 20px; */
-    /* margin-bottom: 20px; */
-    /* margin-left: 4px; */
-    /* padding: 4px; */
-    /* white-space: nowrap; */
     display: inline-flex;
     align-items: center;
     overflow: hidden;
     height: 34px; width: 34px;
     border-radius: 9999px;
-    /* border-radius: var(--rounded-btn, 0.5rem); */
     cursor: pointer;
     color: hsl(var(--nc));
-    transition: width 150ms ease-in-out 0s
-        /* , background-color 300ms linear 200ms; */
+    transition: width 150ms ease-in-out 0s;
 }
 .iconDiv:hover, .iconDiv:focus-visible {
     width: 140px;
-    /* background-color: rgb(51 65 85); */
-    background-color: hsl(var(--p));
-    transition: width 150ms ease-in-out 0s
-        /* , background-color 100ms linear 0s; */
-}
-/* .iconDiv:focus-visible {
-    outline: 1px solid rgb(51 65 85);
-    outline-offset: 4px;
-} */
-.iconDiv:active {
-    opacity: 0.9;
+    background-color: transparent;
+    transition: width 150ms ease-in-out 0s;
 }
 
 .iconDiv::after {
@@ -195,7 +179,7 @@ html, body {
 .right .hint { top:21%; right:-47%; text-align:left;}
 
 .event-card .hint, .event-delete .hint {
-    top: -175%; left:-80%;
+    top: -170%; left:-80%;
     font-size: 0.75rem;
 }
 /* .event-delete .hint {
@@ -276,7 +260,7 @@ section a::before, section a::after {
     transition: stroke-dashoffset 0.3s ease-in-out;
     transform: translateY(-77%);
     fill: none;
-    stroke: #b1d474;
+    stroke: hsl(var(--p));
     stroke-width: 2;
     stroke-dasharray: 400px;
     stroke-dashoffset: 400px;
@@ -298,7 +282,7 @@ section a::before, section a::after {
     transition: stroke-dashoffset 0.3s ease-in-out;
     transform: translateY(-100%);
     fill: none;
-    stroke: #f0f567;
+    stroke: hsl(var(--p));
     stroke-width: 36;
     stroke-dasharray: 400px;
     stroke-dashoffset: 400px;

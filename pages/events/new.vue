@@ -293,16 +293,36 @@ function removeUser(index: any) {
 
     <div class="bg-base-200">
         <div class="flex w-full shadow-none justify-center">
-            <div class="flex flex-col-reverse lg:flex-row w-full justify-center sm:px-20">
+            <div class="flex flex-col lg:flex-row w-full justify-center sm:px-20">
                 <div class="sm:w-auto min-w-[10%] lg:min-w-[42%]">
                     <div class="card-body pb-1.5">
 
-                        <div class="w-full con-hint top pb-2">
+                        <div class="w-full con-hint top pb-2 sm:order-first">
                             <div class="hint">
                                 <p>Event Title</p>
                             </div>
                             <input v-model="eventData.title" placeholder="Untitled Event" name="title" type="text"
                                 class="input input-bordered form-input" />
+                        </div>
+
+                        <div class="lg:hidden">
+                            <div @click="toggleModal">
+                                <button v-if="!showModal && !eventData.img"
+                                    class="edit edit-primary min-w-[100%] lg:min-w-[80%] h-full lg:h-[90%]">
+                                    Cover Picture</button>
+                                <img v-if="!showModal && eventData.img" :src="eventData.img" alt="Cover"
+                                    class="edit edit-primary object-cover h-[19rem] w-[100%] lg:w-[80%]" />
+                            </div>
+                            <div v-if="showModal">
+                                <dialog class="modal" :class="{ 'modal-open': showModal }">
+                                    <div method="dialog" class="modal-box max-w-4xl">
+                                        <CoverPicSelect @coverPicInput="coverPicEmit" @modalState="coverModalEmit" />
+                                    </div>
+                                    <form method="dialog" class="modal-backdrop" @click="toggleModal">
+                                        <button>close</button>
+                                    </form>
+                                </dialog>
+                            </div>
                         </div>
 
                         <div class="w-full con-hint left">
@@ -322,7 +342,30 @@ function removeUser(index: any) {
                             </div>
                         </div>
 
-                        <div class="w-full con-hint left pb-2">
+                        <div class="lg:hidden  pb-0 lg:pb-2">
+                            <div
+                                class="w-full lg:w-[80%] h-full lg:h-[90%] con-hint left">
+                                <div class="hint">
+                                    <p>Friends</p>
+                                </div>
+                                <input v-model="userSearch" placeholder="Invite by username" name="title" type="text"
+                                    :class="inputValid" @keyup.enter="inviteUser" />
+                            </div>
+                            <div v-if="eventData.userInvites.length > 0" class="py-0.5">
+                                <span class="text-sm font-medium">Inviting</span>
+                                <div v-for="(user, index) in eventData.userInvites" :key="index"
+                                    class="inline-block whitespace-nowrap pl-1">
+                                    <span class="badge badge-lg gap-1 text-xs text-primary/90 font-medium pl-3 pr-2">
+                                        {{ user.username }}
+                                        <span
+                                            class="badge badge-xs px-1 bg-transparent cursor-pointer hover:opacity-100 hover:font-semibold hover:badge-error border-0"
+                                            @click="removeUser(index)">x</span>
+                                        </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-full con-hint left pb-0 lg:pb-2">
                             <div class="hint">
                                 <p>Party Size</p>
                             </div>
@@ -330,7 +373,7 @@ function removeUser(index: any) {
                                 class="input input-bordered form-input" @blur="partyBlur" />
                         </div>
 
-                        <div class="w-full con-hint left pb-2">
+                        <div class="w-full con-hint left pb-0 lg:pb-2">
                             <div class="hint">
                                 <p>Damage</p>
                             </div>
@@ -350,10 +393,9 @@ function removeUser(index: any) {
                     </div>
                 </div>
 
-                <div class="w-full h-full pt-8 lg:pl-0 sm:px-8 max-sm:px-8">
+                <div class="w-full h-full pt-8 px-8 lg:px-0">
 
-                    <div class="justify-center content-center self-center items-center max-h-full">
-
+                    <div class="justify-center content-center self-center items-center max-h-full hidden lg:block">
                         <div @click="toggleModal">
                             <button v-if="!showModal && !eventData.img"
                                 class="edit edit-primary min-w-[100%] lg:min-w-[80%] h-full lg:h-[90%]">
@@ -374,7 +416,7 @@ function removeUser(index: any) {
                         </div>
 
                         <div
-                            class="min-w-[100%] lg:min-w-[80%] h-full lg:h-[90%] con-hint right pt-4">
+                            class="w-full lg:w-[80%] h-full lg:h-[90%] con-hint right pt-4">
                             <div class="hint lg:pt-3">
                                 <p>Invite Friends</p>
                             </div>
@@ -383,7 +425,7 @@ function removeUser(index: any) {
                         </div>
 
                         <div v-if="eventData.userInvites.length > 0" class="pt-2">
-                            <span class="text-sm font-medium">Invites:</span>
+                            <span class="text-sm font-medium">Inviting</span>
                             <div v-for="(user, index) in eventData.userInvites" :key="index"
                                 class="inline-block whitespace-nowrap pl-1">
                                 <span class="badge badge-lg gap-1 text-xs text-primary/90 font-medium pl-3 pr-2">
@@ -394,7 +436,6 @@ function removeUser(index: any) {
                                     </span>
                             </div>
                         </div>
-
                     </div>
 
                     <div
