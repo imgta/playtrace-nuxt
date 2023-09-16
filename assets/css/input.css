@@ -117,7 +117,7 @@ html, body {
 }
 
 
-.con-hint {
+.con-hint, .event-card {
     display: inline-block;
     vertical-align: bottom;
     color: hsl(var(--af));
@@ -144,10 +144,10 @@ html, body {
     font-size: 0.9rem;
     transition: all 0s ease-in-out; /* Hint fade speed */
     position: absolute;
-    width: 45%;
+    /* width: 45%; */
 }
 
-.con-hint:hover .hint  {
+.con-hint:hover .hint {
     opacity: 1;
     visibility: visible;
     animation: nudge 0.45s ease-in-out infinite alternate; /* Hint animation effect speed */
@@ -179,12 +179,9 @@ html, body {
 .right .hint { top:21%; right:-47%; text-align:left;}
 
 .event-card .hint, .event-delete .hint {
-    top: -170%; left:-80%;
+    top: -160%; left:-80%;
     font-size: 0.75rem;
 }
-/* .event-delete .hint {
-    color: hsl(var(--er));
-} */
 
 
 @media (max-width: 640px) {
@@ -210,7 +207,7 @@ html, body {
     .top .hint,
     .bottom .hint,
     .left .hint,
-    .right .hint {
+    .right .hint, .event-card .hint {
         top: auto;
         left: auto;
         text-align: left;

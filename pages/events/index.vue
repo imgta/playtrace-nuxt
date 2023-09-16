@@ -242,16 +242,17 @@ async function deleteEvent(eventId: number, eventIdx: number) {
         </ul>
     </div>
 
-    <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-8 py-8">
+    <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-8 md:px-8 py-8">
         <div v-for="(ev, idx) in myInvites" :key="idx" class="card card-compact bg-base-100 not-prose">
             <figure>
                 <img :src="ev.attributes.event.data?.attributes?.eventPic?.data?.attributes?.url"
-                    class="sm:h-[150px] md:h-[200px] lg:h-[225px] w-full object-cover" />
+                    class="h-[200px] lg:h-[225px] w-full object-cover" />
             </figure>
             <div class="card-body">
                 <div>
                     <div class="flex justify-center py-0 my-0">
-                        <h1 class="text-primary text-2xl font-medium">{{ ev.attributes.event.data?.attributes?.title }}</h1>
+                        <h1 class="text-primary text-lg md:text-2xl font-medium">{{
+                            ev.attributes.event.data?.attributes?.title }}</h1>
                     </div>
                     <div class="flex justify-center py-0 my-0">
                         <span class="font-semibold text-xs text-base-content/80 self-center">{{
@@ -314,163 +315,176 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                 </div>
 
                 <!-- CATEGORY TAGS -->
-                <div class="flex gap-0.5 pt-5 pb-0 items-end">
-                    <span v-for="category in ev.attributes.event.data?.attributes?.location[0]?.category.split(', ')"
-                        :key="category"
-                        class="badge badge-outline badge-xs categorytext font-semibold text-center align-middle opacity-80">
-                        {{ category }}
-                    </span>
+                <div class="inline-block pt-5 pb-0">
 
-                    <!-- DELETE EVENT MODAL -->
-                    <div v-if="myId === ev.attributes.event.data?.attributes?.initiator?.data?.id"
-                        class="ml-auto con-hint event-card" @click="openDelete(idx)">
-                        <svg class="w-4 fill-base-content/75 hover:fill-error hover:cursor-pointer"
-                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-                            <path
-                                d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z">
-                            </path>
-                        </svg>
+                    <div class="flex justify-between">
+                        <div v-for="category in ev.attributes.event.data?.attributes?.location[0]?.category.split(', ')"
+                            :key="category" class="inline pr-0.5">
+                            <span
+                                class="badge badge-outline badge-xs categorytext font-semibold text-center align-middle opacity-80 px-1">
+                                {{ category }}
+                            </span>
+                        </div>
+
+                        <!-- DELETE EVENT MODAL -->
+                        <div v-if="myId === ev.attributes.event.data?.attributes?.initiator?.data?.id"
+                            class="ml-auto con-hint event-card" @click="openDelete(idx)">
+                            <svg class="w-3.5 fill-base-content/75 hover:fill-error hover:cursor-pointer"
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                                <path
+                                    d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z">
+                                </path>
+                            </svg>
+                        </div>
+                        <dialog ref="popDelete" class="modal">
+                            <div :class="formBg" method="dialog"
+                                class="modal-box w-auto max-fit px-9 py-3 pb-8 shadow-none">
+                                <h3 className="text-neutral-content font-medium text-md absolute left-3.5 top-3">DELETE</h3>
+                                <button
+                                    class="btn btn-xs btn-circle btn-ghost focus:outline-none absolute right-2 top-2 opacity-75 hover:opacity-100 text-neutral-content/75"
+                                    @click="closeDelete(idx)"><span class="">✕</span></button>
+                                <h1 class="text-primary text-2xl text-center pt-8 pb-0">
+                                    {{ ev.attributes.event.data?.attributes?.title }}
+                                </h1>
+                                <div class="flex justify-center items-center w-full pb-6">
+                                    <span class="text-neutral-content/80 text-center text-sm font-normal">Delete
+                                        event?</span>
+                                </div>
+
+                                <div class="grid grid-cols-2 justify-center items-center w-full text-neutral-content/75">
+
+                                    <div class="col-start-1 hover:cursor-pointer w-full group"
+                                        @click="deleteEvent(ev.attributes.event.data?.id, idx)">
+                                        <div class="flex justify-center group-hover:text-primary group-hover:font-semibold">
+                                            <span class="pr-1">Yes</span>
+                                            <svg class="fill-neutral-content/75 w-4 pb-[0.2rem] group-hover:fill-primary group-hover:animate-bounce inline"
+                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                                                <path
+                                                    d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-start-2 hover:cursor-pointer w-full group" @click="closeDelete(idx)">
+                                        <div class="flex justify-center group-hover:text-error group-hover:font-semibold">
+                                            <span class="pr-1">No</span>
+                                            <svg class="fill-neutral-content/75 w-4 group-hover:fill-error group-hover:animate-bounce inline"
+                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                                                <path
+                                                    d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <form method="dialog" class="modal-backdrop">
+                                <button @click="closeDelete(idx)">close</button>
+                            </form>
+                        </dialog>
+
+                        <!-- INVITE RSVP MODAL -->
+                        <div v-if="ev.attributes.eventStatus !== 'going' || myId !== ev.attributes.event.data?.attributes?.initiator?.data?.id"
+                            class="shake con-hint event-card">
+                            <!-- <div class="hint" :class="rsvpHint(ev.attributes.eventStatus, true)">
+                                <p>{{ rsvpHint(ev.attributes.eventStatus, false) }}</p>
+                            </div> -->
+                            <svg v-if="!rsvpModal" class="w-4 hover:cursor-pointer"
+                                :class="(ev.attributes.eventStatus === 'going') ? 'fill-success' : (ev.attributes.eventStatus === 'maybe') ? 'fill-accent' : (ev.attributes.eventStatus === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-info'"
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" @click="openRsvp(idx)">
+                                <path
+                                    d="M224,44H32A12,12,0,0,0,20,56V192a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A12,12,0,0,0,224,44ZM193.15,68,128,127.72,62.85,68ZM44,188V83.28l75.89,69.57a12,12,0,0,0,16.22,0L212,83.28V188Z">
+                                </path>
+                            </svg>
+                            <svg v-if="rsvpModal" class="w-4" :class="(ev.attributes.eventStatus === 'going') ? 'fill-success' : (ev.attributes.eventStatus === 'maybe') ? 'fill-accent' : (ev.attributes.eventStatus === 'noGo') ? 'fill-error' : 'fill-info/75'" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M230.66,86l-96-64a12,12,0,0,0-13.32,0l-96,64A12,12,0,0,0,20,96V200a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V96A12,12,0,0,0,230.66,86ZM128,46.42l74.86,49.91L141.61,140H114.39L53.14,96.33ZM44,196V119.29l59.58,42.48a12,12,0,0,0,7,2.23h34.9a12,12,0,0,0,7-2.23L212,119.29V196Z">
+                                </path>
+                            </svg>
+                        </div>
+                        <dialog ref="popRsvp" class="modal">
+                            <div :class="formBg" method="dialog"
+                                class="modal-box w-auto max-fit px-9 pt-6 pb-0 shadow-none">
+                                <h3 className="text-neutral-content font-medium text-md absolute left-3.5 top-3">RSVP</h3>
+                                <button
+                                    class="btn btn-xs btn-circle btn-ghost focus:outline-none absolute right-2 top-2 opacity-75 hover:opacity-100 text-neutral-content/75"
+                                    @click="closeRsvp(idx)"><span class="">✕</span></button>
+                                <h1 class="text-primary text-2xl text-center pt-6">
+                                    {{ ev.attributes.event.data?.attributes?.title }}
+                                </h1>
+                                <div
+                                    class="grid justify-center items-center w-full pb-7 text-neutral-content/75 text-center text-xs font-medium">
+                                    <span>Hosted by {{
+                                        ev.attributes.event.data?.attributes?.initiator?.data?.attributes?.username
+                                    }}</span>
+                                    <span>{{ shortDate(ev.attributes.event.data?.attributes?.startDate) }}</span>
+                                </div>
+
+                                <div class="grid grid-cols-5 w-full text-neutral-content/75 pb-6">
+
+                                    <div class="col-start-1 hover:cursor-pointer w-full group hover:text-primary"
+                                        :class="(ev.attributes.eventStatus === 'going') ? 'text-primary font-semibold' : ''"
+                                        @click="rsvpEvent(idx, ev.id, 'going')">
+                                        <div class="flex justify-center row-start-1">
+                                            <svg class="w-5 pb-[0.2rem] "
+                                                :class="(ev.attributes.eventStatus === 'going') ? 'fill-primary' : 'fill-neutral-content/75 group-hover:fill-primary group-hover:animate-bounce'"
+                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                                                <path
+                                                    d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div class="flex justify-center">
+                                            <span>Going</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-start-3 hover:cursor-pointer w-full group hover:text-warning"
+                                        :class="(ev.attributes.eventStatus === 'maybe') ? 'text-warning font-semibold' : ''"
+                                        @click="rsvpEvent(idx, ev.id, 'maybe')">
+                                        <div class="flex justify-center row-start-1">
+                                            <svg :class="(ev.attributes.eventStatus === 'maybe') ? 'fill-warning' : 'fill-neutral-content/75 group-hover:fill-warning group-hover:animate-bounce'"
+                                                class="w-5 pb-[0.2rem]" xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 256 256">
+                                                <path
+                                                    d="M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Zm52-52a12,12,0,0,1-12,12H88a12,12,0,0,1,0-24h80A12,12,0,0,1,180,160ZM76,108a16,16,0,1,1,16,16A16,16,0,0,1,76,108Zm104,0a16,16,0,1,1-16-16A16,16,0,0,1,180,108Z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div class="flex justify-center">
+                                            <span>Maybe</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-start-5 hover:cursor-pointer w-full group hover:text-error"
+                                        :class="(ev.attributes.eventStatus === 'noGo') ? 'text-error font-semibold' : ''"
+                                        @click="rsvpEvent(idx, ev.id, 'noGo')">
+                                        <div class="flex justify-center row-start-1">
+                                            <svg :class="(ev.attributes.eventStatus === 'noGo') ? 'fill-error' : 'fill-neutral-content/75 group-hover:fill-error group-hover:animate-bounce'"
+                                                class="w-5 pb-[0.2rem]" xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 256 256">
+                                                <path
+                                                    d="M188,84a32,32,0,0,0-8,1V60a32,32,0,0,0-43.21-30A32,32,0,0,0,76,44v1A32,32,0,0,0,36,76v76a92,92,0,0,0,184,0V116A32,32,0,0,0,188,84Zm8,68a68,68,0,0,1-136,0V76a8,8,0,0,1,16,0v44a12,12,0,0,0,24,0V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V60a8,8,0,0,1,16,0v65.4A52.09,52.09,0,0,0,116,176a12,12,0,0,0,24,0,28,28,0,0,1,28-28,12,12,0,0,0,12-12V116a8,8,0,0,1,16,0Z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div class="flex justify-center">
+                                            <span>Flake</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <form method="dialog" class="modal-backdrop">
+                                <button @click="closeRsvp(idx)">close</button>
+                            </form>
+                        </dialog>
+
                     </div>
-                    <dialog ref="popDelete" class="modal">
-                        <div :class="formBg" method="dialog" class="modal-box w-auto max-fit px-9 py-3 pb-8 shadow-none">
-                            <h1 class="text-primary text-2xl text-center pt-4 pb-0">
-                                {{ ev.attributes.event.data?.attributes?.title }}
-                            </h1>
-                            <div class="flex justify-center items-center w-full pb-5">
-                                <span class="text-neutral-content/80 text-center text-base font-normal">Delete event?</span>
-                            </div>
-
-                            <div class="grid grid-cols-2 justify-center items-center w-full text-neutral-content/75">
-
-                                <div class="col-start-1 hover:cursor-pointer w-full group"
-                                    @click="deleteEvent(ev.attributes.event.data?.id, idx)">
-                                    <div class="flex justify-center group-hover:text-primary group-hover:font-semibold">
-                                        <span class="pr-1">Yes</span>
-                                        <svg class="fill-neutral-content/75 w-4 pb-[0.2rem] group-hover:fill-primary group-hover:animate-bounce inline"
-                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-                                            <path
-                                                d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                </div>
-
-                                <div class="col-start-2 hover:cursor-pointer w-full group" @click="closeDelete(idx)">
-                                    <div class="flex justify-center group-hover:text-error group-hover:font-semibold">
-                                        <span class="pr-1">No</span>
-                                        <svg class="fill-neutral-content/75 w-4 group-hover:fill-error group-hover:animate-bounce inline"
-                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-                                            <path
-                                                d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <form method="dialog" class="modal-backdrop">
-                            <button @click="closeDelete(idx)">close</button>
-                        </form>
-                    </dialog>
-
-                    <!-- INVITE RSVP MODAL -->
-                    <div v-if="ev.attributes.eventStatus !== 'going' || myId !== ev.attributes.event.data?.attributes?.initiator?.data?.id"
-                        class="ml-auto shake con-hint event-card">
-                        <div class="hint" :class="rsvpHint(ev.attributes.eventStatus, true)">
-                            <p>{{ rsvpHint(ev.attributes.eventStatus, false) }}</p>
-                        </div>
-                        <svg v-if="!rsvpModal" class="w-4 hover:cursor-pointer"
-                            :class="(ev.attributes.eventStatus === 'going') ? 'fill-success' : (ev.attributes.eventStatus === 'maybe') ? 'fill-accent' : (ev.attributes.eventStatus === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-info'"
-                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" @click="openRsvp(idx)">
-                            <path
-                                d="M224,44H32A12,12,0,0,0,20,56V192a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A12,12,0,0,0,224,44ZM193.15,68,128,127.72,62.85,68ZM44,188V83.28l75.89,69.57a12,12,0,0,0,16.22,0L212,83.28V188Z">
-                            </path>
-                        </svg>
-                        <svg v-if="rsvpModal" class="w-4 fill-info/75" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 256 256">
-                            <path
-                                d="M230.66,86l-96-64a12,12,0,0,0-13.32,0l-96,64A12,12,0,0,0,20,96V200a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V96A12,12,0,0,0,230.66,86ZM128,46.42l74.86,49.91L141.61,140H114.39L53.14,96.33ZM44,196V119.29l59.58,42.48a12,12,0,0,0,7,2.23h34.9a12,12,0,0,0,7-2.23L212,119.29V196Z">
-                            </path>
-                        </svg>
-                    </div>
-                    <dialog ref="popRsvp" class="modal">
-                        <div :class="formBg" method="dialog" class="modal-box w-auto max-fit px-9 pt-6 pb-0 shadow-none">
-                            <h3 className="text-neutral-content font-medium text-md absolute left-3.5 top-3">RSVP</h3>
-                            <button
-                                class="btn btn-xs btn-circle btn-ghost focus:outline-none absolute right-2 top-2 opacity-75 hover:opacity-100 text-neutral-content/75"
-                                @click="closeRsvp(idx)"><span class="">✕</span></button>
-                            <h1 class="text-primary text-2xl text-center pt-6">
-                                {{ ev.attributes.event.data?.attributes?.title }}
-                            </h1>
-                            <div
-                                class="grid justify-center items-center w-full pb-7 text-neutral-content/75 text-center text-xs font-medium">
-                                <span>Hosted by {{
-                                    ev.attributes.event.data?.attributes?.initiator?.data?.attributes?.username }}</span>
-                                <span>{{ shortDate(ev.attributes.event.data?.attributes?.startDate) }}</span>
-                            </div>
-
-                            <div class="grid grid-cols-5 w-full text-neutral-content/75 pb-6">
-
-                                <div class="col-start-1 hover:cursor-pointer w-full group hover:text-primary"
-                                    :class="(ev.attributes.eventStatus === 'going') ? 'text-primary font-semibold' : ''"
-                                    @click="rsvpEvent(idx, ev.id, 'going')">
-                                    <div class="flex justify-center row-start-1">
-                                        <svg class="w-5 pb-[0.2rem] "
-                                            :class="(ev.attributes.eventStatus === 'going') ? 'fill-primary' : 'fill-neutral-content/75 group-hover:fill-primary group-hover:animate-bounce'"
-                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-                                            <path
-                                                d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                    <div class="flex justify-center">
-                                        <span>Going</span>
-                                    </div>
-                                </div>
-
-                                <div class="col-start-3 hover:cursor-pointer w-full group hover:text-warning"
-                                    :class="(ev.attributes.eventStatus === 'maybe') ? 'text-warning font-semibold' : ''"
-                                    @click="rsvpEvent(idx, ev.id, 'maybe')">
-                                    <div class="flex justify-center row-start-1">
-                                        <svg :class="(ev.attributes.eventStatus === 'maybe') ? 'fill-warning' : 'fill-neutral-content/75 group-hover:fill-warning group-hover:animate-bounce'"
-                                            class="w-5 pb-[0.2rem]" xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 256 256">
-                                            <path
-                                                d="M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Zm52-52a12,12,0,0,1-12,12H88a12,12,0,0,1,0-24h80A12,12,0,0,1,180,160ZM76,108a16,16,0,1,1,16,16A16,16,0,0,1,76,108Zm104,0a16,16,0,1,1-16-16A16,16,0,0,1,180,108Z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                    <div class="flex justify-center">
-                                        <span>Maybe</span>
-                                    </div>
-                                </div>
-
-                                <div class="col-start-5 hover:cursor-pointer w-full group hover:text-error"
-                                    :class="(ev.attributes.eventStatus === 'noGo') ? 'text-error font-semibold' : ''"
-                                    @click="rsvpEvent(idx, ev.id, 'noGo')">
-                                    <div class="flex justify-center row-start-1">
-                                        <svg :class="(ev.attributes.eventStatus === 'noGo') ? 'fill-error' : 'fill-neutral-content/75 group-hover:fill-error group-hover:animate-bounce'"
-                                            class="w-5 pb-[0.2rem]" xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 256 256">
-                                            <path
-                                                d="M188,84a32,32,0,0,0-8,1V60a32,32,0,0,0-43.21-30A32,32,0,0,0,76,44v1A32,32,0,0,0,36,76v76a92,92,0,0,0,184,0V116A32,32,0,0,0,188,84Zm8,68a68,68,0,0,1-136,0V76a8,8,0,0,1,16,0v44a12,12,0,0,0,24,0V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V60a8,8,0,0,1,16,0v65.4A52.09,52.09,0,0,0,116,176a12,12,0,0,0,24,0,28,28,0,0,1,28-28,12,12,0,0,0,12-12V116a8,8,0,0,1,16,0Z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                    <div class="flex justify-center">
-                                        <span>Flake</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <form method="dialog" class="modal-backdrop">
-                            <button @click="closeRsvp(idx)">close</button>
-                        </form>
-                    </dialog>
-
                 </div>
             </div>
 
+        </div>
     </div>
-</div>
 </template>
