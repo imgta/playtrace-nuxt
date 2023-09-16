@@ -64,6 +64,12 @@
     }
 }
 
+/* .masonry-grid, .masonry-item, .masonry-column {
+    height: calc(100% - 7px);
+    max-height: calc(100% - 7px);
+    min-height: calc(100% - 7px);;
+} */
+
 .radio-tile-group {
     display: flex;
     justify-content: center;

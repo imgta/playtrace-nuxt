@@ -188,8 +188,8 @@ async function selectCover(img: string, pop: boolean) {
     <div class="justify-center content-center self-center items-center px-2">
 
         <div class="flex justify-center items-center">
-            <div class="pb-9 pl-2">
-                <h1 class="text-primary text-3xl text-center pt-4 pr-1.5">
+            <div class="pb-2">
+                <h1 class="text-primary text-3xl text-center pt-4">
                     Select your event cover!
                 </h1>
                 <p class="text-base-content font-medium text-center text-sm">
@@ -247,28 +247,28 @@ async function selectCover(img: string, pop: boolean) {
 
         <div class="pt-6">
             <div v-if="clickAPI === 'splash'">
-                <MasonryWall :items="pics" :ssr-columns="3" :min-columns="3" :column-width="250" :gap="12">
+                <MasonryWall :items="pics" :ssr-columns="3" :min-columns="3" :column-width="250" :gap="2">
                     <template #default="{ item }">
                         <button>
                             <img :src="item" alt="PICs"
-                                class="object-contain cursor-pointer hover:brightness-125 hover:contrast-75 hover:opacity-80"
+                                class="object-cover cursor-pointer hover:brightness-125 hover:contrast-75 hover:opacity-80"
                                 @click="selectCover(item, false)" />
                         </button>
                     </template>
                 </MasonryWall>
             </div>
-        <div v-if="clickAPI === 'giphy'">
-            <MasonryWall :items="gifs" :ssr-columns="3" :min-columns="3" :column-width="250" :gap="12">
-                <template #default="{ item }">
-                    <button>
-                        <img :src="item" alt="GIFs"
-                            class="object-contain cursor-pointer hover:brightness-110 hover:contrast-75 hover:opacity-90"
-                            @click="selectCover(item, false)" />
-                    </button>
-                </template>
-            </MasonryWall>
+            <div v-if="clickAPI === 'giphy'">
+                <MasonryWall :items="gifs" :ssr-columns="3" :min-columns="3" :column-width="250" :gap="2">
+                    <template #default="{ item }">
+                        <button>
+                            <img :src="item" alt="GIFs"
+                                class="object-contain cursor-pointer hover:brightness-110 hover:contrast-75 hover:opacity-90"
+                                @click="selectCover(item, false)" />
+                        </button>
+                    </template>
+                </MasonryWall>
+            </div>
         </div>
-    </div>
 
-</div>
+    </div>
 </template>
