@@ -12,10 +12,14 @@ const expiry = new Date(Date.now() + 86400000); // expiry set to +1 day
 const userCookie: any = useCookie('userCookie', { expires: expiry });
 
 const client = useStrapiClient();
-const user = useStrapiUser().value;
-const myId = (user?.id) as number;
+
+const myId = computed(() => {
+    const user = useStrapiUser().value;
+    return user?.id;
+}) as any;
+
 const userData = reactive({
-    id: myId,
+    id: myId.value,
     username: '',
     fullName: '',
     initials: '',
@@ -24,12 +28,12 @@ const userData = reactive({
 
 // ----------------------------------------------------------------
 onMounted(() => {
-    getUser(myId);
+    watchEffect(() => {
+        getUser(myId.value);
+        console.log('myId.value', myId.value);
+    });
 });
 
-// watchEffect(() => {
-//     console.log('userData', userData);
-// });
 // ----------------------------------------------------------------
 async function outClick() {
     try {
@@ -43,15 +47,6 @@ async function outClick() {
 }
 
 async function getUser(userId: number) {
-    // if (userCookie.value.id === myId) {
-    //     userData.username = userCookie.value.username;
-    //     userData.fullName = userCookie.value.fullName;
-    //     userData.initials = userData.fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
-    //     if (userCookie.value.avatar) {
-    //         userData.avatar = userCookie.value.avatar;
-    //     }
-    // }
-
     try {
         const userRes: Record<string, any> = await client(`${appHost}api/users/${userId}?populate=*`, {
             method: 'GET'
@@ -61,7 +56,7 @@ async function getUser(userId: number) {
             fullName,
             avatar: { formats: { thumbnail: { url: avatarUrl } } },
         } = userRes;
-        console.log('userRes', userRes);
+
         userData.username = username;
         userData.fullName = fullName;
         userData.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
@@ -112,17 +107,17 @@ async function getUser(userId: number) {
                     <ul class="menu menu-horizontal pl-1.5 bg-transparent">
                         <li tabIndex="{{0}}">
 
-                            <div class="dropdown dropdown-hover bg-transparent py-0 pl-0 pr-1.5 hover:bg-transparent">
+                            <div class="dropdown dropdown-hover bg-transparent py-0 px-0 hover:bg-transparent">
 
-                                <NuxtLink v-if="userData.avatar" v-show="userData.avatar" to="/user/me">
-                                    <div v-if="userData.avatar" v-show="userData.avatar" class="avatar iconDiv bg-transparent"
+                                <NuxtLink v-if="userData.avatar" to="/user/me">
+                                    <div class="avatar iconDiv bg-transparent"
                                         :tooltip="userData.username">
                                         <img :src="userData.avatar" class="object-contain" />
                                     </div>
                                 </NuxtLink>
 
-                                <NuxtLink v-if="!userData.avatar" v-show="!userData.avatar" to="/user/me">
-                                    <div v-if="!userData.avatar" v-show="!userData.avatar" class="avatar placeholder items-center">
+                                <NuxtLink v-if="!userData.avatar" to="/user/me">
+                                    <div class="avatar placeholder items-center">
                                         <div class="bg-secondary text-md font-normal rounded-full w-8">
                                             <span class="text-xs text-white">{{ userData.initials }}</span>
                                         </div>

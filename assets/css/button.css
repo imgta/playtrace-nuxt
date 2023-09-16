@@ -3,7 +3,6 @@
     color: hsl(var(--p)/0.85);
     text-decoration: none;
     position: relative;
-    font-weight: 500;
 }
 
 .tracer:hover {
@@ -13,14 +12,14 @@
 .tracer svg {
     fill: none;
     stroke: hsl(var(--p));
-    stroke-width: 4;
+    stroke-width: 3;
     stroke-miterlimit: 10;
     stroke-dasharray: 338;
     stroke-dashoffset: 338;
     stroke-linecap: round;
     position: absolute;
     top: 50%;
-    left: 50.5%;
+    left: 50%;
     width: calc(100% + 1.8rem);
     opacity: 0;
     transform: translate(-50%, -50%);

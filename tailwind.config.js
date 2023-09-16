@@ -4,9 +4,6 @@ module.exports = {
     plugins: [require('@tailwindcss/typography'), require('daisyui')], /* https://daisyui.com/docs/install/ */
     theme: {
         extend: {
-            // fontFamily: {
-            //     sans: ['Roboto', ...defaultTheme.fontFamily.sans]
-            // },
             typography: theme => ({
                 DEFAULT: {
                     css: {

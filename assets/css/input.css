@@ -241,3 +241,68 @@ html, body {
 .categorytext {
     font-size: 0.6rem;
 }
+
+
+section {
+    position: relative;
+    z-index: 0; /* needed for setting pseudo-element z-index */
+    overflow: hidden;
+    backface-visibility: hidden;
+}
+section a {
+    position: relative;
+    display: inline-block;
+    outline: none;
+    color: hsl(var(--p));
+    vertical-align: bottom;
+    text-decoration: none;
+    white-space: nowrap;
+    line-height: 1.8;
+}
+section a::before, section a::after {
+    pointer-events: none;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.link-svgline a svg.link-svgline {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    overflow: hidden;
+    margin: 0;
+    width: 100%;
+    height: 20px;
+    transition: stroke-dashoffset 0.3s ease-in-out;
+    transform: translateY(-77%);
+    fill: none;
+    stroke: #b1d474;
+    stroke-width: 2;
+    stroke-dasharray: 400px;
+    stroke-dashoffset: 400px;
+}
+
+.link-svgline a:hover svg.link-svgline {
+    stroke-dashoffset: 0px;
+}
+.link-svgmarker a svg.link-svgline {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: -1;
+    overflow: hidden;
+    margin: 0;
+    width: 100%;
+    height: 60px;
+    opacity: 0.5;
+    transition: stroke-dashoffset 0.3s ease-in-out;
+    transform: translateY(-100%);
+    fill: none;
+    stroke: #f0f567;
+    stroke-width: 36;
+    stroke-dasharray: 400px;
+    stroke-dashoffset: 400px;
+}
+.link-svgmarker a:hover svg.link-svgline {
+    stroke-dashoffset: 0px;
+}

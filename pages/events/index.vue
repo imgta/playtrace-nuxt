@@ -25,7 +25,7 @@ onMounted(() => {
 const formBg = computed(() => {
     return {
         'bg-base-200/95': pageTheme === 'dracula' || 'night',
-        'bg-slate-800/95 brightness-150': pageTheme === 'corporate' || 'fantasy',
+        'bg-slate-800/95 brightness-125': pageTheme === 'corporate' || 'fantasy',
     };
 });
 watchEffect(() => {
@@ -258,10 +258,6 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                             shortDate(ev.attributes.event.data?.attributes?.startDate) }}</span>
                     </div>
                 </div>
-                <!-- <span class="font-semibold text-sm text-base-content/80 self-center">{{ shortDate(ev.attributes.event.data?.attributes?.startDate) }}</span> -->
-                <div class="flex justify-center gap-0">
-                    <!-- <span class="font-semibold text-md text-base-content/80">{{ cardDate(ev.attributes.event.data?.attributes?.startDate) }}</span> -->
-                </div>
 
                 <div class="flex text-xs font-medium">
                     <svg xmlns="http://www.w3.org/2000/svg"
@@ -317,10 +313,8 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                     <span v-if="ev.attributes.event.data?.attributes?.partySize === 0" class="pl-1.5">Open</span>
                 </div>
 
-                <!-- <span class="pt-3">{{ ev.attributes.event.data?.attributes?.info }}</span> -->
-                <!-- <span class="pt-3">EVENT ID: {{ ev.attributes.event.data?.id }}</span> -->
-
-                <div class="flex pt-5 pb-0 items-end">
+                <!-- CATEGORY TAGS -->
+                <div class="flex gap-0.5 pt-5 pb-0 items-end">
                     <span v-for="category in ev.attributes.event.data?.attributes?.location[0]?.category.split(', ')"
                         :key="category"
                         class="badge badge-outline badge-xs categorytext font-semibold text-center align-middle opacity-80">
@@ -330,9 +324,6 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                     <!-- DELETE EVENT MODAL -->
                     <div v-if="myId === ev.attributes.event.data?.attributes?.initiator?.data?.id"
                         class="ml-auto con-hint event-delete">
-                        <!-- <div class="hint">
-                            <p>Delete?</p>
-                        </div> -->
                         <span
                             class=" text-lg opacity-75 hover:opacity-100 hover:text-error hover:cursor-pointer p-0 m-0"
                             @click="openDelete(idx)">x</span>
@@ -351,7 +342,7 @@ async function deleteEvent(eventId: number, eventIdx: number) {
 
                                 <div class="col-start-1 hover:cursor-pointer w-full group"
                                     @click="deleteEvent(ev.attributes.event.data?.id, idx)">
-                                    <div class="flex justify-center">
+                                    <div class="flex justify-center group-hover:text-primary group-hover:font-semibold">
                                         <span class="pr-1">Yes</span>
                                         <svg class="fill-neutral-content/75 w-4 pb-[0.2rem] group-hover:fill-primary group-hover:animate-bounce inline"
                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
@@ -362,10 +353,10 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                                     </div>
                                 </div>
 
-                                <div class="col-start-2 hover:cursor-pointer shake w-full group" @click="closeDelete(idx)">
-                                    <div class="flex justify-center">
+                                <div class="col-start-2 hover:cursor-pointer w-full group" @click="closeDelete(idx)">
+                                    <div class="flex justify-center group-hover:text-error group-hover:font-semibold">
                                         <span class="pr-1">No</span>
-                                        <svg class="fill-neutral-content/75 w-4 group-hover:fill-error inline"
+                                        <svg class="fill-neutral-content/75 w-4 group-hover:fill-error group-hover:animate-bounce inline"
                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
                                             <path
                                                 d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z">
@@ -387,13 +378,13 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                             <p>{{ rsvpHint(ev.attributes.eventStatus, false) }}</p>
                         </div>
                         <svg v-if="!rsvpModal" class="w-4 hover:cursor-pointer"
-                        :class="(ev.attributes.eventStatus === 'going') ? 'fill-success' : (ev.attributes.eventStatus === 'maybe') ? 'fill-accent' : (ev.attributes.eventStatus === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-accent-focus'"
+                        :class="(ev.attributes.eventStatus === 'going') ? 'fill-success' : (ev.attributes.eventStatus === 'maybe') ? 'fill-accent' : (ev.attributes.eventStatus === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-info'"
                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" @click="openRsvp(idx)">
                             <path
                                 d="M224,44H32A12,12,0,0,0,20,56V192a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A12,12,0,0,0,224,44ZM193.15,68,128,127.72,62.85,68ZM44,188V83.28l75.89,69.57a12,12,0,0,0,16.22,0L212,83.28V188Z">
                             </path>
                         </svg>
-                        <svg v-if="rsvpModal" class="fill-base-content/75 w-4 hover:cursor-pointer hover:fill-accent-focus"
+                        <svg v-if="rsvpModal" class="w-4 fill-info/75"
                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
                             <path
                                 d="M230.66,86l-96-64a12,12,0,0,0-13.32,0l-96,64A12,12,0,0,0,20,96V200a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V96A12,12,0,0,0,230.66,86ZM128,46.42l74.86,49.91L141.61,140H114.39L53.14,96.33ZM44,196V119.29l59.58,42.48a12,12,0,0,0,7,2.23h34.9a12,12,0,0,0,7-2.23L212,119.29V196Z">
@@ -405,25 +396,24 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                         <div :class="formBg" method="dialog" class="modal-box w-auto max-fit px-9 pt-6 pb-0 shadow-none">
                             <h3 className="text-neutral-content font-medium text-md absolute left-3.5 top-3">RSVP</h3>
                             <button
-                                class="btn btn-xs btn-circle btn-ghost absolute right-2 top-2 opacity-75 hover:opacity-100 text-neutral-content/75"
+                                class="btn btn-xs btn-circle btn-ghost focus:outline-none absolute right-2 top-2 opacity-75 hover:opacity-100 text-neutral-content/75"
                                 @click="closeRsvp(idx)"><span class="">✕</span></button>
-                            <div class="flex justify-center items-center w-full pt-5 px-3">
-                                <span class="text-neutral-content/75 text-center text-sm font-normal">Respond to {{
-                                    ev.attributes.event.data?.attributes?.initiator?.data?.attributes?.username }}'s invite
-                                    for</span>
+                            <div class="flex justify-center items-center w-full pt-5 px-3 text-neutral-content/75 text-center text-sm font-normal">
+                                <span v-if="ev.attributes.eventStatus === 'invited'">Respond to invite for</span>
+                                <span v-if="ev.attributes.eventStatus !== 'invited'">Change invite response for</span>
                             </div>
                             <h1 class="text-primary text-2xl text-center">
                                 {{ ev.attributes.event.data?.attributes?.title }}
                             </h1>
-                            <div class="flex justify-center items-center w-full pb-7">
-                                <span class="text-neutral-content/75 text-center text-xs font-normal">{{
-                                    shortDate(ev.attributes.event.data?.attributes?.startDate) }}</span>
+                            <div class="grid justify-center items-center w-full pb-7 text-neutral-content/75 text-center text-xs font-medium">
+                                <span>Hosted by {{ ev.attributes.event.data?.attributes?.initiator?.data?.attributes?.username }}</span>
+                                <span>{{ shortDate(ev.attributes.event.data?.attributes?.startDate) }}</span>
                             </div>
 
                             <div class="grid grid-cols-5 w-full text-neutral-content/75 pb-6">
 
-                                <div class="col-start-1 hover:cursor-pointer w-full group"
-                                    :class="(ev.attributes.eventStatus === 'going') ? 'text-primary' : ' hover:text-primary'"
+                                <div class="col-start-1 hover:cursor-pointer w-full group hover:text-primary"
+                                :class="(ev.attributes.eventStatus === 'going') ? 'text-primary font-semibold' : ''"
                                     @click="rsvpEvent(idx, ev.id, 'going')">
                                     <div class="flex justify-center row-start-1">
                                         <svg class="w-5 pb-[0.2rem] "
@@ -440,11 +430,11 @@ async function deleteEvent(eventId: number, eventIdx: number) {
 
                             </div>
 
-                            <div class="col-start-3 hover:cursor-pointer w-full group"
-                                :class="(ev.attributes.eventStatus === 'maybe') ? 'text-warning' : 'hover:text-warning'"
+                            <div class="col-start-3 hover:cursor-pointer w-full group hover:text-warning"
+                            :class="(ev.attributes.eventStatus === 'maybe') ? 'text-warning font-semibold' : ''"
                                 @click="rsvpEvent(idx, ev.id, 'maybe')">
                                 <div class="flex justify-center row-start-1">
-                                    <svg :class="(ev.attributes.eventStatus === 'maybe') ? 'fill-warning' : 'fill-neutral-content/75 group-hover:fill-warning group-hover:animate-pulse group'"
+                                    <svg :class="(ev.attributes.eventStatus === 'maybe') ? 'fill-warning' : 'fill-neutral-content/75 group-hover:fill-warning group-hover:animate-bounce'"
                                         class="w-5 pb-[0.2rem]" xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 256 256">
                                         <path
@@ -457,11 +447,11 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                                 </div>
                             </div>
 
-                            <div class="col-start-5 hover:cursor-pointer w-full group"
-                                :class="(ev.attributes.eventStatus === 'noGo') ? 'text-error' : 'hover:text-error shake'"
+                            <div class="col-start-5 hover:cursor-pointer w-full group hover:text-error"
+                                :class="(ev.attributes.eventStatus === 'noGo') ? 'text-error font-semibold' : ''"
                                 @click="rsvpEvent(idx, ev.id, 'noGo')">
                                 <div class="flex justify-center row-start-1">
-                                    <svg :class="(ev.attributes.eventStatus === 'noGo') ? 'fill-error' : 'fill-neutral-content/75 group-hover:fill-error group'"
+                                    <svg :class="(ev.attributes.eventStatus === 'noGo') ? 'fill-error' : 'fill-neutral-content/75 group-hover:fill-error group-hover:animate-bounce'"
                                         class="w-5 pb-[0.2rem]" xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 256 256">
                                         <path
