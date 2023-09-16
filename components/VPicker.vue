@@ -4,6 +4,7 @@ import 'v-calendar/style.css';
 
 const emit = defineEmits(['startDateInput']);
 const startDate = ref(new Date());
+startDate.value.setMinutes(0, 0, 0);
 const formatDate = ref('');
 // ----------------------------------------------------------------
 watch(startDate, newStartDate => {
@@ -42,7 +43,7 @@ async function dateInput(startDate: any) {
         </div>
         <div class="collapse-content">
             <div class="mycalendar grid justify-center">
-                <DatePicker v-model="startDate" mode="dateTime" :min-date="new Date()" @input="dateInput" />
+                <DatePicker v-model="startDate" mode="dateTime" :minute-increment="5" :min-date="new Date()" @input="dateInput" />
             </div>
         </div>
     </div>

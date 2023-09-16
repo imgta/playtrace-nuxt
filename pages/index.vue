@@ -34,7 +34,7 @@ const myArr = ['Nuxt 3', 'Strapi', 'Vue.js'];
                 <h3 class="pb-2">
                     Tech Stack
                 </h3>
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div class="grid gap-6 grid-cols-1 lg:grid-cols-3">
                     <div v-for="entry in myArr" :key="entry" class="shadow-xl card card-compact bg-base-100 not-prose">
                         <figure class="overflow-hidden max-h-56">
                         </figure>
