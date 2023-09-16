@@ -213,12 +213,10 @@ function navNewEvent() {
             </footer>
 
         </div>
-    </div>
-
-    <!-- BOTTOM NAV BAR -->
+            <!-- BOTTOM NAV BAR -->
     <div class="btm-nav text-sm font-medium md:invisible">
         <button
-            :class="(route.path === '/') ? 'fill-primary text-primary active' : 'fill-neutral-content/80 text-neutral-content/80 hover:fill-primary hover:text-primary hover:active'"
+            :class="(route.path === '/') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
             @click="navHome">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
                 <path
@@ -228,7 +226,7 @@ function navNewEvent() {
         </button>
 
         <button
-            :class="(route.path === '/events/new') ? 'fill-primary text-primary active' : 'fill-neutral-content/80 text-neutral-content/80 hover:fill-primary hover:text-primary hover:active'"
+            :class="(route.path === '/events/new') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
             @click="navNewEvent">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
                 <path
@@ -238,7 +236,7 @@ function navNewEvent() {
         </button>
 
         <button
-            :class="(route.path === '/events') ? 'fill-primary text-primary active' : 'fill-neutral-content/80 text-neutral-content/80 hover:fill-primary hover:text-primary hover:active'"
+            :class="(route.path === '/events') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
             @click="navEvents">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
                 <path
@@ -246,6 +244,6 @@ function navNewEvent() {
             </svg>
             <span class="btm-nav-label">Your Events</span>
         </button>
-
+    </div>
     </div>
 </template>
