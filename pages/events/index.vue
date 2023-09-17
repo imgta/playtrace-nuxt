@@ -314,14 +314,13 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                     <span v-if="ev.attributes.event.data?.attributes?.partySize === 0" class="pl-1.5">Open</span>
                 </div>
 
-                <!-- CATEGORY TAGS -->
                 <div class="inline-block pt-5 pb-0">
-
                     <div class="flex justify-between">
-                        <div v-for="category in ev.attributes.event.data?.attributes?.location[0]?.category.split(', ')"
-                            :key="category" class="inline pr-0.5">
-                            <span
-                                class="badge badge-outline badge-xs categorytext font-semibold text-center align-middle opacity-80 px-1">
+
+                        <!-- CATEGORY TAGS -->
+                        <div class="pr-1">
+                            <span v-for="category in ev.attributes.event.data?.attributes?.location[0]?.category.split(', ')"
+                            :key="category" class="badge badge-outline badge-xs categorytext font-semibold text-center align-middle opacity-80 px-1">
                                 {{ category }}
                             </span>
                         </div>
@@ -338,16 +337,16 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                         </div>
                         <dialog ref="popDelete" class="modal">
                             <div :class="formBg" method="dialog"
-                                class="modal-box w-auto max-fit px-9 py-3 pb-8 shadow-none">
-                                <h3 className="text-neutral-content font-medium text-md absolute left-3.5 top-3">DELETE</h3>
+                                class="modal-box w-auto max-fit px-8 py-3 pb-8 shadow-none">
+                                <h3 className="text-neutral-content font-medium text-sm absolute left-3.5 top-3">DELETE</h3>
                                 <button
                                     class="btn btn-xs btn-circle btn-ghost focus:outline-none absolute right-2 top-2 opacity-75 hover:opacity-100 text-neutral-content/75"
                                     @click="closeDelete(idx)"><span class="">✕</span></button>
-                                <h1 class="text-primary text-2xl text-center pt-8 pb-0">
+                                <h1 class="text-primary text-2xl text-center pt-9 pb-0 px-6">
                                     {{ ev.attributes.event.data?.attributes?.title }}
                                 </h1>
-                                <div class="flex justify-center items-center w-full pb-6">
-                                    <span class="text-neutral-content/80 text-center text-sm font-normal">Delete
+                                <div class="flex justify-center items-center w-full pb-4">
+                                    <span class="text-neutral-content/80 text-center text-xs font-normal">Delete
                                         event?</span>
                                 </div>
 
@@ -407,7 +406,7 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                         <dialog ref="popRsvp" class="modal">
                             <div :class="formBg" method="dialog"
                                 class="modal-box w-auto max-fit px-9 pt-6 pb-0 shadow-none">
-                                <h3 className="text-neutral-content font-medium text-md absolute left-3.5 top-3">RSVP</h3>
+                                <h3 className="text-neutral-content font-medium text-sm absolute left-3.5 top-3">RSVP</h3>
                                 <button
                                     class="btn btn-xs btn-circle btn-ghost focus:outline-none absolute right-2 top-2 opacity-75 hover:opacity-100 text-neutral-content/75"
                                     @click="closeRsvp(idx)"><span class="">✕</span></button>

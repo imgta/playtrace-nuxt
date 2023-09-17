@@ -63,9 +63,9 @@ export function shortDate(datetimeInput: string): string {
     }
 
     if (dayLabel) {
-        return `${dayLabel} ${shortDayName} > ${hours12(hours)}:${padZero(minutes)}${amOrPm}`;
+        return `${dayLabel} ${shortDayName} • ${hours12(hours)}:${padZero(minutes)}${amOrPm}`;
     } else {
-        return `${shortDayName}, ${monthName} ${dateNum} @ ${hours12(hours)}:${padZero(minutes)}${amOrPm}`;
+        return `${shortDayName}, ${monthName} ${dateNum} • ${hours12(hours)}:${padZero(minutes)}${amOrPm}`;
     }
 }
 
