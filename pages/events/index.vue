@@ -8,7 +8,6 @@ const themeCookie = useCookie('selectedTheme');
 const pageTheme = ref(themeCookie).value as any;
 
 const popDelete = ref<any | null>(null);
-
 const popRsvp = ref<any | null>(null);
 const rsvpModal = ref(false);
 // const rsvpPick = ref('');
@@ -80,7 +79,7 @@ async function getMyInvites(userId: number) {
             method: 'GET'
         });
         myInvites.value = await allInvitesRes.data;
-        console.log('myInvites.value', myInvites.value);
+        console.log('allInvitesRes', allInvitesRes);
     } catch (error) {
         console.error(error);
     }
@@ -221,12 +220,17 @@ async function deleteEvent(eventId: number, eventIdx: number) {
         await navigateTo('/events');
     }
 }
+
+function eventIdPage(eventId: number) {
+    const eventPage = `events/${eventId}`;
+    return eventPage;
+}
 // ----------------------------------------------------------------
 </script>
 
 <template>
     <div class="pb-2">
-        <h1 class="text-primary text-4xl text-center pt-4 pr-1.5 pb-0.5">
+        <h1 class="text-primary text-4xl text-center pt-4 pb-0.5">
             Your Events
         </h1>
         <p class="text-base-content/80 text-center text-sm">
@@ -244,10 +248,12 @@ async function deleteEvent(eventId: number, eventIdx: number) {
 
     <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-8 md:px-8 py-8">
         <div v-for="(ev, idx) in myInvites" :key="idx" class="card card-compact bg-base-100 not-prose">
-            <figure>
-                <img :src="ev.attributes.event.data?.attributes?.eventPic?.data?.attributes?.url"
-                    class="h-[200px] lg:h-[225px] w-full object-cover" />
-            </figure>
+            <NuxtLink :to="eventIdPage(ev.attributes.event.data.id)">
+                <figure class="hover:opacity-75 hover:saturate-150 hover:scale-105 duration-300 ease-in-out hover:cursor-pointer">
+                    <img :src="ev.attributes.event.data?.attributes?.eventPic?.data?.attributes?.url"
+                        class="h-[200px] lg:h-[225px] w-full object-cover" />
+                </figure>
+            </NuxtLink>
             <div class="card-body">
                 <div>
                     <div class="flex justify-center py-0 my-0">
@@ -258,11 +264,12 @@ async function deleteEvent(eventId: number, eventIdx: number) {
                         <span class="font-semibold text-xs text-base-content/80 self-center">{{
                             shortDate(ev.attributes.event.data?.attributes?.startDate) }}</span>
                     </div>
+                    <span>Event ID: {{ ev.attributes.event.data.id }}</span>
                 </div>
 
                 <div class="flex text-xs font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        :class="myId === ev.attributes.event.data?.attributes?.initiator?.data?.id ? 'fill-accent w-4' : 'fill-base-content/75 w-4'"
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4"
+                        :class="myId === ev.attributes.event.data?.attributes?.initiator?.data?.id ? 'fill-accent' : 'fill-base-content/75'"
                         viewBox="0 0 256 256">
                         <path
                             d="M246.46,73.17a16,16,0,0,0-17.74-2.26l-46.9,23.38-40-66.49a16.11,16.11,0,0,0-27.6,0l-40,66.49L27.31,70.92A16.1,16.1,0,0,0,4.82,90.35l37,113.35a12,12,0,0,0,17.51,6.61C59.57,210.17,84.39,196,128,196s68.43,14.19,68.62,14.3a12,12,0,0,0,17.57-6.58l37-113.29A16,16,0,0,0,246.46,73.17ZM195.53,183.52C182.18,178.4,159.2,172,128,172s-54.18,6.42-67.53,11.54l-27-82.71L70,119a16.18,16.18,0,0,0,21-6.11l37-61.49,37,61.5a16.18,16.18,0,0,0,21,6.1l36.52-18.2Zm-19.67-31A12,12,0,0,1,164,162.69a12.91,12.91,0,0,1-1.85-.14,229.32,229.32,0,0,0-68.34,0,12,12,0,0,1-3.66-23.72,253.38,253.38,0,0,1,75.66,0A12,12,0,0,1,175.86,152.52Z">

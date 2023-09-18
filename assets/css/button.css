@@ -40,6 +40,7 @@
     transition: all 0.2s ease;
     border: none;
     background: none;
+    margin: 0;
 }
 
 /* initial bubble styling and position: Login */
@@ -58,6 +59,7 @@
     transition: all 0.4s ease;
 }
 
+
 .logincorp:before, .signupcorp:before {
     border-radius: 0px;
 }
@@ -73,7 +75,7 @@
 
 
 /* initial bubble coloring */
-.login:hover:before, .signup:hover:before, .logincorp:hover:before, .signupcorp:hover:before, .event-create:hover:before {
+.login:hover:before, .signup:hover:before, .logincorp:hover:before, .signupcorp:hover:before, .event-create:hover:before, .invite:hover:before {
     width: 100%;
     background: hsl(var(--p));
     opacity: 95%;
@@ -82,7 +84,7 @@
 }
 
 /* button text before hover */
-.login span, .signup span, .logincorp span, .signupcorp span, .event-create span {
+.login span, .signup span, .logincorp span, .signupcorp span, .event-create span, .invite span {
     position: relative;
     font-size: 1rem;
     font-weight: 600;
@@ -92,12 +94,12 @@
 .login span, .signup span, .logincorp span, .signupcorp span {
     color: hsl(var(--nc) / 0.8);
 }
-.event-create span {
+.event-create span, .invite span {
     color: hsl(var(--bc) / 0.8)
 }
 
 /* button text on hover */
-.login:hover span, .signup:hover span, .logincorp:hover span, .signupcorp:hover span, .event-create:hover span {
+.login:hover span, .signup:hover span, .logincorp:hover span, .signupcorp:hover span, .event-create:hover span, .invite:hover span {
     filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.35));
     color: whitesmoke;
 }
@@ -116,11 +118,9 @@
 .login svg, .logincorp svg, .signup svg, .signupcorp svg {
     stroke: hsl(var(--nc) / 0.8);
 }
-.event-create svg {
+.event-create svg, .invite svg {
     stroke: hsl(var(--bc) / 0.8);
 }
-
-
 /* Arrow styling and positioning: Signup */
 .login svg, .logincorp svg {
     margin-left: 5.3rem;  /* adjusts overall bubble stretch */
@@ -136,17 +136,72 @@
 }
 
 /* Arrow animation on hover */
-.login:hover svg, .signup:hover svg, .logincorp:hover svg, .signupcorp:hover svg, .event-create:hover svg {
+.login:hover svg, .signup:hover svg, .logincorp:hover svg, .signupcorp:hover svg, .event-create:hover svg, .invite:hover svg {
     transform: translateX(-5px);
     filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.35));
     stroke: whitesmoke;
 }
 
 /* Button hover effects */
-.login:active, .signup:active, .logincorp:active, .signupcorp:active, .event-create:active {
+.login:active, .signup:active, .logincorp:active, .signupcorp:active, .event-create:active, .invite:active {
     transform: scale(0.95);
 }
 
+.invite {
+    padding: 0;
+    transition: all 0.2s ease;
+    border: none;
+    background: none;
+    margin: 0;
+}
+
+.invite:before {
+    position: relative;
+    display: flex;
+    top: -17%;
+    left: 2%;
+    background: hsl(var(--p));
+    max-width: 10rem;
+    max-height: fit-content;
+    width: 2.2rem;
+    height: 2.2rem;
+    opacity: 75%;
+    filter: contrast(0.6);
+    transition: all 0.4s ease;
+    padding:0;
+    margin: 0;
+}
+
+.invite span {
+    position: relative;
+    display:inline-flex;
+    top: -138%;
+    left: 19%;
+}
+.invite svg {
+    position: relative;
+    display:inline-flex;
+    top: -140%;
+    left: -7%;
+    margin-left: 2.6rem;
+    transform: translateX(-9px);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+    transition: all 0.35s ease;
+}
+
+@media (min-width: 1024px)  {
+    .invite span{
+        top: -148%;
+        left: 19%;
+    }
+    .invite svg {
+        top: -152%;
+        left: -7%;
+    }
+}
 
 
 /* Party Effect */

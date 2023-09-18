@@ -7,37 +7,37 @@ html, body {
     color: hsl(var(--bc) / 0.9);
     border-radius: var(--rounded-btn, 0.5rem);
 }
-.form-input {
+.form-input, .invite-search {
     background-color: transparent;
     border-color: hsl(var(--bc));
 }
 .auth-input {
     background-color: hsl(var(--b1));
 }
-.form-input:focus::placeholder {
+.form-input:focus::placeholder, .invite-search:focus::placeholder {
     color: transparent;
 }
-.form-input::placeholder {
+.form-input::placeholder, .invite-search::placeholder {
     color: hsl(var(--bc) / 0.8);
     font-size: small;
 }
-.form-input:focus, .auth-input:focus {
+.form-input:focus, .auth-input:focus, .invite-search:focus {
     background-color: hsl(var(--b1));
     color: hsl(var(--bc) / var(--tw-text-opacity));
     border-color: hsl(var(--p));
 }
-.form-input:focus {
+.form-input:focus, .invite-search:focus {
     caret-color: hsl(var(--af)/0.85);
 }
 .auth-input:focus {
     caret-color: hsl(var(--pf)/0.85);
 }
-.form-input:hover, .auth-input:hover {
+.form-input:hover, .auth-input:hover, .invite-search:hover {
     color: hsl(var(--bc) / var(--tw-text-opacity));
     border-color: hsl(var(--p));
     filter:brightness(1.2);
 }
-.form-input:hover {
+.form-input:hover, .invite-search:hover {
     background-color: hsl(var(--p) / 0.3);
 }
 
@@ -110,10 +110,19 @@ html, body {
     transition: all .2s ease-in-out;
     outline: none;
 }
-
 .search:focus {
     opacity: 1;
     width: 15rem;
+}
+
+.invite-search {
+    color: hsl(var(--bc) / 0.9);
+    border-radius: var(--rounded-btn, 0.5rem);
+    transition: all .2s ease-in-out;
+}
+.invite-search:focus {
+    width: 23.5rem;
+    opacity: 1;
 }
 
 
@@ -173,10 +182,10 @@ html, body {
 .bottom:hover {transform: translateY(12px); }
 .right:hover {transform: translateX(12px); } */
 
-.top .hint { top:-52%; left:1.5%; }
+.top .hint { top:-1.8rem; left:0.3rem; }
 .bottom .hint { bottom: 52%; left:1.5%; }
-.left .hint { top:21%; left:-47%; text-align:right;}
-.right .hint { top:21%; right:-47%; text-align:left;}
+.left .hint { top:15%; left:-6.8rem; text-align:right; width:100px;}
+.right .hint { top:21%; right:-6rem; text-align:left;}
 
 .event-card .hint, .event-delete .hint {
     top: -160%; left:-80%;
