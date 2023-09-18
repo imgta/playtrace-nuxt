@@ -20,6 +20,11 @@ module.exports = {
                     },
                 },
             }),
+            // fontFamily: {
+            //     loretta: ['Loretta', 'serif'],
+            //     dmsans: ['DM Sans', 'sans-serif'],
+            //     jetbrainsmono: ['JetBrains Mono', 'monospace'],
+            // },
         },
     },
     daisyui: {

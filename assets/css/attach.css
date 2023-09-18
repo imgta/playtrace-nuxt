@@ -11,14 +11,14 @@
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
     transition-duration: 175ms;
-    border-radius: var(--rounded-btn, 0.5rem); /* 8px */
+    border-radius: var(--rounded-btn, 0.5rem);
     /* height: 16rem; */
     /* width: 26rem; */
     min-height: 16rem;
-    font-size: 0.875rem;     /* 14px */;
-    line-height: 1.25rem;    /* 20px */;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     line-height: 1em;
-    gap: 0.5rem;             /* 8px */;
+    gap: 0.5rem;
     font-weight: 600;
     text-decoration-line: none;
     border-width: var(--border-btn, 1px);
@@ -63,12 +63,6 @@
         width: 12rem; */
     }
 }
-
-/* .masonry-grid, .masonry-item, .masonry-column {
-    height: calc(100% - 7px);
-    max-height: calc(100% - 7px);
-    min-height: calc(100% - 7px);;
-} */
 
 .radio-tile-group {
     display: flex;

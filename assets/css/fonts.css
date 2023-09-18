@@ -1,0 +1,43 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@100;200;300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@100;200;300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bitter:wght@100;200;300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@100;200;300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap");
+
+
+@font-face { font-family: "Anemone"; src: local("Anemone"),
+    url(@/assets/fonts/Anemone-medium.otf) format("opentype");
+}
+@font-face { font-family: "Attalea"; src: local("Attalea"),
+    url(@/assets/fonts/Attalea-medium.otf) format("opentype");
+}
+@font-face { font-family: "Cork"; src: local("Cork"),
+    url(@/assets/fonts/Cork-medium.otf) format("opentype");
+}
+@font-face { font-family: "Cloud"; src: local("Cloud"),
+    url(@/assets/fonts/Cloud-medium.otf) format("opentype");
+}
+@font-face { font-family: "Loretta"; src: local("Loretta"),
+        url(@/assets/fonts/Loretta-medium.otf) format("opentype");
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    /* font-family: "DM Sans", sans-serif; */
+    /* font-family: "Anemone", sans-serif; */
+    /* font-family: "Atkinson Hyperlegible", sans-serif; */
+    /* font-family: "Attalea", sans-serif; */
+    /* font-family: "Bitter", serif; */
+    /* font-family: "Cloud", sans-serif; */
+    /* font-family: "Cork", serif; */
+    /* font-family: "EB Garamond", serif; */
+    /* font-family: "Fira Sans", sans-serif; */
+    /* font-family: "JetBrains Mono", monospace; */
+    /* font-family: "Loretta", serif; */
+    /* font-family: "Montserrat", sans-serif; */
+    /* font-family: "Work Sans", sans-serif; */
+}

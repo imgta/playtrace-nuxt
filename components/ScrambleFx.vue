@@ -20,7 +20,6 @@ watchEffect(() => {
         startScramble();
     }
 });
-
 onUnmounted(() => {
     stopScramble();
 });
@@ -71,11 +70,9 @@ function scramble() {
 </script>
 
 <template>
-    <div class="text-primary normal-case font-mono font-medium md:font-normal text-lg md:text-xl"
+    <div class="text-primary normal-case font-mono md:font-medium font-normal text-lg md:text-xl"
         @mouseenter="startScramble"
         @mouseleave="stopScramble">
-        <div class="scrambled-text">
             {{ scrambledText }}
-        </div>
     </div>
 </template>
