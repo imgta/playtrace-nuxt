@@ -182,7 +182,7 @@ html, body {
 .bottom:hover {transform: translateY(12px); }
 .right:hover {transform: translateX(12px); } */
 
-.top .hint { top:-1.8rem; left:0.3rem; }
+.top .hint, .top-none .hint { top:-1.8rem; left:0.3rem; }
 .bottom .hint { bottom: 52%; left:1.5%; }
 .left .hint { top:15%; left:-6.8rem; text-align:right; width:100px;}
 .right .hint { top:21%; right:-6rem; text-align:left;}
@@ -195,8 +195,8 @@ html, body {
 
 @media (max-width: 640px) {
     /* Disable animation and reposition for max-sm screens */
-    .con-hint:hover .hint,
-    .con-hint:focus-within .hint {
+    .con-hint:hover:not(.top-none) .hint,
+    .con-hint:focus-within:not(.top-none) .hint {
         opacity: 1;
         visibility: visible;
         animation: none; /* Disable animation */
@@ -205,22 +205,20 @@ html, body {
     }
 
     /* Reset hover shift direction for max-sm screens */
-    .left:hover,
-    .top:hover,
-    .bottom:hover,
-    .right:hover {
+    .left:hover, .bottom:hover, .right:hover, .top:hover {
         transform: none;
     }
 
     /* Reset hint position for max-sm screens */
-    .top .hint,
-    .bottom .hint,
-    .left .hint,
-    .right .hint, .event-card .hint {
+    .top .hint, .bottom .hint, .left .hint, .right .hint,
+    .event-card .hint {
         top: auto;
         left: auto;
         text-align: left;
     }
+    /* .top-none .hint {
+        top: -1rem; left:0;
+    } */
 }
 
 .menu :where(li ul):before {

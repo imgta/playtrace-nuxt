@@ -7,7 +7,7 @@ const popSignUp = ref<any | null>(null);
 const popSwitch = ref('');
 
 const themeCookie = useCookie('selectedTheme');
-const pageTheme = ref(themeCookie).value as any;
+const { value: pageTheme } = ref(themeCookie);
 const loginTheme = ref('');
 const signupTheme = ref('');
 

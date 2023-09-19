@@ -13,23 +13,21 @@ const createInviteAPI = ref<boolean>(false);
 const autoResult: any = ref(null);
 const locationAddress = ref('');
 
-const partyCap: any = ref(null);
-const coverDmg: any = ref(null);
+const partyCap = ref<string>() as any;
+const coverDmg = ref<string>() as any;
 const eventData = reactive({
-    title: '',
-    startDate: '',
-    location: [],
-    size: '',
-    coverCharge: '',
-    info: '',
-    img: '',
-    userInvites: [],
-}) as any;
+    title: '' as string,
+    startDate: '' as string,
+    location: [] as any,
+    size: 0 as number,
+    coverCharge: '' as string,
+    info: '' as string,
+    img: '' as string,
+    userInvites: [] as any,
+});
 const userSearch = ref('');
+const { id: myId, username: myUsername } = useStrapiUser().value as any;
 const user = useStrapiUser().value;
-const myUsername = user?.username;
-const myId = (user?.id) as number;
-console.log('user', user);
 
 // ----------------------------------------------------------------
 onMounted(() => {
@@ -53,13 +51,11 @@ watchEffect(() => {
     } else {
         eventBtnClass.value = 'before:rounded-[100rem]';
     }
-    console.log('eventData.userInvites', eventData.userInvites);
 });
 
-const inputValid = computed(() => {
+const validInvite = computed(() => {
     const username = userSearch.value.trim();
     const isValidInvite = eventData.userInvites.some((user: any) => user.Invite === username) || username === myUsername;
-
     return isValidInvite ? 'input input-bordered form-input' : 'input input-bordered form-input inputshake';
 });
 // ----------------------------------------------------------------
@@ -69,51 +65,114 @@ async function locationInput() {
         try {
             const address = await locationData.formatted_address.replace(', USA', '');
 
-            // Filter out irrelevant/redundant types from the types array
-            const categories = locationData.types.filter((type: string) => !['tourist_attraction', 'point_of_interest', 'establishment', 'meal_delivery', 'meal_takeaway', 'grocery_or_supermarket', 'health'].includes(type));
+            console.log('locationData.types', locationData.types);
 
-            // Join the categories into a single string
-            const categoryStr = categories.join(', ');
-            // Find last index of address_components (zipcode component)
+            // Filter out and replace irrelevant/redundant types from the types array
+            const typeFilter = ['tourist_attraction', 'point_of_interest', 'establishment', 'street_address', 'meal_delivery', 'meal_takeaway', 'health', 'premise'];
+
+            const typeReplace = {
+                'grocery_or_supermarket': 'grocery, food',
+                'drugstore': 'drugstore',
+                'convenience': 'convenience',
+                'beauty_salon': 'beauty_salon',
+                'clothing_store': 'clothing_store',
+                'transit_station': 'transit',
+                'place_of_worship': 'sanctuary',
+                'natural_feature': 'nature',
+            };
+
+            // Create Set to track unique types and avoid duplicates
+            const uniqueTags = new Set<string>(locationData.types
+                .filter((type: string) => {
+                    if (type === 'store' && locationData.types.some((tag: string) => tag !== type && tag.endsWith('_store'))) {
+                        return false;
+                    }
+                    return !typeFilter.includes(type);
+                })
+                .map((type: string) => (locationData.types.includes('grocery_or_supermarket')) ? 'grocery, food' : (locationData.types.includes('drugstore')) ? 'drugstore' : (locationData.types.includes('convenience')) ? 'convenience' : (locationData.types.includes('beauty_salon')) ? 'beauty_salon' : (locationData.types.includes('clothing_store')) ? 'clothing_store' : (locationData.types.includes('transit_station')) ? 'transit' : (locationData.types.includes('place_of_worship')) ? 'sanctuary' : (locationData.types.includes('natural_feature')) ? 'nature' : type.replace(/_store$/, ''))
+                .map((type: string) => type.replace(/_/g, ' '))
+            );
+
+            const tags = (uniqueTags.size < 1) ? null : [...uniqueTags].join(', ');
+
+            // Find zipcode => last index of address_components (zipcode component)
             const zipcode = locationData.address_components[locationData.address_components.length - 1].long_name;
-            console.log('zipcode', zipcode);
             const locationObj = {
                 fullAddress: `${locationData.name} - ${address}`,
                 address: address,
                 venue: locationData.name,
                 zipcode: zipcode,
-                category: categoryStr,
+                category: tags,
             };
+
             eventData.location.push(locationObj);
             locationAddress.value = eventData.location[0].fullAddress;
+
+            console.log('tags', tags);
         } catch (error) {
             console.error(error);
         }
     }
 }
 
+function chargeFocus() {
+    try {
+        if (coverDmg?.value?.includes('$')) {
+            coverDmg.value = coverDmg.value.slice(1);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 function chargeBlur() {
-    if (coverDmg.value.includes('$')) {
-        return `Cover charge: ${coverDmg.value}`;
-    } else if (coverDmg.value) {
-        const dmg = coverDmg.value;
-        const floatVal = Number.parseFloat(dmg).toFixed(2);
-        eventData.coverCharge = floatVal;
-        coverDmg.value = `$${floatVal}`;
-    } else if (!coverDmg.value) {
-        const zeroDmg = '0';
-        const zeroFloat = Number.parseFloat(zeroDmg).toFixed(2);
-        eventData.coverCharge = zeroFloat;
-        coverDmg.value = `$${zeroFloat}`;
+    if (!coverDmg.value) {
+        return;
+    }
+    try {
+        // eslint-disable-next-line unicorn/prefer-number-properties
+        if (isNaN(coverDmg.value)) {
+            toast.error('Cover charge must be a valid number!', { timeout: 1500 });
+            coverDmg.value = '';
+        // eslint-disable-next-line unicorn/prefer-number-properties
+        } else if (!isNaN(coverDmg.value)) {
+            const floatVal = Number.parseFloat(coverDmg.value).toFixed(2);
+            eventData.coverCharge = floatVal;
+            coverDmg.value = `$${floatVal}`;
+        }
+    } catch (error) {
+        console.error(error);
     }
 }
 
 function partyBlur() {
-    if (partyCap.value) {
-        const cap = partyCap.value;
-        eventData.size = cap;
-        const capUnit = `${cap} spots`;
-        partyCap.value = capUnit;
+    if (!partyCap.value || Number(partyCap.value) < 1) {
+        partyCap.value = '';
+        return;
+    }
+    try {
+        // eslint-disable-next-line unicorn/prefer-number-properties
+        if (isNaN(partyCap.value)) {
+            toast.error('Party cap must be a valid number!', { timeout: 1500 });
+            partyCap.value = '';
+        // eslint-disable-next-line unicorn/prefer-number-properties
+        } else if (!isNaN(partyCap.value)) {
+            eventData.size = partyCap.value;
+            const cap = Number(partyCap.value);
+            partyCap.value = cap > 1 ? `${partyCap.value} spots` : `${partyCap.value} spot`;
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+function partyFocus() {
+    try {
+        if (partyCap.value) {
+            const cap = partyCap.value.split(' ');
+            partyCap.value = cap.length > 1 ? cap[0] : partyCap.value;
+        }
+    } catch (error) {
+        console.error(error);
     }
 }
 
@@ -171,7 +230,6 @@ async function createEvent(e: Event) {
             partySize: eventData.size,
             coverCharge: eventData.coverCharge,
             info: eventData.info,
-            categories: eventData.categories
         };
         // Fetch img URL, convert response to blob
         const imgRes = await (fetch(eventData.img));
@@ -180,12 +238,13 @@ async function createEvent(e: Event) {
         // Append event fields and image
         formData.append('data', JSON.stringify(form));
         formData.append('files.eventPic', imgBlob, imgName);
+
         const eventRes: Record<string, any> = await client(`${appHost}api/events`, {
             method: 'POST',
             body: formData,
         });
         const eventResult = await eventRes.data;
-        console.log('eventResult', eventResult);
+        // console.log('eventResult', eventResult);
 
         // (2) Create an 'accepted' event invitation for event host (initiator)
         const hostInviteForm = new FormData();
@@ -196,16 +255,19 @@ async function createEvent(e: Event) {
             eventStatus: 'going',
         };
         hostInviteForm.append('data', JSON.stringify(hostInviteObj));
+        // console.log('hostInviteForm', hostInviteForm);
+
         const hostInviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
             method: 'POST',
             body: hostInviteForm,
         });
         const hostInviteData = await hostInviteRes.data;
-        console.log('hostInviteData', hostInviteData);
-        createEventAPI.value = false;
+        // console.log('hostInviteData', hostInviteData);
 
         // (3) Create 'invited' event invitation for each user in userInvites array
         createInvites(await eventResult);
+
+        createEventAPI.value = false;
     } catch (error: any) {
         console.error(error);
     } finally {
@@ -231,7 +293,7 @@ async function createInvites(eventRes: any) {
                 body: inviteForm,
             });
             const inviteData = await inviteRes.data;
-            console.log('inviteData', inviteData);
+            // console.log('inviteData', inviteData);
         } catch (error) {
             console.error(error);
         } finally {
@@ -330,7 +392,7 @@ function removeUser(index: any) {
                                 <p>Location</p>
                             </div>
                             <input id="autocomplete" v-model="locationAddress" name="location" type="text"
-                                placeholder="Where at?" class="input input-bordered form-input" />
+                                placeholder="Where at?" class="input input-bordered form-input" @blur="locationInput" />
                         </div>
 
                         <div class="w-full con-hint left py-0">
@@ -349,18 +411,19 @@ function removeUser(index: any) {
                                     <p>Friends</p>
                                 </div>
                                 <input v-model="userSearch" placeholder="Invite by username" name="title" type="text"
-                                    :class="inputValid" @keyup.enter="inviteUser" />
+                                    :class="validInvite" @keyup.enter="inviteUser" />
                             </div>
                             <div v-if="eventData.userInvites.length > 0" class="py-0.5">
                                 <span class="text-sm font-medium">Inviting</span>
                                 <div v-for="(user, index) in eventData.userInvites" :key="index"
                                     class="inline-block whitespace-nowrap pl-1">
-                                    <span class="badge badge-lg gap-1 text-xs text-primary/90 font-medium pl-3 pr-2">
-                                        {{ user.username }}
-                                        <span
-                                            class="badge badge-xs px-1 bg-transparent cursor-pointer hover:opacity-100 hover:font-semibold hover:badge-error border-0"
-                                            @click="removeUser(index)">x</span>
-                                        </span>
+                                <span
+                                    class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
+                                        user.username }}
+                                    <span
+                                        class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
+                                        @click="removeUser(index)"><span class="text-[10px]">✕</span></span>
+                                </span>
                                 </div>
                             </div>
                         </div>
@@ -370,7 +433,7 @@ function removeUser(index: any) {
                                 <p>Party Size</p>
                             </div>
                             <input v-model="partyCap" placeholder="Unlimited" name="capacity" type="text"
-                                class="input input-bordered form-input" @blur="partyBlur" />
+                                class="input input-bordered form-input" @blur="partyBlur" @focus="partyFocus" />
                         </div>
 
                         <div class="w-full con-hint left pb-0 lg:pb-2">
@@ -378,7 +441,7 @@ function removeUser(index: any) {
                                 <p>Damage</p>
                             </div>
                             <input id="cover" v-model="coverDmg" placeholder="Cover charge" name="cover" type="text"
-                                class="input input-bordered form-input" @blur="chargeBlur" />
+                                class="input input-bordered form-input" @blur="chargeBlur" @focus="chargeFocus" />
                         </div>
 
                         <div class="con-hint left w-full">
@@ -387,7 +450,7 @@ function removeUser(index: any) {
                             </div>
                             <textarea v-model="eventData.info" placeholder="Whose birthday is it this time?" type="text"
                                 name="description"
-                                class="textarea text-bordered textarea-sm textarea-neutral form-input h-20 lg:max-w-[100%] sm:max-w-[100%] resize leading-normal" />
+                                class="textarea text-bordered textarea-neutral form-input h-20 resize whitespace-normal" />
                         </div>
 
                     </div>
@@ -421,20 +484,23 @@ function removeUser(index: any) {
                                 <p>Invite Friends</p>
                             </div>
                             <input v-model="userSearch" placeholder="Invite by username" name="title" type="text"
-                                :class="inputValid" @keyup.enter="inviteUser" />
+                                :class="validInvite" @keyup.enter="inviteUser" />
                         </div>
 
-                        <div v-if="eventData.userInvites.length > 0" class="pt-2">
-                            <span class="text-sm font-medium">Inviting</span>
+                        <div v-if="eventData.userInvites.length > 0" class="flex items-center pt-2.5 w-full lg:w-[80%]">
+
                             <div v-for="(user, index) in eventData.userInvites" :key="index"
-                                class="inline-block whitespace-nowrap pl-1">
-                                <span class="badge badge-lg gap-1 text-xs text-primary/90 font-medium pl-3 pr-2">
-                                    {{ user.username }}
+                                class="grid grid-flow-col-dense gap-1 pl-1">
+                                <span
+                                    class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
+                                        user.username }}
                                     <span
-                                        class="badge badge-xs px-1 bg-transparent cursor-pointer hover:opacity-100 hover:font-semibold hover:badge-error border-0"
-                                        @click="removeUser(index)">x</span>
-                                    </span>
+                                        class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
+                                        @click="removeUser(index)"><span class="text-[10px]">✕</span></span>
+                                </span>
+
                             </div>
+
                         </div>
                     </div>
 
