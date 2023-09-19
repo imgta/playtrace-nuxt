@@ -3,8 +3,8 @@ definePageMeta({
     middleware: ['auth'],
 });
 const { url: appHost } = useRuntimeConfig().public.strapi;
-const userData = useStrapiUser().value;
-const myId = (userData?.id) as number;
+const { id: myId } = useStrapiUser().value as any;
+
 const user = reactive({
     id: '',
     username: '',
@@ -16,61 +16,62 @@ const popAvatar = ref<any | null>(null);
 // ----------------------------------------------------------------
 onMounted(() => {
     getUser(myId);
-    console.log(user);
 });
 // ----------------------------------------------------------------
 async function getUser(userId: number) {
     try {
-        const userRes = await $fetch(`${appHost}api/users/${userId}?populate=*`);
-        const userMe = await userRes as unknown | any;
-        const { fullName, username, avatar } = userMe as any;
+        const userRes: any = await $fetch(`${appHost}api/users/${userId}?populate=*`);
+        const { fullName, username, avatar: { url: avatar } } = userRes;
+
         user.username = username;
         user.fullName = fullName;
         user.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
-        user.avatar = avatar?.url || '';
+        user.avatar = avatar || '';
     } catch (e) {
         console.error(e);
     }
 }
 
 function openAvatar() {
-    if (popAvatar.value) {
-        popAvatar.value.showModal();
-    }
+    popAvatar.value.showModal();
 }
 // ----------------------------------------------------------------
 </script>
 
 <template>
-    <div class="w-full h-full">
+    <div class="flex justif-center">
 
-            <div class="flex justify-center w-full">
-                <div v-if="!user.avatar" v-show="!user.avatar" class="avatar placeholder items-center">
-                    <div class="bg-secondary text-md font-normal rounded-full w-8" @click="openAvatar">
-                        <span class="text-xs text-white">{{ user.initials }}</span>
-                    </div>
-                    <span class="text-base-content/80 pl-2 text-md">{{ user.username }}</span>
-                </div>
-
-                <div v-if="user.avatar" v-show="user.avatar" class="avatar w-full pl-10 pt-5">
-                    <div class="rounded-full hover:opacity-70 cursor-pointer lg:h-48 lg:w-56 sm:h-40 sm:w-52 max-sm:h-32 max-sm:w-44" @click="openAvatar">
-                        <img :src="user.avatar" class="object-cover" />
-                    </div>
-                    <div class="pl-4 pt-4 w-full">
-                        <p class="text-xl">@{{ user.username }}</p>
-                        <p class="text-sm pl-1.5">{{ user.fullName }}</p>
-                    </div>
-                </div>
+        <div v-if="!user.avatar" class="avatar placeholder pl-10 pt-5">
+            <div class="bg-secondary text-4xl font-normal rounded-full hover:opacity-70 cursor-pointer min-w-fit h-32 sm:h-40 md:h-48 lg:h-56 tracking-widest"
+                @click="openAvatar">
+                <span class=" ">{{ user.initials }}</span>
             </div>
+        </div>
+        <div v-if="!user.avatar" class="pl-3 pt-7">
+            <span class="inline align-top text-xl">@{{ user.username }}</span>
+            <div class="pl-3 pt-0.5">
+                <span class="align-top text-sm">{{ user.fullName }}</span>
+            </div>
+        </div>
 
-            <dialog ref="popAvatar" class="modal">
-                <div class="modal-box bg-base-200/90 grid justify-center">
-                    <ProfileModal />
-                </div>
-                <form method="dialog" class="modal-backdrop">
-                    <button>close</button>
-                </form>
-            </dialog>
-
+        <div v-if="user.avatar" class="avatar pl-10 pt-5">
+            <div class="rounded-full hover:opacity-70 cursor-pointer min-w-fit h-32 sm:h-40 md:h-48 lg:h-56"
+                @click="openAvatar">
+                <img :src="user.avatar" class="object-cover" />
+            </div>
+            <div class="pl-4 pt-2.5 w-full">
+                <p class="text-xl">@{{ user.username }}</p>
+                <p class="text-sm pl-3 pt-0.5">{{ user.fullName }}</p>
+            </div>
+        </div>
     </div>
+
+    <dialog ref="popAvatar" class="modal">
+        <div class="modal-box bg-base-200/90 grid justify-center">
+            <ProfileModal />
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
 </template>

@@ -14,31 +14,29 @@ const userCookie: any = useCookie('userCookie', { expires: expiry });
 
 const client = useStrapiClient();
 
-const myId = computed(() => {
-    const user = useStrapiUser().value;
-    return user?.id;
-}) as any;
+const { value: myId } = computed(() => {
+    const { id } = useStrapiUser().value as any;
+    return id;
+});
 
 const userData = reactive({
-    id: myId.value,
+    id: myId,
     username: '',
     fullName: '',
     initials: '',
     avatar: '',
 }) as any;
 
-const drawerOpen = ref(false);
-
+const drawerOpen = ref<boolean>(false);
 // ----------------------------------------------------------------
 onMounted(() => {
     watchEffect(() => {
-        getUser(myId.value);
-        console.log('myId.value', myId.value);
+        getUser(myId);
     });
 });
-watch(() => route.path, path => {
+
+watch(() => route.path, () => {
     drawerOpen.value = false;
-    console.log('userData.avatar', userData.avatar);
 });
 // ----------------------------------------------------------------
 function toggleSide() {
@@ -69,7 +67,7 @@ async function getUser(userId: number) {
         userData.username = username;
         userData.fullName = fullName;
         userData.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
-        console.log('userData.initials', userData.initials);
+
         if (avatarUrl) {
             userData.avatar = avatarUrl;
         }

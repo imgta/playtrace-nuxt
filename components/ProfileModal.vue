@@ -3,8 +3,7 @@ const client = useStrapiClient();
 const { toast } = useMisc();
 
 const { url: appHost } = useRuntimeConfig().public.strapi;
-const user: any = useStrapiUser().value;
-const refId: any = (user?.id);
+const { id: refId, username: refUsername } = useStrapiUser().value as any;
 
 const imgUrl = ref('');
 const file = ref(null);
@@ -12,18 +11,14 @@ const imgFile: any = ref(null);
 const avatarRes: any = ref(null);
 const oldAvatarId: any = ref(null);
 // ----------------------------------------------------------------
-// watchEffect(() => {
-//     console.log('user', user);
-//     console.log('refId', refId);
-// });
+
 // ----------------------------------------------------------------
 function handleUploadFile() {
     const fileInput: any = file.value;
     if (fileInput.files.length > 0) {
         const selectedFile = fileInput.files[0];
         imgFile.value = selectedFile;
-        console.log(selectedFile);
-        console.log('imgFile.value.name', imgFile.value.name);
+        console.log(selectedFile); ;
     }
 }
 function handleImgUrl() {
@@ -56,22 +51,17 @@ async function updateAvatar(event: Event) {
         // (2a) Handle IMAGE URL
         if (imgUrl.value !== '') {
             try {
-                const imgName = `${user.username}_avatar`;
-                const imgRes: any = await client(imgUrl.value, {
-                    method: 'GET',
-                    headers: {
-                        'Access-Control-Allow-Origin': `${appHost}`,
-                    }
-                });
+                const imgName = `${refUsername}_avatar`;
+
+                // Fetch response is already converted to blob
+                const imgRes: any = await $fetch(imgUrl.value);
                 console.log('imgRes', imgRes);
-                // Convert fetch response to blob
-                const imgBlob = await imgRes.blob();
 
                 const formData = new FormData();
                 formData.append('ref', 'plugin::users-permissions.user');
                 formData.append('refId', refId);
                 formData.append('field', 'avatar');
-                formData.append('files', imgBlob, imgName);
+                formData.append('files', imgRes, imgName);
 
                 const postRes: Record<string, any> = await client(`${appHost}api/upload`, {
                     method: 'POST',
@@ -88,7 +78,7 @@ async function updateAvatar(event: Event) {
         // (2b) Handle IMAGE FILE ATTACHMENT
         if (imgUrl.value === '' && imgFile.value !== null) {
             try {
-                const imgName = `${user.username}_avatar`;
+                const imgName = `${refUsername}_avatar`;
 
                 const formData = new FormData();
                 formData.append('ref', 'plugin::users-permissions.user');
@@ -118,24 +108,26 @@ async function updateAvatar(event: Event) {
 <template>
     <div class="w-full h-full bg-transparent">
         <div class="pb-8">
-            <h1 class="text-primary text-4xl text-center pt-4 pr-1.5 pb-0.5">
-                Change avatar.
+            <h1 class="text-primary text-4xl text-center pt-4 pb-0.5">
+                Change avatar
             </h1>
             <p class="text-neutral-content/80 text-center text-sm">
-                Use an image URL or file!
+                With an image URL or file.
             </p>
         </div>
 
-        <div class="pb-2">
-            <input v-model="imgUrl" placeholder="Enter image URL" type="text" class="input input-bordered form-input"
-                @blur="handleImgUrl" />
-        </div>
-        <div class="pb-2">
-            <input ref="file" type="file" accept="image/*"
-                class="file-input file-input-bordered file-input-primary form-input" @change="handleUploadFile" />
-        </div>
-        <div class="">
-            <button type="submit" class="btn btn-outline btn-primary" @click="updateAvatar">Upload</button>
+        <div class="grid justify-center pb-3">
+            <div class="flex justify-start py-1">
+                <input v-model="imgUrl" placeholder="Enter image URL" type="text" class="input input-bordered form-input search h-10"
+                    @blur="handleImgUrl" />
+            </div>
+            <div class="flex justify-start py-1">
+                <input ref="file" type="file" accept="image/*"
+                    class="file-input file-input-bordered file-input-primary file-input-sm w-full max-w-[15rem] text-xs" @change="handleUploadFile" />
+            </div>
+            <div class="flex justify-start pt-2">
+                <button type="submit" class="btn btn-outline btn-primary btn-wide max-w-[15rem]" @click="updateAvatar">Upload</button>
+            </div>
         </div>
     </div>
 </template>
