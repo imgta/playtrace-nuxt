@@ -296,7 +296,6 @@ async function createInvites(eventRes: any) {
                 body: inviteForm,
             });
             const inviteData = await inviteRes.data;
-            // console.log('inviteData', inviteData);
         } catch (error) {
             console.error(error);
         } finally {
@@ -312,7 +311,7 @@ async function inviteUser() {
         // Check if user has already been added to userInvites array
         // Note: invitation for initiator (host) will already be created on event creation
         if (eventData.userInvites.some((user: any) => user.username === username) || username === myUsername) {
-            toast.info('User is already on the invite list!', { timeout: 1700 });
+            toast.error('User is already on the invite list!', { timeout: 1700 });
             userSearch.value = '';
             return;
         }

@@ -6,12 +6,13 @@ export default defineNuxtConfig({
         public: {
             unSplashAPI: process.env.UNSPLASH_KEY,
             giphyAPI: process.env.GIPHY_KEY,
-            googleMapsAPI: process.env.GOOGLE_KEY,
             weatherAPI: process.env.WEATHER_API_KEY,
+            googleMapsAPI: process.env.GOOGLE_KEY,
             // strapiHost: process.env.STRAPI_URL,
             // Keys within public, will be also exposed to the client-side
             // weatherAppSecret: process.env.WEATHER_APP_SECRET, //call this: const config = useRuntimeConfig(); config.public.weatherAppSecret
         },
+        // googleMapsAPI: process.env.GOOGLE_KEY,
     },
     build: {
         transpile: ['vue-toastification', 'v-calendar', '@yeger/vue-masonry-wall'],

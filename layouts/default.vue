@@ -1,7 +1,4 @@
 <script setup lang="ts">
-// definePageMeta({
-//     middleware: ['auth'],
-// });
 const route = useRoute();
 const { url: appHost } = useRuntimeConfig().public.strapi;
 const { toast } = useMisc();
@@ -75,7 +72,12 @@ watch(() => userData.id, () => {
         }
     }
 });
-
+watch(() => popLogin.value, () => {
+    if (route.fullPath.includes('?redirect')) {
+        openLogin();
+        toast.error('Please login or register.', { timeout: 1500 });
+    }
+});
 const formBg = computed(() => {
     return {
         'bg-base-200/95': pageTheme === 'dracula' || 'night',
@@ -91,12 +93,7 @@ watchEffect(() => {
         signupTheme.value = 'signup auth-modal';
     }
 });
-watch(() => popLogin.value, () => {
-    if (route.fullPath.includes('?redirect')) {
-        openLogin();
-        toast.error('Please login or register.', { timeout: 1500 });
-    }
-});
+
 // ----------------------------------------------------------------
 async function getUser(userId: number) {
     try {
@@ -249,6 +246,11 @@ function formSwitch() {
 <template>
     <div :data-theme="themeCookie" class="flex flex-col min-h-screen bg-base-200">
         <div class="navbar bg-base-200 px-5">
+
+            <!-- <Loading :my-loading="loading" />
+            <button @click="loading = true">
+                test
+            </button> -->
 
             <div class="flex-1">
                 <NuxtLink to="/">
