@@ -106,6 +106,7 @@ async function updateAvatar(event: Event) {
 </script>
 
 <template>
+    <!-- <Loading :my-loading="loading" /> -->
     <div class="w-full h-full bg-transparent">
         <div class="pb-8">
             <h1 class="text-primary text-4xl text-center pt-4 pb-0.5">
