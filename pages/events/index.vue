@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { cardDate, shortDate } from '~/utils/misc';
+import { shortDate } from '~/utils/misc';
 
 const client = useStrapiClient();
 const { id: myId } = useStrapiUser().value as any;
@@ -7,33 +7,19 @@ const { url: appHost } = useRuntimeConfig().public.strapi;
 const { path } = useRoute();
 const { toast } = useMisc();
 
-// const myInvites: Record<string, any> = ref([]);
 const myEvents: Record<string, any> = ref([]);
 const inviteCount = ref<number>();
 const eventTab = ref<string>('all');
 // ----------------------------------------------------------------
 onMounted(() => {
-    // getMyInvites(myId);
     getMyEvents(myId);
 });
 
 watchEffect(() => {
-    // console.log('myInvites.value', myInvites.value);
-    console.log('inviteCount.value', inviteCount.value);
+    // console.log('inviteCount.value', inviteCount.value);
 });
 
 // ----------------------------------------------------------------
-// async function getHostedEvents(userId: number) {
-//     try {
-//         const hostedRes: Record<string, any> = await client(`${appHost}api/events?populate=*&filters[initiator][id][$in]=${userId}`, {
-//             method: 'GET'
-//         });
-//         hostedEvents.value = await hostedRes.data;
-//         console.log('hostedEvents', hostedEvents.value);
-//     } catch (error) {
-//         console.error(error);
-//     }
-// }
 // function weatherDate(input: string): string {
 //     const date = new Date(input);
 //     const year = date.getFullYear();
@@ -80,18 +66,6 @@ async function getMyEvents(userId: number) {
         console.error(error);
     }
 }
-
-// async function getMyInvites(userId: number) {
-//     try {
-//         const allInvitesRes: Record<string, any> = await client(`${appHost}api/invited-users?populate=deep,3&filters[$and][0][collection][$eq]=event&filters[$and][1][users_permissions_user][id][$eq]=${userId}&sort=event.startDate`, {
-//             method: 'GET'
-//         });
-
-//         myInvites.value = await allInvitesRes.data;
-//     } catch (error) {
-//         console.error(error);
-//     }
-// }
 
 function mapEventsDestruct(userId: number) {
     return myEvents.value.map((event: any) => {
@@ -150,7 +124,7 @@ function eventDisplay(event: any) {
             ? (myId !== event.hostId && !pastEventCheck(event.startDate))
             : (eventTab.value === 'inPast')
                 ? (pastEventCheck(event.startDate))
-                : true;
+                : !(pastEventCheck(event.startDate));
 }
 
 // ----------------------------------------------------------------
@@ -169,12 +143,13 @@ function eventDisplay(event: any) {
     <div class="flex justify-center pt-2">
         <div class="join">
             <input class="btn btn-sm join-item normal-case" :checked="eventTab === 'all'" type="radio" name="options"
-                aria-label="All" @click="clickEventDisplay('all')" />
+                aria-label="Upcoming" @click="clickEventDisplay('all')" />
             <input class="btn btn-sm join-item normal-case" type="radio" name="options" aria-label="Host"
                 @click="clickEventDisplay('isHost')" />
 
             <div class="indicator">
-                <span class="indicator-item badge badge-sm badge-accent px-1 font-bold">{{ inviteCount }}</span>
+                <span v-if="inviteCount" class="indicator-item badge badge-sm badge-accent px-1 font-bold"
+                    :class="inviteCount > 99 ? 'text-[0.6rem]' : ''">{{ inviteCount > 99 ? '99+' : inviteCount }}</span>
                 <input class="btn btn-sm join-item normal-case" type="radio" name="options" aria-label="Invites"
                     @click="clickEventDisplay('isInvited')" />
             </div>
@@ -186,11 +161,10 @@ function eventDisplay(event: any) {
 
     <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-8 md:px-8 py-8">
         <div v-for="(ev, idx) in mapEventsDestruct(myId)" :key="idx" :class="eventDisplay(ev) ? '' : 'hidden'">
-
             <div v-if="eventDisplay(ev)" class="card card-compact bg-base-100 not-prose">
                 <figure
                     class="hover:grayscale-0 hover:blur-none hover:scale-105 transitional-all ease-in-out duration-300  hover:cursor-pointer"
-                    :class="(ev.eventStatus !== 'going') ? 'blur-[1.75px]' : (pastEventCheck(ev.startDate)) ? 'grayscale' : ''"
+                    :class="(ev.eventStatus === 'invited') ? 'blur-[1.83px]' : (pastEventCheck(ev.startDate)) ? 'grayscale' : ''"
                     @click="clickEventPage(ev.eventId)">
                     <img :src="ev.coverUrl" class="h-[200px] lg:h-[225px] w-full object-cover" />
                 </figure>
@@ -237,20 +211,25 @@ function eventDisplay(event: any) {
 
                             <span class="align-super pl-1.5 font-semibold">
                                 {{ ev.hostFirstName }}
-                                <span v-if="myId !== ev.hostId" class="font-medium">
-                                    <span class="text-primary"> invited you!</span></span>
+                                <span v-if="myId !== ev.hostId && ev.eventStatus === 'going'" class="font-medium">
+                                    <span class="text-accent"> invited you!</span></span>
                             </span>
                         </div>
 
                         <div class="flex items-center text-xs font-semibold">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="inline-flex fill-base-content/80 w-5"
+                            <!-- <svg xmlns="http://www.w3.org/2000/svg" class="inline-flex fill-base-content/80 w-5"
                                 viewBox="0 0 256 256">
                                 <path
                                     d="M164.38,181.1a52,52,0,1,0-72.76,0,75.89,75.89,0,0,0-30,28.89,12,12,0,0,0,20.78,12,53,53,0,0,1,91.22,0,12,12,0,1,0,20.78-12A75.89,75.89,0,0,0,164.38,181.1ZM100,144a28,28,0,1,1,28,28A28,28,0,0,1,100,144Zm147.21,9.59a12,12,0,0,1-16.81-2.39c-8.33-11.09-19.85-19.59-29.33-21.64a12,12,0,0,1-1.82-22.91,20,20,0,1,0-24.78-28.3,12,12,0,1,1-21-11.6,44,44,0,1,1,73.28,48.35,92.18,92.18,0,0,1,22.85,21.69A12,12,0,0,1,247.21,153.59Zm-192.28-24c-9.48,2.05-21,10.55-29.33,21.65A12,12,0,0,1,6.41,136.79,92.37,92.37,0,0,1,29.26,115.1a44,44,0,1,1,73.28-48.35,12,12,0,1,1-21,11.6,20,20,0,1,0-24.78,28.3,12,12,0,0,1-1.82,22.91Z">
                                 </path>
-                            </svg>
+                            </svg> -->
+                            <!-- <span v-if="ev.partySize !== 0" class="inline-flex pl-1.5">
+                                <span class="text-primary">{{ ev.goingCount }}</span>/{{ ev.partySize }}
+                            </span> -->
                             <span v-if="ev.partySize !== 0" class="inline-flex pl-1.5">
-                                <span class="text-primary">{{ ev.goingCount }}</span>/{{ ev.partySize }}</span>
+                                <span class="text-primary">{{ ev.partySize - ev.goingCount }}</span>/{{ ev.partySize }}
+                                <span class="font-medium pl-0.5"> spots</span>
+                            </span>
                             <span v-if="!ev.partySize" class="pl-1.5">open</span>
                             <span v-if="(ev.partySize - ev.goingCount) === 0" class="pl-1.5">full</span>
                         </div>
