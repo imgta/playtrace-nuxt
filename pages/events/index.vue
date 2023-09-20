@@ -108,9 +108,6 @@ function mapEventsDestruct(userId: number) {
             return invite.attributes.eventStatus === 'going';
         }).length;
 
-        console.log('eventId', eventId);
-        console.log('hostAvatar', hostAvatar);
-
         return { eventId, eventStatus, title, host, hostName, hostFirstName, hostLastName, hostInitials, hostId, hostAvatar, startDate, coverUrl, partySize, goingCount };
     });
 }
