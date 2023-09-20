@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { shortDate } from '~/utils/misc';
 
+definePageMeta({
+    middleware: ['auth'],
+});
+
 const client = useStrapiClient();
 const { id: myId } = useStrapiUser().value as any;
 const { url: appHost } = useRuntimeConfig().public.strapi;

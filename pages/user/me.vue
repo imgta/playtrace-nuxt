@@ -21,12 +21,12 @@ onMounted(() => {
 async function getUser(userId: number) {
     try {
         const userRes: any = await $fetch(`${appHost}api/users/${userId}?populate=*`);
-        const { fullName, username, avatar: { url: avatar } } = userRes;
+        const { fullName, username } = await userRes;
+        user.avatar = await userRes.avatar?.url;
 
         user.username = username;
         user.fullName = fullName;
         user.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
-        user.avatar = avatar || '';
     } catch (e) {
         console.error(e);
     }
@@ -35,6 +35,8 @@ async function getUser(userId: number) {
 function openAvatar() {
     popAvatar.value.showModal();
 }
+
+console.log('user.avatar', user.avatar);
 // ----------------------------------------------------------------
 </script>
 

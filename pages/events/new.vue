@@ -1,4 +1,7 @@
 <script setup lang="ts">
+definePageMeta({
+    middleware: ['auth'],
+});
 const { toast } = useMisc();
 const client = useStrapiClient();
 const { url: appHost } = useRuntimeConfig().public.strapi;
