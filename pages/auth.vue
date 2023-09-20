@@ -1,7 +1,7 @@
 <script setup lang="ts">
+
 const { toast } = useMisc();
 const { login, register } = useStrapiAuth();
-
 const themeCookie = useCookie('selectedTheme');
 const loginTheme = ref('');
 const signupTheme = ref('');
@@ -99,25 +99,32 @@ function clickRegForm() {
 
 <template>
     <div v-if="authSwitch === 'login'">
-        <h1 class="text-primary text-4xl text-center pt-4 pr-1.5 pb-0.5">
+        <h1 class="text-primary text-4xl text-center pt-4 pb-0.5">
             Sign in.
         </h1>
-        <p class="text-neutral-content/80 text-center text-sm">
+        <p class="text-base-content/80 text-center text-sm">
             We've missed you!
         </p>
-        <div class="card-body pt-5 pb-1.5 bg-none">
+        <div class="card-body pt-5 pb-1.5">
 
-            <div class="grid justify-center focus:text-base-content bg-none">
-                <label class="label-text text-neutral-content/80">Username</label>
+            <div class="grid justify-center focus:text-base-content">
+                <label class="label-text text-base-content/80">Username</label>
                 <input v-model="loginData.username" type="text" name="username"
-                    class="form-control input input-bordered auth-input" @keyup.enter="onLogin" />
+                    class="form-control input input-bordered form-input auth-input" @keyup.enter="onLogin" />
 
-                <label class="label-text text-neutral-content/80">Password</label>
+                <label class="label-text text-base-content/80">Password</label>
                 <input v-model="loginData.password" type="password" name="password"
-                    class="form-control input input-bordered auth-input" @keyup.enter="onLogin" />
+                    class="form-control input input-bordered form-input auth-input" @keyup.enter="onLogin" />
                 <label class="label">
                     <span class="label-text-alt"></span>
-                    <span class="label-text-alt link link-hover" @click="onDemo">Demo?</span>
+                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.40]" @click="onDemo">
+                        Demo?
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                x="0px" y="0px" viewBox="0 0 152.9 43.4" style="enable-background:new 0 0 152.9 43.4;"
+                                xml:space="preserve">
+                                <path d="M151.9,13.6c0,0,3.3-9.5-85-8.3c-97,1.3-58.3,29-58.3,29s9.7,8.1,69.7,8.1c68.3,0,69.3-23.1,69.3-23.1 s1.7-10.5-14.7-18.4" />
+                            </svg>
+                    </span>
                 </label>
             </div>
 
@@ -132,7 +139,7 @@ function clickRegForm() {
             </div>
 
             <button
-                class="modal-action justify-center label-text-alt text-neutral-content/80 hover:text-neutral-content font-extralight link link-hover mx-0 px-0"
+                class="modal-action justify-center label-text-alt text-base-content/90 hover:text-base-content font-light link link-hover"
                 @click="clickRegForm">
                 C'mon, sign up already!
             </button>
@@ -140,32 +147,42 @@ function clickRegForm() {
     </div>
 
     <div v-if="authSwitch === 'register'">
-        <h1 class="text-primary text-4xl text-center pt-4 pr-1.5 pb-0.5">
+        <h1 class="text-primary text-4xl text-center pt-4 pb-0.5">
             Register.
         </h1>
-        <p class="text-neutral-content/80 text-center text-sm">
+        <p class="text-base-content/80 text-center text-sm">
             Join the party!
         </p>
 
         <div class="card-body pt-5 pb-1.5 bg-none">
 
             <div class="grid justify-center focus:text-base-content bg-none">
-                <label class="label-text text-neutral-content/80">Full Name</label>
+                <label class="label-text text-base-content/80">Full Name</label>
                 <input v-model="signupData.fullname" required type="text" name="fullname"
-                    class="form-control input input-bordered auth-input" />
+                    class="form-control input input-bordered form-input auth-input" />
 
-                <label class="label-text text-neutral-content/80">Email</label>
+                <label class="label-text text-base-content/80">Email</label>
                 <input v-model="signupData.email" required type="email" name="email"
-                    class="form-control input input-bordered auth-input" />
+                    class="form-control input input-bordered form-input auth-input" />
 
-                <label class="label-text text-neutral-content/80">Username</label>
+                <label class="label-text text-base-content/80">Username</label>
                 <input v-model="signupData.username" required type="text" name="username"
-                    class="form-control input input-bordered auth-input" />
+                    class="form-control input input-bordered form-input auth-input" />
 
-                <label class="label-text text-neutral-content/80">Password</label>
+                <label class="label-text text-base-content/80">Password</label>
                 <input v-model="signupData.password" required type="password" name="password"
-                    class="form-control input input-bordered auth-input" @keyup.enter="onRegister" />
-
+                    class="form-control input input-bordered form-input auth-input" @keyup.enter="onRegister" />
+                    <label class="label">
+                    <span class="label-text-alt"></span>
+                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.40]" @click="onDemo">
+                        Demo?
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                x="0px" y="0px" viewBox="0 0 152.9 43.4" style="enable-background:new 0 0 152.9 43.4;"
+                                xml:space="preserve">
+                                <path d="M151.9,13.6c0,0,3.3-9.5-85-8.3c-97,1.3-58.3,29-58.3,29s9.7,8.1,69.7,8.1c68.3,0,69.3-23.1,69.3-23.1 s1.7-10.5-14.7-18.4" />
+                            </svg>
+                    </span>
+                </label>
             </div>
 
             <div class="flex justify-center items-center w-full h-14 pr-3.5">
@@ -179,7 +196,7 @@ function clickRegForm() {
             </div>
 
             <button
-                class="modal-action justify-center label-text-alt text-neutral-content/75 hover:text-neutral-content font-extralight link link-hover mx-0 px-0"
+                class="modal-action justify-center label-text-alt text-base-content/90 hover:text-base-content font-light link link-hover"
                 @click="clickLoginForm">
                 Have we met before?
             </button>
