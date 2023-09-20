@@ -138,7 +138,7 @@ function pastEventCheck(startDate: string) {
 }
 
 function clickEventPage(eventId: number) {
-    navigateTo(`events/${eventId}`);
+    navigateTo(`/events/${eventId}`);
 }
 
 // ----------------------------------------------------------------
