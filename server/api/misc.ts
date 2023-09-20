@@ -9,10 +9,10 @@ export default defineEventHandler(async e => {
         });
     }
 
-    const { googleMapsAPI } = useRuntimeConfig().public;
+    // const { meiliPublicKey } = useRuntimeConfig().public;
 
     const result = 'hi';
     return {
-        googleMapsAPI
+        result
     };
 });
