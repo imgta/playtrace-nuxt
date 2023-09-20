@@ -5,11 +5,11 @@
 A new social events hosting app that will help you embolden relationships, electrify social circles, and explore communities, candidly.
 Check out the live site and start your [trace](https://playtrace.app)!
 
-### `tech stack`
+## 🛠 `tech stack`
 - FRONTEND: Nuxt 3 (Vue.js, TypeScript)
 - BACKEND: Strapi (JWT-authenticated headless CMS, SQL)
 
-### `integrations`
+## 🚀 `integrations`
 - AWS S3: image uploads
 - Google Places API: location auto-completes
 - GIPHY & Unsplash API: custom cover images
