@@ -7,18 +7,19 @@ const { url: appHost } = useRuntimeConfig().public.strapi;
 const { path } = useRoute();
 const { toast } = useMisc();
 
-const myInvites: Record<string, any> = ref([]);
+// const myInvites: Record<string, any> = ref([]);
 const myEvents: Record<string, any> = ref([]);
+const inviteCount = ref<number>();
 const eventTab = ref<string>('all');
 // ----------------------------------------------------------------
 onMounted(() => {
-    getMyInvites(myId);
+    // getMyInvites(myId);
     getMyEvents(myId);
 });
 
 watchEffect(() => {
     // console.log('myInvites.value', myInvites.value);
-    // console.log('myEvents.value', myEvents.value);
+    console.log('inviteCount.value', inviteCount.value);
 });
 
 // ----------------------------------------------------------------
@@ -71,22 +72,26 @@ async function getMyEvents(userId: number) {
         });
 
         myEvents.value = await myEventsRes.data;
+
+        inviteCount.value = myEvents.value.filter((event: Record<string, any>) => {
+            return event.attributes.initiator.data.id !== userId;
+        }).length;
     } catch (error) {
         console.error(error);
     }
 }
 
-async function getMyInvites(userId: number) {
-    try {
-        const allInvitesRes: Record<string, any> = await client(`${appHost}api/invited-users?populate=deep,3&filters[$and][0][collection][$eq]=event&filters[$and][1][users_permissions_user][id][$eq]=${userId}&sort=event.startDate`, {
-            method: 'GET'
-        });
+// async function getMyInvites(userId: number) {
+//     try {
+//         const allInvitesRes: Record<string, any> = await client(`${appHost}api/invited-users?populate=deep,3&filters[$and][0][collection][$eq]=event&filters[$and][1][users_permissions_user][id][$eq]=${userId}&sort=event.startDate`, {
+//             method: 'GET'
+//         });
 
-        myInvites.value = await allInvitesRes.data;
-    } catch (error) {
-        console.error(error);
-    }
-}
+//         myInvites.value = await allInvitesRes.data;
+//     } catch (error) {
+//         console.error(error);
+//     }
+// }
 
 function mapEventsDestruct(userId: number) {
     return myEvents.value.map((event: any) => {
@@ -114,7 +119,7 @@ function mapEventsDestruct(userId: number) {
         const hostLastName = rest.join(' ');
         const hostInitials = hostName.split(/\s+/).map((name: string) => name[0].toUpperCase()).join('');
 
-        // Find user's RSVP to event
+        // Find RSVPs to event
         const inviteUserId = invites.find((invite: Record<string, any>) => invite.attributes.users_permissions_user.data.id === userId);
         const eventStatus = inviteUserId?.attributes.eventStatus;
 
@@ -169,7 +174,7 @@ function eventDisplay(event: any) {
                 @click="clickEventDisplay('isHost')" />
 
             <div class="indicator">
-                <span class="indicator-item badge badge-secondary">new</span>
+                <span class="indicator-item badge badge-sm badge-accent px-1 font-bold">{{ inviteCount }}</span>
                 <input class="btn btn-sm join-item normal-case" type="radio" name="options" aria-label="Invites"
                     @click="clickEventDisplay('isInvited')" />
             </div>
