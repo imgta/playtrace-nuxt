@@ -519,10 +519,10 @@ function removeInvite(index: any) {
                                 </path>
                             </svg>
                             <div class="inline pl-2">
-                                <span v-if="eventData.location[0]?.address && userRsvp === 'going'" class="">
-                                    {{ eventData.location[0]?.address }}</span>
                                 <span v-if="userRsvp !== 'going'">RSVP to reveal.</span>
-                                <span v-if="!eventData.location[0]?.address && userRsvp === 'going'">TBD.</span>
+                                <span v-else-if="eventData.location[0]?.address && userRsvp === 'going'" class="">
+                                    {{ eventData.location[0]?.address }}</span>
+                                <span v-else-if="!eventData.location[0]?.address && userRsvp === 'going'">TBD.</span>
                             </div>
                         </div>
 
@@ -535,7 +535,7 @@ function removeInvite(index: any) {
                                 </path>
                             </svg>
                             <span v-if="eventData.coverCharge" class="inline pl-2">${{ eventData.coverCharge }} cover</span>
-                            <span v-if="!eventData.coverCharge" class="inline pl-2">Free</span>
+                            <span v-else class="inline pl-2">Free</span>
                         </div>
 
                         <!-- PARTY SIZE -->
@@ -550,9 +550,9 @@ function removeInvite(index: any) {
                                 <span v-if="eventData.partySize"><span class="text-primary/80">{{ eventData.spots }}</span>/{{
                                     eventData.partySize }}
                                     spots left!</span>
-                                <span v-if="!eventData.spots" class="text-base-content/50"><s>{{ eventData.spots }}/{{
+                                <span v-else-if="!eventData.partySize">open</span>
+                                <span v-else-if="!eventData.spots" class="text-base-content/50"><s>{{ eventData.spots }}/{{
                                     eventData.partySize }} full </s></span>
-                                <span v-if="!eventData.partySize">open</span>
                             </div>
                         </div>
 
@@ -579,33 +579,35 @@ function removeInvite(index: any) {
                         <p class="text-xs md:text-sm text-base-content/75 py-5 pb-8">{{ eventData.info }}</p>
 
                         <!-- INVITATIONS -->
-                        <div class="flex justify-center h-full pb-0.5">
-                            <input v-model="userSearch" class="input input-bordered invite-search text-center h-10"
-                                placeholder="Send more invites" name="invites" type="text" :class="inputValid"
-                                @keyup.enter="inviteUser" />
-                        </div>
-                        <Loader v-if="createInviteAPI" />
-                        <div v-if="eventData.newInvites.length > 0" class="flex justify-center align-top py-4 md:pt-4">
-                            <div class="inline-flex justify-start py-1.5 pr-2 h-[2.2rem]">
-                                <button v-if="!createInviteAPI" class="invite max-h-[2.2rem]" :class="eventBtnClass"
-                                    type="submit" @click="createInvites(eventObj)">
-                                    <span>Invite</span>
-                                    <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
-                                        <path d="M1,5 L11,5"></path>
-                                        <polyline points="8 1 12 5 8 9"></polyline>
-                                    </svg>
-                                </button>
+                        <div v-if="userId === eventData.creatorId">
+                            <div class="flex justify-center h-full pb-0.5">
+                                <input v-model="userSearch" class="input input-bordered invite-search text-center h-10"
+                                    placeholder="Send more invites" name="invites" type="text" :class="inputValid"
+                                    @keyup.enter="inviteUser" />
                             </div>
+                            <Loader v-if="createInviteAPI" />
+                            <div v-if="eventData.newInvites.length > 0" class="flex justify-center align-top py-4 md:pt-4">
+                                <div class="inline-flex justify-start py-1.5 pr-2 h-[2.2rem]">
+                                    <button v-if="!createInviteAPI" class="invite max-h-[2.2rem]" :class="eventBtnClass"
+                                        type="submit" @click="createInvites(eventObj)">
+                                        <span>Invite</span>
+                                        <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
+                                            <path d="M1,5 L11,5"></path>
+                                            <polyline points="8 1 12 5 8 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
 
-                            <div v-for="(user, index) in eventData.newInvites" :key="index"
-                                class="inline-grid grid-cols-3 gap-0.5 pl-2">
-                                <span
-                                    class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
-                                        user.username }}
+                                <div v-for="(user, index) in eventData.newInvites" :key="index"
+                                    class="inline-grid grid-cols-3 gap-0.5 pl-2">
                                     <span
-                                        class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
-                                        @click="removeInvite(index)"><span class="text-[10px]">✕</span></span>
-                                </span>
+                                        class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
+                                            user.username }}
+                                        <span
+                                            class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
+                                            @click="removeInvite(index)"><span class="text-[10px]">✕</span></span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
 

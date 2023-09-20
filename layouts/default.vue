@@ -498,7 +498,7 @@ function formSwitch() {
                     <span>Copyright © 2023 - All right reserved</span>
                 </div>
 
-                <a href="https://github.com/imgta">
+                <a href="https://github.com/imgta/playtrace-nuxt">
                     <div class="flex-none">
                         <svg class="w-[30px] fill-base-content hover:animate-pulse hover:scale-125 hover:fill-primary duration-300 ease-in-out"
                             xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 64 64">
