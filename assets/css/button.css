@@ -92,6 +92,9 @@
     transition: all 0.35s ease;
 }
 .login span, .signup span, .logincorp span, .signupcorp span {
+    color: hsl(var(--bc) / 0.8);
+}
+.auth-modal span {
     color: hsl(var(--nc) / 0.8);
 }
 .event-create span, .invite span {
@@ -116,6 +119,9 @@
     transition: all 0.35s ease;
 }
 .login svg, .logincorp svg, .signup svg, .signupcorp svg {
+    stroke: hsl(var(--bc) / 0.8);
+}
+.auth-modal svg {
     stroke: hsl(var(--nc) / 0.8);
 }
 .event-create svg, .invite svg {
