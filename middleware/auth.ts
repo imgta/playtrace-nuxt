@@ -1,6 +1,5 @@
 export default defineNuxtRouteMiddleware((to, from) => {
     const strapiJwt = useCookie('strapi_jwt');
-    const { toast } = useMisc();
     // this is just a quick solution. Ideally we would check if the jwt is valid here too.
     // TODO: decode JWT token with header for validation
     const token = strapiJwt.value;
@@ -9,8 +8,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
     //     return navigateTo(`/auth/login/?redirect=${to.path}`);
     // }
     if (!token && !isLoginPage(to.path)) {
-        toast.error('Please login.', { timeout: 1500 });
-        return navigateTo(`/?redirect=${to.path}`);
+        return navigateTo(`/auth/?redirect=${to.path}`);
     }
 
     if (token && isLoginPage(to.path) && from.query.redirect) {

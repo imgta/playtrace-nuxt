@@ -2,21 +2,28 @@
 // definePageMeta({
 //     middleware: ['auth'],
 // });
-const route = useRoute();
-const { toast } = useMisc();
-const targetText = '▶_trace.';
-const token = useStrapiToken();
-const { logout } = useStrapiAuth();
-const { url: appHost } = useRuntimeConfig().public.strapi;
 const themeCookie = useCookie('selectedTheme');
 const expiry = new Date(Date.now() + 86400000); // expiry set to +1 day
 const userCookie: any = useCookie('userCookie', { expires: expiry });
 
+const route = useRoute();
+const { toast } = useMisc();
+const targetText = '▶_trace.';
+const token = useStrapiToken().value;
+const { logout } = useStrapiAuth();
+const { url: appHost } = useRuntimeConfig().public.strapi;
+
 const client = useStrapiClient();
 
 const { value: myId } = computed(() => {
-    const { id } = useStrapiUser().value as any;
-    return id;
+    if (token) {
+        try {
+            const { id } = useStrapiUser().value as any;
+            return id;
+        } catch (error) {
+            console.error(error);
+        }
+    }
 });
 
 const userData = reactive({
@@ -28,35 +35,21 @@ const userData = reactive({
 }) as any;
 
 const drawerOpen = ref<boolean>(false);
+
+// console.log('token', token.value ? 'yes' : 'no');
 // ----------------------------------------------------------------
 onMounted(() => {
-    watchEffect(() => {
-        getUser(myId);
-    });
+    if (token) {
+        watchEffect(() => {
+            getUser(myId);
+        });
+    }
 });
 
 watch(() => route.path, () => {
     drawerOpen.value = false;
 });
 // ----------------------------------------------------------------
-function toggleSide() {
-    drawerOpen.value = !drawerOpen.value;
-}
-async function logoutClick() {
-    try {
-        logout();
-    } catch (error) {
-        console.error(error);
-    } finally {
-        userData.username = '';
-        userData.fullName = '';
-        userData.initials = '';
-        userData.avatar = '';
-        toast.info('User logged out.', { timeout: 1500 });
-        await navigateTo('/');
-    }
-}
-
 async function getUser(userId: number) {
     try {
         const userRes: Record<string, any> = await client(`${appHost}api/users/${userId}?populate=*`, {
@@ -78,6 +71,24 @@ async function getUser(userId: number) {
     }
 }
 
+async function logoutClick() {
+    try {
+        logout();
+    } catch (error) {
+        console.error(error);
+    } finally {
+        userData.username = '';
+        userData.fullName = '';
+        userData.initials = '';
+        userData.avatar = '';
+        toast.info('User logged out.', { timeout: 1500 });
+        await navigateTo('/');
+    }
+}
+
+function toggleSide() {
+    drawerOpen.value = !drawerOpen.value;
+}
 function navHome() {
     navigateTo('/');
 }
@@ -153,7 +164,7 @@ function navNewEvent() {
                                     <div
                                         class="flex bg-transparent font-medium text-primary text-xs md:text-sm max-h-[34px] w-full">
                                         <span v-if="drawerOpen" class="self-center pl-3 w-full">{{
-                                            `${userData.username}nametest` }} </span>
+                                            `${userData.username}` }} </span>
                                     </div>
                                 </div>
 

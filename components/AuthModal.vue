@@ -54,6 +54,8 @@ async function onLogin() {
     } catch (error: any) {
         toast.error((error.error.message as string), { timeout: 2000 });
         console.error(error);
+    } finally {
+        popLogin.value.close();
     }
 }
 
@@ -77,28 +79,27 @@ async function onRegister() {
     } catch (error: any) {
         toast.error((error.error.message as string), { timeout: 2000 });
         console.error(error);
+    } finally {
+        popSignUp.value.close();
     }
 }
 
+function openLogin() {
+    popLogin.value.showModal();
+    popSwitch.value = 'login';
+}
 function closeLogin() {
     loginData.username = '';
     loginData.password = '';
     popLogin.value.close();
 }
+
+function openSignup() {
+    popSignUp.value.showModal();
+    popSwitch.value = 'signup';
+}
 function closeSignup() {
     popSignUp.value.close();
-}
-function openLogin() {
-    if (popLogin.value) {
-        popLogin.value.showModal();
-    }
-    popSwitch.value = 'login';
-}
-function openSignup() {
-    if (popSignUp.value) {
-        popSignUp.value.showModal();
-    }
-    popSwitch.value = 'signup';
 }
 
 function formSwitch() {
