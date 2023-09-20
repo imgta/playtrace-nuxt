@@ -20,7 +20,7 @@ onMounted(() => {
 });
 
 watchEffect(() => {
-    // console.log('inviteCount.value', inviteCount.value);
+    console.log('myEvents.value', myEvents.value);
 });
 
 // ----------------------------------------------------------------
@@ -63,7 +63,7 @@ async function getMyEvents(userId: number) {
 
         myEvents.value = await myEventsRes.data;
 
-        inviteCount.value = myEvents.value.filter((event: Record<string, any>) => {
+        inviteCount.value = await myEvents.value.filter((event: Record<string, any>) => {
             return event.attributes.initiator.data.id !== userId;
         }).length;
     } catch (error) {
@@ -83,7 +83,7 @@ function mapEventsDestruct(userId: number) {
                         attributes: {
                             username: host,
                             fullName: hostName,
-                            avatar: { data: { attributes: { formats: { thumbnail: { url: hostAvatar } } } } },
+                            // avatar: { data: { attributes: { formats: { thumbnail: { url: hostAvatar } } } } },
                         }
                     }
                 },
@@ -91,6 +91,8 @@ function mapEventsDestruct(userId: number) {
                 invited_users: { data: invites },
             }
         } = event;
+
+        const hostAvatar = event.attributes.initiator.data.attributes?.avatar?.data?.attributes?.formats?.thumbnail?.url;
 
         // Event host details
         const [hostFirstName, ...rest] = hostName.split(/\s+/);
@@ -105,6 +107,9 @@ function mapEventsDestruct(userId: number) {
         const goingCount = invites.filter((invite: Record<string, any>) => {
             return invite.attributes.eventStatus === 'going';
         }).length;
+
+        console.log('eventId', eventId);
+        console.log('hostAvatar', hostAvatar);
 
         return { eventId, eventStatus, title, host, hostName, hostFirstName, hostLastName, hostInitials, hostId, hostAvatar, startDate, coverUrl, partySize, goingCount };
     });
@@ -202,7 +207,7 @@ function eventDisplay(event: any) {
                                     </div>
                                 </div>
 
-                                <div v-if="!ev.hostAvatar" class="flex items-center avatar hover:cursor-pointer">
+                                <div v-else class="flex items-center avatar hover:cursor-pointer">
                                     <div class="inline avatar placeholder w-8 rounded-full text-sm hover:cursor-pointer">
                                         <div class="bg-secondary">
                                             <span class="">{{ ev.hostInitials }}</span>
