@@ -320,16 +320,16 @@ function removeInvite(index: any) {
                 <!-- COVER PIC -->
                 <div class="md:shrink md:p-1.5">
                     <img class="h-80 w-full object-cover md:max-h-[27rem] md:max-w-full md:w-[33rem] md:h-[27rem]"
-                        :src="eventData.eventPic">
+                        :src="eventData?.eventPic">
                 </div>
 
                 <!-- CARD -->
-                <div class="md:grow px-5 py-2.5">
+                <div class="md:grow pl-5 pr-3 py-2.5">
 
                     <!-- TOP RIGHT MODALS -->
-                    <div class="flex justify-end pt-1.5">
+                    <div class="flex justify-end pt-0.5 pb-4">
                         <!-- INVITE RSVP MODAL -->
-                        <div v-if="userRsvp !== 'going' || userId !== eventData.creatorId" class="self-end pb-0.5 shake">
+                        <div v-if="userRsvp !== 'going' || userId !== eventData.creatorId" class="self-end shake">
                             <svg v-if="!rsvpModal" class="w-4 hover:cursor-pointer"
                                 :class="(userRsvp === 'going') ? 'fill-info' : (userRsvp === 'maybe') ? 'fill-accent' : (userRsvp === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-info'"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" @click="openRsvp()">
@@ -347,7 +347,7 @@ function removeInvite(index: any) {
                         </div>
                         <dialog ref="popRsvp" class="modal">
                             <div :class="formBg" method="dialog"
-                                class="modal-box w-auto max-fit px-9 pt-6 pb-0 shadow-none">
+                                class="modal-box w-auto max-fit px-9 pt-6shadow-none">
                                 <h3 className="text-neutral-content font-medium text-sm absolute left-3.5 top-3">
                                     RSVP</h3>
                                 <button
