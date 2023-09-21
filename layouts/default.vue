@@ -100,7 +100,9 @@ async function getUser(userId: number) {
         const userRes: Record<string, any> = await client(`${appHost}api/users/${userId}?populate=*`, {
             method: 'GET'
         });
+
         const { username, fullName } = userRes;
+
         userData.avatar = userRes?.avatar?.formats?.thumbnail?.url;
         userData.username = username;
         userData.fullName = fullName;
@@ -134,17 +136,16 @@ async function onLogin() {
         return;
     }
     try {
-        await login({ identifier: loginData.username, password: loginData.password });
-        navigateTo('/events');
+        const loginRes = await login({ identifier: loginData.username, password: loginData.password });
+        const newUserId = loginRes.user.value?.id;
+        userData.id = newUserId;
     } catch (error: any) {
         toast.error((error.error.message as string), { timeout: 2000 });
         console.error(error);
     } finally {
         closeLogin();
+        navigateTo('/events');
         toast.success('User logged in!', { timeout: 2000 });
-
-        const { id } = useStrapiUser().value as any;
-        userData.id = id;
     }
 }
 
@@ -152,21 +153,16 @@ async function onDemo() {
     try {
         loginData.username = 'demo';
         loginData.password = 'demo123';
-        await login({ identifier: loginData.username, password: loginData.password });
-        navigateTo('/events');
+        const loginRes = await login({ identifier: loginData.username, password: loginData.password });
+        const newUserId = loginRes.user.value?.id;
+        userData.id = newUserId;
     } catch (error) {
         console.error(error);
     } finally {
-        try {
-            closeLogin();
-            closeSignup();
-        } catch (error) {
-            console.error(error);
-        }
+        navigateTo('/events');
+        closeLogin();
+        closeSignup();
         toast.success('Demo account active!', { timeout: 2000 });
-
-        const { id } = useStrapiUser().value as any;
-        userData.id = id;
     }
 }
 
@@ -185,17 +181,16 @@ async function onRegister() {
         return;
     }
     try {
-        await register({ username: signupData.username, email: signupData.email, fullName: signupData.fullname, password: signupData.password, });
-        navigateTo('/events');
+        const signupRes = await register({ username: signupData.username, email: signupData.email, fullName: signupData.fullname, password: signupData.password, });
+        const newUserId = signupRes.user.value?.id;
+        userData.id = newUserId;
     } catch (error: any) {
         toast.error((error.error.message as string), { timeout: 2000 });
         console.error(error);
     } finally {
+        navigateTo('/events');
         closeSignup();
         toast.success('User registered!', { timeout: 2000 });
-
-        const { id } = useStrapiUser().value as any;
-        userData.id = id;
     }
 }
 
@@ -512,7 +507,7 @@ function formSwitch() {
 
         </div>
             <!-- BOTTOM NAV BAR -->
-    <div class="btm-nav text-sm font-medium md:invisible">
+    <div class="btm-nav text-sm font-medium z-30 md:hidden">
         <button
             :class="(route.path === '/') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
             @click="navHome">

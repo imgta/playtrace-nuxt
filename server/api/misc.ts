@@ -10,6 +10,7 @@ export default defineEventHandler(async e => {
     }
 
     // const { meiliPublicKey } = useRuntimeConfig().public;
+    // const { brevoMailAPI } = useRuntimeConfig();
 
     const result = 'hi';
     return {

@@ -13,7 +13,8 @@ const route = useRoute();
 </script>
 
 <template>
-    <div class="btm-nav text-sm font-medium">
+    <Parrot />
+    <!-- <div class="btm-nav text-sm font-medium">
         <button
             :class="(route.path === '/') ? 'fill-primary text-primary active' : 'fill-neutral-content/80 text-neutral-content/80 hover:fill-primary hover:text-primary hover:active'">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
@@ -37,5 +38,5 @@ const route = useRoute();
             </svg>
             <span class="btm-nav-label">Your Events</span>
         </button>
-    </div>
+    </div> -->
 </template>

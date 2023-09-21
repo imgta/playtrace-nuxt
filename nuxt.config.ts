@@ -13,6 +13,7 @@ export default defineNuxtConfig({
             // weatherAppSecret: process.env.WEATHER_APP_SECRET, //call this: const config = useRuntimeConfig(); config.public.weatherAppSecret
         },
         // googleMapsAPI: process.env.GOOGLE_KEY,
+        brevoMailAPI: process.env.BREVO_EMAIL_KEY,
     },
     build: {
         transpile: ['vue-toastification', 'v-calendar', '@yeger/vue-masonry-wall'],
