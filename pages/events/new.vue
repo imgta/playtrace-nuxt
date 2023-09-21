@@ -98,8 +98,12 @@ async function locationInput() {
 
             const tags = (uniqueTags.size < 1) ? null : [...uniqueTags].join(', ');
 
-            // Find zipcode => last index of address_components (zipcode component)
-            const zipcode = locationData.address_components[locationData.address_components.length - 1].long_name;
+            // Find zipcode => last or second to last index of address_components
+            const addyArr = locationData.address_components;
+            const zipcode = addyArr[addyArr.length - 1].types[0] === 'postal_code' ? addyArr[addyArr.length - 1].long_name : addyArr[addyArr.length - 2].long_name;
+
+            console.log('zipcode', zipcode);
+
             const locationObj = {
                 fullAddress: `${locationData.name} - ${address}`,
                 address: address,

@@ -7,15 +7,19 @@ definePageMeta({
 
 const client = useStrapiClient();
 const { id: myId } = useStrapiUser().value as any;
-const { url: appHost } = useRuntimeConfig().public.strapi;
+const { strapi: { url: appHost }, weatherAPI } = useRuntimeConfig().public;
+
 const { path } = useRoute();
 const { toast } = useMisc();
 
 const myEvents: Record<string, any> = ref([]);
 const inviteCount = ref<number>();
 const eventTab = ref<string>('all');
+
+const isLoading = ref<boolean>(true);
 // ----------------------------------------------------------------
 onMounted(() => {
+    isLoading.value = true;
     getMyEvents(myId);
 });
 
@@ -24,47 +28,17 @@ watchEffect(() => {
 });
 
 // ----------------------------------------------------------------
-// function weatherDate(input: string): string {
-//     const date = new Date(input);
-//     const year = date.getFullYear();
-//     const month = String(date.getMonth() + 1).padStart(2, '0'); // Add 1 to month as it's 0-based
-//     const day = String(date.getDate()).padStart(2, '0');
-//     return `${year}-${month}-${day}`;
-// }
-
-// async function getForecast(zip: string, date: string) {
-//     const { weatherAPI } = useRuntimeConfig().public;
-//     const today: any = new Date();
-//     const eventDate: any = new Date(date);
-
-//     const msDelta = (eventDate - today);
-//     const daysDelta = Math.ceil(msDelta / (1000 * 60 * 60 * 24));
-//     console.log('daysDelta', daysDelta);
-//     try {
-//         if (daysDelta <= 10) {
-//             const weather: Record<string, any> = await client(`http://api.weatherapi.com/v1/forecast.json?key=${weatherAPI}&q=${zip}&days=10&aqi=no&alerts=no`);
-//             console.log('weather', weather);
-//             // Find the forecast for the specified date
-//             const target = await weather.forecast.forecastday.find((day: any) => day.date === weatherDate(date));
-//             const condition = await target.day.condition.text;
-//             console.log('condition', condition);
-//             return await condition;
-//         }
-//     } catch (error) {
-//         console.error(error);
-//     }
-// }
-
 async function getMyEvents(userId: number) {
+    isLoading.value = true;
     try {
-        const myEventsRes: Record<string, any> = await client(`${appHost}api/events?populate[0]=initiator.avatar&populate[1]=initiator.wallets&populate[2]=eventPic.url&populate[3]=invited_users.users_permissions_user&populate[4]=eventReceipt.receiptItem&filters[invited_users][users_permissions_user][id][$in][0]=${userId}&sort=startDate`, {
+        const myEventsRes: Record<string, any> = await client(`${appHost}api/events?populate[0]=initiator.avatar&populate[1]=initiator.wallets&populate[2]=eventPic.url&populate[3]=invited_users.users_permissions_user&populate[4]=eventReceipt.receiptItem&populate[5]=location.zipcode&filters[invited_users][users_permissions_user][id][$in][0]=${userId}&sort=startDate`, {
             method: 'GET'
         });
 
         myEvents.value = await myEventsRes.data;
 
-        inviteCount.value = await myEvents.value.filter((event: Record<string, any>) => {
-            return event.attributes.initiator.data.id !== userId;
+        inviteCount.value = myEvents.value.filter((event: Record<string, any>) => {
+            return (event.attributes.initiator.data.id !== userId) && !pastEventCheck(event.attributes.startDate);
         }).length;
     } catch (error) {
         console.error(error);
@@ -72,45 +46,60 @@ async function getMyEvents(userId: number) {
 }
 
 function mapEventsDestruct(userId: number) {
-    return myEvents.value.map((event: any) => {
-        const {
-            id: eventId,
-            attributes: {
-                title, partySize, startDate,
-                initiator: {
-                    data: {
-                        id: hostId,
-                        attributes: {
-                            username: host,
-                            fullName: hostName,
-                            // avatar: { data: { attributes: { formats: { thumbnail: { url: hostAvatar } } } } },
+    try {
+        return myEvents.value.map((event: any) => {
+            const {
+                id: eventId,
+                attributes: {
+                    title, partySize, startDate,
+                    initiator: {
+                        data: {
+                            id: hostId,
+                            attributes: {
+                                username: host,
+                                fullName: hostName,
+                            }
                         }
-                    }
-                },
-                eventPic: { data: { attributes: { url: coverUrl } } },
-                invited_users: { data: invites },
-            }
-        } = event;
+                    },
+                    eventPic: { data: { attributes: { url: coverUrl } } },
+                    invited_users: { data: invites },
+                    location: [{ zipcode }],
+                }
+            } = event;
+            const hostAvatar = event.attributes.initiator.data.attributes?.avatar?.data?.attributes?.formats?.thumbnail?.url;
+            // Event host details
+            const [hostFirstName, ...rest] = hostName.split(/\s+/);
+            const hostLastName = rest.join(' ');
+            const hostInitials = hostName.split(/\s+/).map((name: string) => name[0].toUpperCase()).join('');
+            // Find RSVPs to event
+            const inviteUserId = invites.find((invite: Record<string, any>) => invite.attributes.users_permissions_user.data.id === userId);
+            const eventStatus = inviteUserId?.attributes.eventStatus;
+            // Event headcount (RSVP === 'going')
+            const goingCount = invites.filter((invite: Record<string, any>) => {
+                return invite.attributes.eventStatus === 'going';
+            }).length;
 
-        const hostAvatar = event.attributes.initiator.data.attributes?.avatar?.data?.attributes?.formats?.thumbnail?.url;
-
-        // Event host details
-        const [hostFirstName, ...rest] = hostName.split(/\s+/);
-        const hostLastName = rest.join(' ');
-        const hostInitials = hostName.split(/\s+/).map((name: string) => name[0].toUpperCase()).join('');
-
-        // Find RSVPs to event
-        const inviteUserId = invites.find((invite: Record<string, any>) => invite.attributes.users_permissions_user.data.id === userId);
-        const eventStatus = inviteUserId?.attributes.eventStatus;
-
-        // Event headcount (RSVP === 'going')
-        const goingCount = invites.filter((invite: Record<string, any>) => {
-            return invite.attributes.eventStatus === 'going';
-        }).length;
-
-        return { eventId, eventStatus, title, host, hostName, hostFirstName, hostLastName, hostInitials, hostId, hostAvatar, startDate, coverUrl, partySize, goingCount };
-    });
+            return { eventId, eventStatus, title, host, hostName, hostFirstName, hostLastName, hostInitials, hostId, hostAvatar, startDate, coverUrl, partySize, goingCount, zipcode };
+        });
+    } catch (error) {
+        console.error(error);
+    } finally {
+        isLoading.value = false;
+    }
 }
+
+// async function getWeather(event: any) {
+//     const today = new Date();
+//     const eventDate = new Date(event.startDate);
+//     const msDelta = eventDate.getTime() - today.getTime();
+
+//     const weather: Record<string, any> = await client(`http://api.weatherapi.com/v1/forecast.json?key=${weatherAPI}&q=${event.zipcode}&days=10&aqi=no&alerts=no`, {
+//         method: 'GET'
+//     });
+
+//     const forecast: string = await weather.current?.condition.text;
+//     return forecast;
+// }
 
 function pastEventCheck(startDate: string) {
     const currentTime = new Date();
@@ -166,13 +155,22 @@ function eventDisplay(event: any) {
     </div>
 
     <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-8 md:px-8 py-8">
+
+        <div v-if="isLoading" class="flex justify-center col-span-4 pt-24">
+            <Loader />
+        </div>
+
         <div v-for="(ev, idx) in mapEventsDestruct(myId)" :key="idx" :class="eventDisplay(ev) ? '' : 'hidden'">
             <div v-if="eventDisplay(ev)" class="card card-compact bg-base-100 not-prose">
+
                 <figure
-                    class="hover:grayscale-0 hover:blur-none hover:scale-105 transitional-all ease-in-out duration-300  hover:cursor-pointer"
+                    class="hover:grayscale-0 hover:blur-none hover:scale-105 transitional-all ease-in-out duration-300  hover:cursor-pointer relative text-center"
                     :class="((ev.eventStatus === 'invited') && pastEventCheck(ev.startDate)) ? 'grayscale' : (ev.eventStatus === 'invited') ? 'blur-[1.83px]' : pastEventCheck(ev.startDate) ? 'grayscale' : ''"
                     @click="clickEventPage(ev.eventId)">
-                    <img :src="ev.coverUrl" class="h-[200px] lg:h-[225px] w-full object-cover" />
+
+                        <img :src="ev.coverUrl" class="h-[200px] lg:h-[225px] w-full object-cover" />
+                        <!-- <span class="absolute top-2 right-4 text-xl font-medium text-accent" :class="ev.eventStatus === 'invited' ? '' : 'hidden'">Invited</span> -->
+
                 </figure>
 
                 <div class="py-2.5 px-5">
@@ -236,8 +234,8 @@ function eventDisplay(event: any) {
                                 <span class="text-primary">{{ ev.partySize - ev.goingCount }}</span>/{{ ev.partySize }}
                                 <span class="font-medium pl-0.5"> spots</span>
                             </span>
-                            <span v-if="!ev.partySize" class="pl-1.5">open</span>
-                            <span v-if="(ev.partySize - ev.goingCount) === 0" class="pl-1.5">full</span>
+                            <span v-else-if="(ev.partySize - ev.goingCount) === 0" class="pl-1.5">full</span>
+                            <span v-else-if="!ev.partySize" class="pl-1.5">open</span>
                         </div>
 
                     </div>
