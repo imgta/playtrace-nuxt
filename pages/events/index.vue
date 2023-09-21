@@ -170,7 +170,7 @@ function eventDisplay(event: any) {
             <div v-if="eventDisplay(ev)" class="card card-compact bg-base-100 not-prose">
                 <figure
                     class="hover:grayscale-0 hover:blur-none hover:scale-105 transitional-all ease-in-out duration-300  hover:cursor-pointer"
-                    :class="((ev.eventStatus === 'invited') && pastEventCheck(ev.startDate)) ? 'grayscale blur-[1.83px]' : (ev.eventStatus === 'invited') ? 'blur-[1.83px]' : pastEventCheck(ev.startDate) ? 'grayscale' : ''"
+                    :class="((ev.eventStatus === 'invited') && pastEventCheck(ev.startDate)) ? 'grayscale' : (ev.eventStatus === 'invited') ? 'blur-[1.83px]' : pastEventCheck(ev.startDate) ? 'grayscale' : ''"
                     @click="clickEventPage(ev.eventId)">
                     <img :src="ev.coverUrl" class="h-[200px] lg:h-[225px] w-full object-cover" />
                 </figure>
