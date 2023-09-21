@@ -333,7 +333,7 @@ function removeInvite(index: any) {
                     <!-- TOP RIGHT MODALS -->
                     <div class="flex justify-end pt-0.5 pb-4">
                         <!-- INVITE RSVP MODAL -->
-                        <div v-if="userRsvp !== 'going' || userId !== eventData.creatorId" class="self-end shake">
+                        <div v-if="userId !== eventData.creatorId" class="self-end shake">
                             <svg v-if="!rsvpModal" class="w-4 hover:cursor-pointer"
                                 :class="(userRsvp === 'going') ? 'fill-info' : (userRsvp === 'maybe') ? 'fill-accent' : (userRsvp === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-info'"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" @click="openRsvp()">
