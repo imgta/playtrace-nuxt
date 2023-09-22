@@ -3,15 +3,15 @@ definePageMeta({
     middleware: ['auth'],
 });
 
-const client = useStrapiClient();
 const { toast } = useMisc();
-const appHost = useRuntimeConfig().public.strapi.url;
-const eventId = Number(useRoute().params.id);
-const { id: userId, username: userUsername } = useStrapiUser().value as any;
-const { shortDate } = useDateTime();
-
+const { client, appHost, myId } = useAuth();
 const themeCookie = useCookie('selectedTheme');
 const pageTheme = ref(themeCookie).value as any;
+const { formBg } = useTheme(pageTheme);
+
+const eventId = Number(useRoute().params.id);
+
+const { shortDate } = useDateTime();
 
 const userRsvp = ref();
 const inviteId = ref();
@@ -48,7 +48,7 @@ const isLoading = ref<boolean>(true);
 // ----------------------------------------------------------------
 onMounted(() => {
     getEvent(eventId);
-    getInvite(eventId, userId);
+    getInvite(eventId, myId);
 });
 watchEffect(() => {
     if (themeCookie.value === 'corporate') {
@@ -56,13 +56,7 @@ watchEffect(() => {
     } else {
         eventBtnClass.value = 'before:rounded-[100rem]';
     }
-    console.log('userInvites', eventData.userInvites);
-});
-const formBg = computed(() => {
-    return {
-        'bg-base-200/95': pageTheme === 'dracula' || 'night',
-        'bg-slate-800/95 brightness-125': pageTheme === 'corporate' || 'fantasy',
-    };
+    console.log('eventData', eventData);
 });
 const inputValid = computed(() => {
     if (eventData.newInvites.length < 1) {
@@ -102,7 +96,7 @@ async function getEvent(eventId: number) {
 
         eventData.categories.push(eventData.location[0]?.category.split(', '));
 
-        // Calculate remaining open spots for event
+        // Calculate remaining open spots
         // Push all invited usernames from eventInvites to userInvites array
         let going = 0;
         eventData.eventInvites.forEach(async (invite: Record<string, any>) => {
@@ -122,10 +116,10 @@ async function getEvent(eventId: number) {
     }
 }
 
-async function getInvite(eventId: number, userId: number) {
+async function getInvite(eventId: number, myId: number) {
     isLoading.value = true;
     try {
-        const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users?populate=*&filters[$and][0][collection][$eq]=event&filters[$and][1][users_permissions_user][id][$eq]=${userId}&filters[$and][2][event][id][$eq]=${eventId}`);
+        const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users?populate=*&filters[$and][0][collection][$eq]=event&filters[$and][1][users_permissions_user][id][$eq]=${myId}&filters[$and][2][event][id][$eq]=${eventId}`);
         const {
             id,
             attributes: { eventStatus },
@@ -165,7 +159,7 @@ async function rsvpEvent(eventId: number, inviteId: number, rsvp: string) {
         } else if (rsvp === 'noGo') {
             toast.error('RSVP: Not going.', { timeout: 1500 });
         }
-        await getInvite(eventId, userId);
+        await getInvite(eventId, myId);
     }
 };
 
@@ -225,7 +219,7 @@ async function deleteEvent(eventId: number) {
         console.error(error);
     } finally {
         toast.info('Event deleted!', { timeout: 1500 });
-        getInvite(eventId, userId);
+        getInvite(eventId, myId);
         await navigateTo('/events');
     }
 }
@@ -314,9 +308,12 @@ async function inviteUser() {
         console.log('newInvites', eventData.newInvites);
     }
 }
-
 function removeInvite(index: any) {
     eventData.newInvites.splice(index, 1);
+}
+
+function googleMaps(address: string) {
+    return `https://www.google.com/maps/place/${address.replaceAll(' ', '+')}`;
 }
 // ----------------------------------------------------------------
 </script>
@@ -330,8 +327,7 @@ function removeInvite(index: any) {
                 <div class="md:shrink md:p-1.5">
                     <Loader v-if="isLoading" class="my-[9rem] mx-[13rem] md:my-[13.5rem] md:mx-[15.5rem]" />
                     <img class="h-80 w-full object-cover md:max-h-[27rem] md:max-w-full md:w-[33rem] md:h-[27rem]"
-                        :class="isLoading ? 'hidden' : ''"
-                        :src="eventData.eventPic">
+                        :class="isLoading ? 'hidden' : ''" :src="eventData.eventPic">
                 </div>
 
                 <!-- CARD -->
@@ -340,7 +336,7 @@ function removeInvite(index: any) {
                     <!-- TOP RIGHT MODALS -->
                     <div class="flex justify-end pt-0.5 pb-4">
                         <!-- INVITE RSVP MODAL -->
-                        <div v-if="userId !== eventData.creatorId" class="self-end shake">
+                        <div v-if="myId !== eventData.creatorId" class="self-end shake">
                             <svg v-if="!rsvpModal" class="w-4 hover:cursor-pointer"
                                 :class="(userRsvp === 'going') ? 'fill-info' : (userRsvp === 'maybe') ? 'fill-accent' : (userRsvp === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-info'"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" @click="openRsvp()">
@@ -357,8 +353,7 @@ function removeInvite(index: any) {
                             </svg>
                         </div>
                         <dialog ref="popRsvp" class="modal">
-                            <div :class="formBg" method="dialog"
-                                class="modal-box w-auto max-fit px-9 pt-6shadow-none">
+                            <div :class="formBg" method="dialog" class="modal-box w-auto max-fit px-9 pt-6shadow-none">
                                 <h3 className="text-neutral-content font-medium text-sm absolute left-3.5 top-3">
                                     RSVP</h3>
                                 <button
@@ -435,7 +430,7 @@ function removeInvite(index: any) {
                         </dialog>
 
                         <!-- DELETE EVENT MODAL -->
-                        <div v-if="userId === eventData.creatorId" class="con-hint event-card" @click="openDelete()">
+                        <div v-if="myId === eventData.creatorId" class="con-hint event-card" @click="openDelete()">
                             <svg class="w-3.5 fill-base-content/75 hover:fill-error hover:cursor-pointer"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
                                 <path
@@ -463,7 +458,8 @@ function removeInvite(index: any) {
 
                                     <div class="col-start-1 hover:cursor-pointer w-full group"
                                         @click="deleteEvent(eventId)">
-                                        <div class="flex justify-center group-hover:text-primary group-hover:font-semibold px-4">
+                                        <div
+                                            class="flex justify-center group-hover:text-primary group-hover:font-semibold px-4">
                                             <span class="pr-1">Yes</span>
                                             <svg class="fill-neutral-content/75 w-4 pb-[0.2rem] group-hover:fill-primary group-hover:animate-bounce inline"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
@@ -496,11 +492,19 @@ function removeInvite(index: any) {
                     <!-- CARD HEADER -->
                     <div class="pb-2">
                         <div v-if="isLoading">
-                            <div class="flex justify-center text-center tracking-wide text-xl md:text-2xl lg:text-3xl text-primary font-semibold blur-md animate-pulse">Event Title</div>
-                            <div class="flex justify-center font-medium text-xs lg:text-sm text-base-content/80 blur-md animate-pulse">Next Sun • 12:45AM</div>
+                            <div
+                                class="flex justify-center text-center tracking-wide text-xl md:text-2xl lg:text-3xl text-primary font-semibold blur-md animate-pulse">
+                                Event Title</div>
+                            <div
+                                class="flex justify-center font-medium text-xs lg:text-sm text-base-content/80 blur-md animate-pulse">
+                                Next Sun • 12:45AM</div>
                         </div>
-                        <div :class="isLoading ? 'hidden' : ''" class="flex justify-center text-center tracking-wide text-xl md:text-2xl lg:text-3xl text-primary font-semibold">{{ eventData.title }}</div>
-                        <div :class="isLoading ? 'hidden' : ''" class="flex justify-center font-medium text-xs lg:text-sm text-base-content/80">{{ shortDate(eventData.startDate) }}</div>
+                        <div :class="isLoading ? 'hidden' : ''"
+                            class="flex justify-center text-center tracking-wide text-xl md:text-2xl lg:text-3xl text-primary font-semibold">
+                            {{ eventData.title }}</div>
+                        <div :class="isLoading ? 'hidden' : ''"
+                            class="flex justify-center font-medium text-xs lg:text-sm text-base-content/80">{{
+                                shortDate(eventData.startDate) }}</div>
                     </div>
 
                     <!-- EVENT INFO -->
@@ -509,7 +513,7 @@ function removeInvite(index: any) {
                         <!-- HOSTS -->
                         <div class="flex">
                             <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 md:w-[1.2rem]"
-                                :class="userId === eventData.creatorId ? 'fill-accent-focus/90' : 'fill-base-content/75'"
+                                :class="myId === eventData.creatorId ? 'fill-accent-focus/90' : 'fill-base-content/75'"
                                 viewBox="0 0 256 256">
                                 <path
                                     d="M246.46,73.17a16,16,0,0,0-17.74-2.26l-46.9,23.38-40-66.49a16.11,16.11,0,0,0-27.6,0l-40,66.49L27.31,70.92A16.1,16.1,0,0,0,4.82,90.35l37,113.35a12,12,0,0,0,17.51,6.61C59.57,210.17,84.39,196,128,196s68.43,14.19,68.62,14.3a12,12,0,0,0,17.57-6.58l37-113.29A16,16,0,0,0,246.46,73.17ZM195.53,183.52C182.18,178.4,159.2,172,128,172s-54.18,6.42-67.53,11.54l-27-82.71L70,119a16.18,16.18,0,0,0,21-6.11l37-61.49,37,61.5a16.18,16.18,0,0,0,21,6.1l36.52-18.2Zm-19.67-31A12,12,0,0,1,164,162.69a12.91,12.91,0,0,1-1.85-.14,229.32,229.32,0,0,0-68.34,0,12,12,0,0,1-3.66-23.72,253.38,253.38,0,0,1,75.66,0A12,12,0,0,1,175.86,152.52Z">
@@ -533,15 +537,20 @@ function removeInvite(index: any) {
                             </div>
                             <div class="inline pl-2" :class="isLoading ? 'hidden' : ''">
                                 <span v-if="userRsvp !== 'going'">RSVP to reveal.</span>
-                                <span v-else-if="eventData.location[0]?.address && userRsvp === 'going'" class="">
-                                    {{ eventData.location[0]?.address }}</span>
-                                <span v-else-if="!eventData.location[0]?.address && userRsvp === 'going'">TBD.</span>
+
+                                <span v-else-if="eventData.location[0]?.venue && userRsvp === 'going'" class="">
+                                    <a :href="googleMaps(eventData.location[0]?.address)" target="_blank" class="hover-link hover:link">
+                                        {{ eventData.location[0]?.venue }}
+                                    </a>
+                                </span>
+                                <span v-else-if="!eventData.location[0] && userRsvp === 'going'">TBD.</span>
                             </div>
                         </div>
 
                         <!-- COVER CHARGE -->
                         <div class="flex">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="inline w-[0.95rem] md:w-[1.1rem] fill-base-content/75 rotate-[24deg]"
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="inline w-[0.95rem] md:w-[1.1rem] fill-base-content/75 rotate-[24deg]"
                                 viewBox="0 0 256 256">
                                 <path
                                     d="M228,108.4a20,20,0,0,0,16-19.59V64a20,20,0,0,0-20-20H32A20,20,0,0,0,12,64V88.81A20,20,0,0,0,28,108.4a20,20,0,0,1,0,39.2,20,20,0,0,0-16,19.59V192a20,20,0,0,0,20,20H224a20,20,0,0,0,20-20V167.19a20,20,0,0,0-16-19.59,20,20,0,0,1,0-39.2ZM36,170.34a44,44,0,0,0,0-84.68V68H84V188H36Zm184,0V188H108V68H220V85.66a44,44,0,0,0,0,84.68Z">
@@ -549,7 +558,8 @@ function removeInvite(index: any) {
                             </svg>
                             <span v-if="isLoading" class="inline pl-2 blur-sm animate-pulse">Free.99</span>
                             <div :class="isLoading ? 'hidden' : ''">
-                                <span v-if="eventData.coverCharge" class="inline pl-2">${{ eventData.coverCharge }} cover</span>
+                                <span v-if="eventData.coverCharge" class="inline pl-2">${{ eventData.coverCharge }}
+                                    cover</span>
                                 <span v-else class="inline pl-2">Free</span>
                             </div>
                         </div>
@@ -564,8 +574,9 @@ function removeInvite(index: any) {
                             </svg>
                             <div v-if="isLoading" class="inline pl-2 blur-sm animate-pulse">open</div>
                             <div class="inline pl-2" :class="isLoading ? 'hidden' : ''">
-                                <span v-if="eventData.partySize"><span class="text-primary/80">{{ eventData.spots }}</span>/{{
-                                    eventData.partySize }}
+                                <span v-if="eventData.partySize"><span class="text-primary/80">{{ eventData.spots
+                                }}</span>/{{
+    eventData.partySize }}
                                     spots left!</span>
                                 <span v-else-if="!eventData.partySize">open</span>
                                 <span v-else-if="!eventData.spots" class="text-base-content/50"><s>{{ eventData.spots }}/{{
@@ -575,15 +586,15 @@ function removeInvite(index: any) {
 
                         <!-- TAGS/CATEGORIES -->
                         <div v-if="isLoading">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="inline w-[1.05rem] md:w-[1.25rem] fill-base-content/75 -rotate-45"
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="inline w-[1.05rem] md:w-[1.25rem] fill-base-content/75 -rotate-45"
                                 viewBox="0 0 256 256">
                                 <path
                                     d="M246.15,133.18,146.83,33.86A19.85,19.85,0,0,0,132.69,28H40A12,12,0,0,0,28,40v92.69a19.85,19.85,0,0,0,5.86,14.14l99.32,99.32a20,20,0,0,0,28.28,0l84.69-84.69A20,20,0,0,0,246.15,133.18Zm-98.83,93.17L52,131V52h79l95.32,95.32ZM100,84A16,16,0,1,1,84,68,16,16,0,0,1,100,84Z">
                                 </path>
                             </svg>
                             <div class="inline pl-[0.2rem]">
-                                <div
-                                    class="inline pl-1">
+                                <div class="inline pl-1">
                                     <span
                                         class="badge badge-outline badge-sm text-[11px] font-semibold text-center align-middle opacity-90 px-1 py-1 blur-sm animate-pulse">
                                         this_is_a_tag
@@ -592,15 +603,15 @@ function removeInvite(index: any) {
                             </div>
                         </div>
                         <div v-if="eventData.location[0]?.category" :class="isLoading ? 'hidden' : ''">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="inline w-[1.05rem] md:w-[1.25rem] fill-base-content/75 -rotate-45"
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="inline w-[1.05rem] md:w-[1.25rem] fill-base-content/75 -rotate-45"
                                 viewBox="0 0 256 256">
                                 <path
                                     d="M246.15,133.18,146.83,33.86A19.85,19.85,0,0,0,132.69,28H40A12,12,0,0,0,28,40v92.69a19.85,19.85,0,0,0,5.86,14.14l99.32,99.32a20,20,0,0,0,28.28,0l84.69-84.69A20,20,0,0,0,246.15,133.18Zm-98.83,93.17L52,131V52h79l95.32,95.32ZM100,84A16,16,0,1,1,84,68,16,16,0,0,1,100,84Z">
                                 </path>
                             </svg>
                             <div class="inline pl-[0.2rem]">
-                                <div v-for="tag in eventData.categories[0]" :key="tag"
-                                    class="inline pl-1">
+                                <div v-for="tag in eventData.categories[0]" :key="tag" class="inline pl-1">
                                     <span
                                         class="badge badge-outline badge-sm text-[11px] font-semibold text-center align-middle opacity-90 px-1 py-1">
                                         {{ tag }}
@@ -610,11 +621,14 @@ function removeInvite(index: any) {
                         </div>
 
                         <!-- EVENT DESCRIPTION -->
-                        <p v-if="isLoading" class="text-xs md:text-sm text-base-content/75 py-5 pb-8 blur-sm animate-pulse">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Enim quia, fuga nostrum pariatur, sit nemo dicta odit deserunt consequuntur similique exercitationem, labore optio!</p>
-                        <p :class="isLoading ? 'hidden' : ''" class="text-xs md:text-sm text-base-content/75 py-5 pb-8">{{ eventData.info }}</p>
+                        <p v-if="isLoading" class="text-xs md:text-sm text-base-content/75 py-5 pb-8 blur-sm animate-pulse">
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Enim quia, fuga nostrum pariatur, sit
+                            nemo dicta odit deserunt consequuntur similique exercitationem, labore optio!</p>
+                        <p :class="isLoading ? 'hidden' : ''" class="text-xs md:text-sm text-base-content/75 py-5 pb-8">{{
+                            eventData.info }}</p>
 
                         <!-- INVITATIONS -->
-                        <div v-if="userId === eventData.creatorId">
+                        <div v-if="myId === eventData.creatorId">
                             <div class="flex justify-center h-full pb-0.5">
                                 <input v-model="userSearch" class="input input-bordered invite-search text-center h-10"
                                     placeholder="Send more invites" name="invites" type="text" :class="inputValid"
@@ -641,14 +655,14 @@ function removeInvite(index: any) {
                                         <span
                                             class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
                                             @click="removeInvite(index)"><span class="text-[10px]">✕</span></span>
-                                    </span>
-                                </div>
+                                </span>
                             </div>
                         </div>
-
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
+</div>
 </template>
