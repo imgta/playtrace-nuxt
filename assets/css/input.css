@@ -10,8 +10,13 @@ img:not([src]) {
 
 .form-input, .auth-input {
     width: 100%;
-    color: hsl(var(--bc) / 0.9);
     border-radius: var(--rounded-btn, 0.5rem);
+}
+.form-input {
+    color: hsl(var(--bc) / 0.9);
+}
+.auth-input {
+    color: hsl(var(--bc) / 0.9);
 }
 .form-input, .invite-search {
     background-color: transparent;

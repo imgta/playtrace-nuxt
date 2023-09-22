@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { shortDate } from '~/utils/misc';
-
 definePageMeta({
     middleware: ['auth'],
 });
@@ -10,6 +8,7 @@ const { toast } = useMisc();
 const appHost = useRuntimeConfig().public.strapi.url;
 const eventId = Number(useRoute().params.id);
 const { id: userId, username: userUsername } = useStrapiUser().value as any;
+const { shortDate } = useDateTime();
 
 const themeCookie = useCookie('selectedTheme');
 const pageTheme = ref(themeCookie).value as any;

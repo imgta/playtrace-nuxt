@@ -1,9 +1,6 @@
 <script setup lang="ts">
-const client = useStrapiClient();
 const { toast } = useMisc();
-
-const { url: appHost } = useRuntimeConfig().public.strapi;
-const { id: refId, username: refUsername } = useStrapiUser().value as any;
+const { myId, myUsername, appHost, client } = useAuth();
 
 const imgUrl = ref('');
 const file = ref(null);
@@ -29,7 +26,7 @@ async function updateAvatar(event: Event) {
     event.preventDefault();
     try {
         // (1) Find and delete old avatar by id if it exists
-        const userRes: Record<string, any> = await client(`${appHost}api/users?populate=deep,2&filters[id][$eq]=${refId}`, {
+        const userRes: Record<string, any> = await client(`${appHost}api/users?populate=deep,2&filters[id][$eq]=${myId}`, {
             method: 'GET',
         });
         console.log('userRes', userRes);
@@ -51,7 +48,7 @@ async function updateAvatar(event: Event) {
         // (2a) Handle IMAGE URL
         if (imgUrl.value !== '') {
             try {
-                const imgName = `${refUsername}_avatar`;
+                const imgName = `${myUsername}_avatar`;
 
                 // Fetch response is already converted to blob
                 const imgRes: any = await $fetch(imgUrl.value);
@@ -59,7 +56,7 @@ async function updateAvatar(event: Event) {
 
                 const formData = new FormData();
                 formData.append('ref', 'plugin::users-permissions.user');
-                formData.append('refId', refId);
+                formData.append('refId', myId);
                 formData.append('field', 'avatar');
                 formData.append('files', imgRes, imgName);
 
@@ -78,11 +75,11 @@ async function updateAvatar(event: Event) {
         // (2b) Handle IMAGE FILE ATTACHMENT
         if (imgUrl.value === '' && imgFile.value !== null) {
             try {
-                const imgName = `${refUsername}_avatar`;
+                const imgName = `${myUsername}_avatar`;
 
                 const formData = new FormData();
                 formData.append('ref', 'plugin::users-permissions.user');
-                formData.append('refId', refId);
+                formData.append('refId', myId);
                 formData.append('field', 'avatar');
                 formData.append('files', imgFile.value, imgName);
 
