@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { dashDate } from '@/composables/useDateTime';
 import { bolt, heart, infocon } from '@/utils/svgPack';
 
+const { dashDate } = useDateTime();
 const today = new Date();
 const monthDay = dashDate(today.toDateString());
 const router = useRouter();
