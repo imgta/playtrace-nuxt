@@ -1,5 +1,5 @@
 export default defineEventHandler(async event => {
-    const { brevoMailAPI } = useRuntimeConfig();
+    const { brevoMailAPI } = useRuntimeConfig().public;
     // const { inviteEmail } = useBrevo(brevoMailAPI);
     // const { name, toEmail, message } = await readBody(event);
     // if (!name || !toEmail || !message) {

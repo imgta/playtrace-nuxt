@@ -1,5 +1,5 @@
 export default function (brevoAPI: any) {
-    async function inviteEmail(fromEmail: string, toEmail: string, fullName: string, message: string) {
+    async function inviteEmail(fromEmail: string, toEmail: string, toName: string, message: string) {
         const response = await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
             headers: {
@@ -12,7 +12,7 @@ export default function (brevoAPI: any) {
                     name: 'playTrace',
                     email: fromEmail,
                 },
-                to: [{ email: toEmail, name: fullName }],
+                to: [{ email: toEmail, name: toName }],
                 replyTo: {
                     email: fromEmail,
                     name: 'playTrace',
