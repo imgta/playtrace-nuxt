@@ -34,7 +34,7 @@ export default function () {
     }) as Record<string, any>;
 
     const signupData = reactive({
-        fullname: '',
+        fullName: '',
         email: '',
         username: '',
         password: '',
@@ -129,7 +129,7 @@ export default function () {
     }
 
     async function onRegister() {
-        if (!signupData.fullname) {
+        if (!signupData.fullName) {
             toast.error('Full Name required!', { timeout: 1700 });
             return;
         } else if (!signupData.email) {
@@ -143,7 +143,7 @@ export default function () {
             return;
         }
         try {
-            const signupRes = await register({ username: signupData.username, email: signupData.email, fullName: signupData.fullname, password: signupData.password, });
+            const signupRes = await register({ username: signupData.username, email: signupData.email, fullName: signupData.fullName, password: signupData.password, });
             const newUserId = signupRes.user.value?.id;
             userData.id = newUserId;
         } catch (error: any) {
