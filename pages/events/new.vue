@@ -3,7 +3,7 @@ definePageMeta({
     middleware: ['auth'],
 });
 const { toast } = useMisc();
-const { appHost, client, user, myUsername } = useAuth();
+const { appHost, client } = useAuth();
 const themeCookie = useCookie('selectedTheme');
 
 const eventBtnClass = ref('');
@@ -27,6 +27,8 @@ const eventData = reactive({
     userInvites: [] as any,
 });
 const userSearch = ref('');
+const { username: myUsername } = useStrapiUser().value as any;
+const user = useStrapiUser().value;
 
 // ----------------------------------------------------------------
 onMounted(() => {
