@@ -9,12 +9,12 @@ export default function () {
         const token = useStrapiToken().value;
         return token;
     });
-    const user = useStrapiUser().value;
-    const { value: { id: myId, username: myUsername } } = computed(() => {
+
+    const { value: myId } = computed(() => {
         if (token) {
             try {
-                const user = useStrapiUser().value as any;
-                return user;
+                const { id } = useStrapiUser().value as any;
+                return id;
             } catch (error) {
                 console.error(error);
             }
@@ -171,8 +171,6 @@ export default function () {
 
     return {
         myId,
-        myUsername,
-        user,
         token,
         appHost,
         client,
