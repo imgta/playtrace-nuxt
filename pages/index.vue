@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { articleDate } from '~/utils/misc';
+const { articleDate } = useDateTime();
 
 const myArr = ['Nuxt 3', 'Strapi', 'Vue.js'];
 </script>

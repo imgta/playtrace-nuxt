@@ -1,57 +1,17 @@
 <script setup lang="ts">
 const route = useRoute();
-const { url: appHost } = useRuntimeConfig().public.strapi;
 const { toast } = useMisc();
-const { logout, login, register } = useStrapiAuth();
-const client = useStrapiClient();
 
 const targetText = '▶_trace.';
 const themeCookie = useCookie('selectedTheme');
-const expiry = new Date(Date.now() + 86400000); // expiry set to +1 day
-const userCookie: any = useCookie('userCookie', { expires: expiry });
-const { value: pageTheme } = ref(themeCookie);
+const pageTheme = ref(themeCookie).value;
+const { formBg } = useTheme(pageTheme);
 
-const popLogin = ref<any | null>(null);
-const popSignUp = ref<any | null>(null);
-const popSwitch = ref('');
+const { myId, token, userData, loginData, signupData, popLogin, popSignup, popRef, popModal, getUser, onDemo, onLogout, onLogin, onRegister } = useAuth();
+
 const loginTheme = ref('');
 const signupTheme = ref('');
-const loginData = reactive({
-    username: '',
-    password: '',
-});
-const signupData = reactive({
-    fullname: '',
-    email: '',
-    username: '',
-    password: '',
-});
 
-const { value: token } = computed(() => {
-    const token = useStrapiToken().value;
-    return token;
-});
-
-const { value: myId } = computed(() => {
-    if (token) {
-        try {
-            const { id } = useStrapiUser().value as any;
-            return id;
-        } catch (error) {
-            console.error(error);
-        }
-    }
-});
-
-const userData = reactive({
-    id: myId,
-    username: '',
-    fullName: '',
-    initials: '',
-    avatar: '',
-}) as any;
-
-const drawerOpen = ref<boolean>(false);
 // ----------------------------------------------------------------
 onMounted(() => {
     if (token) {
@@ -61,7 +21,7 @@ onMounted(() => {
     }
 });
 watch(() => route.path, () => {
-    drawerOpen.value = false;
+    popRef.drawer = false;
 });
 watch(() => userData.id, () => {
     if (userData.id !== null) {
@@ -74,18 +34,12 @@ watch(() => userData.id, () => {
 });
 watch(() => popLogin.value, () => {
     if (route.fullPath.includes('?redirect')) {
-        openLogin();
+        popModal('open', 'login');
         toast.error('Please login or register.', { timeout: 1500 });
     }
 });
-const formBg = computed(() => {
-    return {
-        'bg-base-200/95': pageTheme === 'dracula' || 'night',
-        'bg-neutral/95': pageTheme === 'fantasy' || 'corporate',
-    };
-});
 watchEffect(() => {
-    if (themeCookie.value === 'corporate') {
+    if (pageTheme === 'corporate') {
         loginTheme.value = 'logincorp auth-modal';
         signupTheme.value = 'signupcorp auth-modal';
     } else {
@@ -95,107 +49,9 @@ watchEffect(() => {
 });
 
 // ----------------------------------------------------------------
-async function getUser(userId: number) {
-    try {
-        const userRes: Record<string, any> = await client(`${appHost}api/users/${userId}?populate=*`, {
-            method: 'GET'
-        });
-
-        const { username, fullName } = userRes;
-
-        userData.avatar = userRes?.avatar?.formats?.thumbnail?.url;
-        userData.username = username;
-        userData.fullName = fullName;
-        userData.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
-    } catch (error) {
-        console.error(error);
-    } finally {
-        userCookie.value = userData;
-    }
-}
-
-async function logoutClick() {
-    try {
-        logout();
-    } catch (error) {
-        console.error(error);
-    } finally {
-        userData.id = null;
-        drawerOpen.value = false;
-        await navigateTo('/');
-        toast.info('User logged out.', { timeout: 1500 });
-    }
-}
-
-async function onLogin() {
-    if (!loginData.username) {
-        toast.error('Username required!', { timeout: 1700 });
-        return;
-    } else if (!loginData.password) {
-        toast.error('Password required!', { timeout: 1700 });
-        return;
-    }
-    try {
-        const loginRes = await login({ identifier: loginData.username, password: loginData.password });
-        const newUserId = loginRes.user.value?.id;
-        userData.id = newUserId;
-    } catch (error: any) {
-        toast.error((error.error.message as string), { timeout: 2000 });
-        console.error(error);
-    } finally {
-        closeLogin();
-        navigateTo('/events');
-        toast.success('User logged in!', { timeout: 2000 });
-    }
-}
-
-async function onDemo() {
-    try {
-        loginData.username = 'demo';
-        loginData.password = 'demo123';
-        const loginRes = await login({ identifier: loginData.username, password: loginData.password });
-        const newUserId = loginRes.user.value?.id;
-        userData.id = newUserId;
-    } catch (error) {
-        console.error(error);
-    } finally {
-        navigateTo('/events');
-        closeLogin();
-        closeSignup();
-        toast.success('Demo account active!', { timeout: 2000 });
-    }
-}
-
-async function onRegister() {
-    if (!signupData.fullname) {
-        toast.error('Full Name required!', { timeout: 1700 });
-        return;
-    } else if (!signupData.email) {
-        toast.error('Email required!', { timeout: 1700 });
-        return;
-    } else if (!signupData.username) {
-        toast.error('Username required!', { timeout: 1700 });
-        return;
-    } else if (!signupData.password) {
-        toast.error('Password required!', { timeout: 1700 });
-        return;
-    }
-    try {
-        const signupRes = await register({ username: signupData.username, email: signupData.email, fullName: signupData.fullname, password: signupData.password, });
-        const newUserId = signupRes.user.value?.id;
-        userData.id = newUserId;
-    } catch (error: any) {
-        toast.error((error.error.message as string), { timeout: 2000 });
-        console.error(error);
-    } finally {
-        navigateTo('/events');
-        closeSignup();
-        toast.success('User registered!', { timeout: 2000 });
-    }
-}
 
 function toggleSide() {
-    drawerOpen.value = !drawerOpen.value;
+    popRef.drawer = !popRef.drawer;
 }
 function navHome() {
     navigateTo('/');
@@ -206,35 +62,7 @@ function navEvents() {
 function navNewEvent() {
     navigateTo('/events/new');
 }
-function openLogin() {
-    popLogin.value.showModal();
-    popSwitch.value = 'login';
-}
-function closeLogin() {
-    loginData.username = '';
-    loginData.password = '';
-    popLogin.value.close();
-}
-function openSignup() {
-    popSignUp.value.showModal();
-    popSwitch.value = 'signup';
-}
-function closeSignup() {
-    popSignUp.value.close();
-}
-function formSwitch() {
-    try {
-        if (popSwitch.value === 'signup') {
-            openLogin();
-            closeSignup();
-        } else if (popSwitch.value === 'login') {
-            openSignup();
-            closeLogin();
-        }
-    } catch (error) {
-        console.error(error);
-    }
-}
+
 // ----------------------------------------------------------------
 </script>
 
@@ -255,142 +83,145 @@ function formSwitch() {
             <ThemeSwitch />
             <div v-if="!userData.id">
 
-                <!-- <AuthModal @inUser="inUserEmit" /> -->
-
-                <button class="btn-primary font-normal btn-outline btn-sm normal-case mt-0" @click="openLogin">
-        <span class="hover:text-neutral-content w-full h-full flex items-center">
-            Login
-        </span>
-    </button>
-
-    <dialog ref="popLogin" class="modal">
-
-        <div v-if="popSwitch === 'login'" :class="formBg" method="dialog"
-            class="modal-box w-auto max-fit px-9 pb-3 shadow-none">
-            <h1 class="text-primary text-4xl text-center pt-4 pb-0.5">
-                Sign in.
-            </h1>
-            <p class="text-neutral-content/80 text-center text-sm">
-                We've missed you!
-            </p>
-            <div class="card-body pt-5 pb-1.5 bg-none">
-
-                <div class="focus:text-base-content bg-none">
-
-                    <label class="label-text text-neutral-content/80">Username</label>
-                    <input v-model="loginData.username" type="text" name="username"
-                        class="form-control input input-bordered form-input auth-input" @keyup.enter="onLogin" />
-                    <label class="label-text text-neutral-content/80">Password</label>
-                    <input v-model="loginData.password" type="password" name="password"
-                        class="form-control input input-bordered form-input auth-input" @keyup.enter="onLogin" />
-                    <label class="label">
-                        <span class="label-text-alt"></span>
-                        <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.40]"
-                            @click="onDemo">
-                            Demo?
-                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                x="0px" y="0px" viewBox="0 0 152.9 43.4" style="enable-background:new 0 0 152.9 43.4;"
-                                xml:space="preserve">
-                                <path
-                                    d="M151.9,13.6c0,0,3.3-9.5-85-8.3c-97,1.3-58.3,29-58.3,29s9.7,8.1,69.7,8.1c68.3,0,69.3-23.1,69.3-23.1 s1.7-10.5-14.7-18.4" />
-                            </svg>
-                        </span>
-                    </label>
-
-                </div>
-
-                <div class="flex justify-center items-center w-full h-14 pr-3.5">
-                    <button type="submit" :class="loginTheme" @click="onLogin">
-                        <span>Log in</span>
-                        <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
-                            <path d="M1,5 L11,5"></path>
-                            <polyline points="8 1 12 5 8 9"></polyline>
-                        </svg>
-                    </button>
-                </div>
-
-                <button
-                    class="modal-action justify-center label-text-alt text-neutral-content/80 hover:text-neutral-content font-extralight link link-hover pb-2"
-                    @click="formSwitch">
-                    C'mon, sign up already!
+                <button class="btn-primary font-normal btn-outline btn-sm normal-case mt-0" @click="popModal('open', 'login')">
+                    <span class="hover:text-neutral-content w-full h-full flex items-center">
+                        Login
+                    </span>
                 </button>
 
-            </div>
-        </div>
-        <form method="dialog" class="modal-backdrop">
-            <button @click="closeLogin">close</button>
-        </form>
-    </dialog>
+                <dialog ref="popLogin" class="modal">
 
-    <button class="btn-primary btn-outline btn-sm" @click="openSignup">
-        <div class="hover:text-neutral-content min-w-full h-full flex items-center">
-            Signup
-        </div>
-    </button>
+                    <div :class="formBg" method="dialog"
+                        class="modal-box w-auto max-fit px-9 pb-3 shadow-none">
+                        <h1 class="text-primary text-4xl text-center pt-4 pb-0.5">
+                            Sign in.
+                        </h1>
+                        <p class="text-neutral-content/80 text-center text-sm">
+                            We've missed you!
+                        </p>
+                        <div class="card-body pt-5 pb-1.5 bg-none">
 
-    <dialog ref="popSignUp" class="modal">
-        <div v-if="popSwitch === 'signup'" :class="formBg" method="dialog"
-            class="modal-box w-auto max-fit px-9 pb-3 shadow-none">
-            <h1 class="text-primary text-4xl text-center pt-4 pb-0.5">
-                Register.
-            </h1>
-            <p class="text-neutral-content/80 text-center text-sm">
-                Join the party!
-            </p>
+                            <div class="focus:text-base-content bg-none">
 
-            <div class="card-body pt-5 pb-1.5 bg-none">
-                <div class="focus:text-base-content bg-none">
-                    <label class="label-text text-neutral-content/80">Full Name</label>
-                    <input v-model="signupData.fullname" required type="text" name="fullname"
-                        class="form-control input input-bordered form-input auth-input" />
-                    <label class="label-text text-neutral-content/80">Email</label>
-                    <input v-model="signupData.email" required type="email" name="email"
-                        class="form-control input input-bordered form-input auth-input" />
-                    <label class="label-text text-neutral-content/80">Username</label>
-                    <input v-model="signupData.username" required type="text" name="username"
-                        class="form-control input input-bordered form-input auth-input" />
-                    <label class="label-text text-neutral-content/80">Password</label>
-                    <input v-model="signupData.password" required type="password" name="password"
-                        class="form-control input input-bordered form-input auth-input" @keyup.enter="onRegister" />
-                    <label class="label">
-                        <span class="label-text-alt"></span>
-                        <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.40]"
-                            @click="onDemo">
-                            Demo?
-                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                                x="0px" y="0px" viewBox="0 0 152.9 43.4" style="enable-background:new 0 0 152.9 43.4;"
-                                xml:space="preserve">
-                                <path
-                                    d="M151.9,13.6c0,0,3.3-9.5-85-8.3c-97,1.3-58.3,29-58.3,29s9.7,8.1,69.7,8.1c68.3,0,69.3-23.1,69.3-23.1 s1.7-10.5-14.7-18.4" />
-                            </svg>
-                        </span>
-                    </label>
-                </div>
+                                <label class="label-text text-neutral-content/80">Username</label>
+                                <input v-model="loginData.username" type="text" name="username"
+                                    class="form-control input input-bordered form-input auth-input"
+                                    @keyup.enter="onLogin" />
+                                <label class="label-text text-neutral-content/80">Password</label>
+                                <input v-model="loginData.password" type="password" name="password"
+                                    class="form-control input input-bordered form-input auth-input"
+                                    @keyup.enter="onLogin" />
+                                <label class="label">
+                                    <span class="label-text-alt"></span>
+                                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.40]"
+                                        @click="onDemo">
+                                        Demo?
+                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                            viewBox="0 0 152.9 43.4" style="enable-background:new 0 0 152.9 43.4;"
+                                            xml:space="preserve">
+                                            <path
+                                                d="M151.9,13.6c0,0,3.3-9.5-85-8.3c-97,1.3-58.3,29-58.3,29s9.7,8.1,69.7,8.1c68.3,0,69.3-23.1,69.3-23.1 s1.7-10.5-14.7-18.4" />
+                                        </svg>
+                                    </span>
+                                </label>
 
-                <div class="flex justify-center items-center w-full h-14 pr-3.5">
-                    <button type="submit" :class="signupTheme" @click="onRegister">
-                        <span>Register</span>
-                        <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
-                            <path d="M1,5 L11,5"></path>
-                            <polyline points="8 1 12 5 8 9"></polyline>
-                        </svg>
-                    </button>
-                </div>
+                            </div>
 
-                <button
-                    class="modal-action justify-center label-text-alt text-neutral-content/75 hover:text-neutral-content font-extralight link link-hover pb-2"
-                    @click="formSwitch">
-                    Have we met before?
+                            <div class="flex justify-center items-center w-full h-14 pr-3.5">
+                                <button type="submit" :class="loginTheme" @click="onLogin">
+                                    <span>Log in</span>
+                                    <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
+                                        <path d="M1,5 L11,5"></path>
+                                        <polyline points="8 1 12 5 8 9"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <button
+                                class="modal-action justify-center label-text-alt text-neutral-content/80 hover:text-neutral-content font-extralight link link-hover pb-2"
+                                @click="popModal('open', 'signup')">
+                                C'mon, sign up already!
+                            </button>
+
+                        </div>
+                    </div>
+                    <form method="dialog" class="modal-backdrop">
+                        <button @click="popModal('close', 'login')">close</button>
+                    </form>
+                </dialog>
+
+                <button class="btn-primary btn-outline btn-sm" @click="popModal('open', 'signup')">
+                    <div class="hover:text-neutral-content min-w-full h-full flex items-center">
+                        Signup
+                    </div>
                 </button>
 
-            </div>
+                <dialog ref="popSignup" class="modal">
+                    <div :class="formBg" method="dialog"
+                        class="modal-box w-auto max-fit px-9 pb-3 shadow-none">
+                        <h1 class="text-primary text-4xl text-center pt-4 pb-0.5">
+                            Register.
+                        </h1>
+                        <p class="text-neutral-content/80 text-center text-sm">
+                            Join the party!
+                        </p>
 
-        </div>
+                        <div class="card-body pt-5 pb-1.5 bg-none">
+                            <div class="focus:text-base-content bg-none">
+                                <label class="label-text text-neutral-content/80">Full Name</label>
+                                <input v-model="signupData.fullname" required type="text" name="fullname"
+                                    class="form-control input input-bordered form-input auth-input" />
+                                <label class="label-text text-neutral-content/80">Email</label>
+                                <input v-model="signupData.email" required type="email" name="email"
+                                    class="form-control input input-bordered form-input auth-input" />
+                                <label class="label-text text-neutral-content/80">Username</label>
+                                <input v-model="signupData.username" required type="text" name="username"
+                                    class="form-control input input-bordered form-input auth-input" />
+                                <label class="label-text text-neutral-content/80">Password</label>
+                                <input v-model="signupData.password" required type="password" name="password"
+                                    class="form-control input input-bordered form-input auth-input"
+                                    @keyup.enter="onRegister" />
+                                <label class="label">
+                                    <span class="label-text-alt"></span>
+                                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.40]"
+                                        @click="onDemo">
+                                        Demo?
+                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                            viewBox="0 0 152.9 43.4" style="enable-background:new 0 0 152.9 43.4;"
+                                            xml:space="preserve">
+                                            <path
+                                                d="M151.9,13.6c0,0,3.3-9.5-85-8.3c-97,1.3-58.3,29-58.3,29s9.7,8.1,69.7,8.1c68.3,0,69.3-23.1,69.3-23.1 s1.7-10.5-14.7-18.4" />
+                                        </svg>
+                                    </span>
+                                </label>
+                            </div>
 
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
-        </form>
-</dialog>
+                            <div class="flex justify-center items-center w-full h-14 pr-3.5">
+                                <button type="submit" :class="signupTheme" @click="onRegister">
+                                    <span>Register</span>
+                                    <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
+                                        <path d="M1,5 L11,5"></path>
+                                        <polyline points="8 1 12 5 8 9"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <button
+                                class="modal-action justify-center label-text-alt text-neutral-content/75 hover:text-neutral-content font-extralight link link-hover pb-2"
+                                @click="popModal('open', 'login')">
+                                Have we met before?
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <form method="dialog" class="modal-backdrop">
+                        <button>close</button>
+                    </form>
+                </dialog>
 
             </div>
 
@@ -413,7 +244,7 @@ function formSwitch() {
 
                 <div class="navbar-center flex">
                     <div class="drawer drawer-end">
-                        <input id="my-drawer-4" type="checkbox" class="drawer-toggle" :checked="drawerOpen"
+                        <input id="my-drawer-4" type="checkbox" class="drawer-toggle" :checked="popRef.drawer"
                             @click="toggleSide()" />
                         <div class="drawer-content px-1">
                             <label for="my-drawer-4"
@@ -422,32 +253,34 @@ function formSwitch() {
                                 <div v-if="userData.avatar && userData.avatar !== null" class="flex">
                                     <div class="avatar">
                                         <div class="max-h-[34px]"
-                                            :class="drawerOpen ? 'rounded-l-full w-[3.65rem]' : 'w-8 rounded-full'">
+                                            :class="popRef.drawer ? 'rounded-l-full w-[3.65rem]' : 'w-8 rounded-full'">
                                             <img :src="userData.avatar" class="object-contain" />
                                         </div>
                                     </div>
                                     <div class="flex bg-transparent font-medium text-primary text-xs md:text-sm">
-                                        <span v-if="drawerOpen" class="self-center pl-3">{{ userData.username }}</span>
+                                        <span v-if="popRef.drawer" class="self-center pl-3">{{ userData.username }}</span>
                                     </div>
                                 </div>
 
                                 <div v-if="!userData.avatar && userData.avatar !== null" class="flex">
                                     <div class="avatar placeholder max-h-[34px]">
-                                        <div v-if="drawerOpen" class="bg-secondary rounded-l-full min-w-[3.65rem] text-sm">
-                                            <span class="text-white self-center justify-center">{{ userData.initials }}</span>
+                                        <div v-if="popRef.drawer" class="bg-secondary rounded-l-full min-w-[3.65rem] text-sm">
+                                            <span class="text-white self-center justify-center">{{ userData.initials
+                                            }}</span>
                                         </div>
-                                        <div v-if="!drawerOpen" class="bg-secondary rounded-full w-8 text-xs">
-                                            <span class="text-white self-center justify-center">{{ userData.initials }}</span>
+                                        <div v-if="!popRef.drawer" class="bg-secondary rounded-full w-8 text-xs">
+                                            <span class="text-white self-center justify-center">{{ userData.initials
+                                            }}</span>
                                         </div>
                                         <!-- <div class="bg-secondary"
-                                            :class="drawerOpen ? 'rounded-l-full min-w-[3.65rem] text-sm' : 'rounded-full w-8 text-xs'">
+                                            :class="pop.drawer ? 'rounded-l-full min-w-[3.65rem] text-sm' : 'rounded-full w-8 text-xs'">
                                             <span class="text-white self-center justify-center">{{ userData.initials
                                             }}</span>
                                         </div> -->
                                     </div>
                                     <div
                                         class="flex bg-transparent font-medium text-primary text-xs md:text-sm max-h-[34px] w-full">
-                                        <span v-if="drawerOpen" class="self-center pl-3 w-full">{{
+                                        <span v-if="popRef.drawer" class="self-center pl-3 w-full">{{
                                             `${userData.username}` }} </span>
                                     </div>
                                 </div>
@@ -466,7 +299,7 @@ function formSwitch() {
                                     </NuxtLink>
                                 </li>
                                 <li><span class="hover:text-primary link link-hover hover:bg-transparent"
-                                        @click="logoutClick">
+                                        @click="onLogout">
                                         Logout
                                     </span></li>
 
@@ -506,37 +339,37 @@ function formSwitch() {
             </footer>
 
         </div>
-            <!-- BOTTOM NAV BAR -->
-    <div class="btm-nav text-sm font-medium z-30 md:hidden">
-        <button
-            :class="(route.path === '/') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
-            @click="navHome">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
-                <path
-                    d="M221.56,100.85,141.61,25.38l-.16-.15a19.93,19.93,0,0,0-26.91,0l-.17.15L34.44,100.85A20.07,20.07,0,0,0,28,115.55V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V164h24v44a20,20,0,0,0,20,20h48a20,20,0,0,0,20-20V115.55A20.07,20.07,0,0,0,221.56,100.85ZM204,204H164V160a20,20,0,0,0-20-20H112a20,20,0,0,0-20,20v44H52V117.28l76-71.75,76,71.75Z" />
-            </svg>
-            <span class="btm-nav-label">Home</span>
-        </button>
+        <!-- BOTTOM NAV BAR -->
+        <div class="btm-nav text-sm font-medium z-30 md:hidden">
+            <button
+                :class="(route.path === '/') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
+                @click="navHome">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
+                    <path
+                        d="M221.56,100.85,141.61,25.38l-.16-.15a19.93,19.93,0,0,0-26.91,0l-.17.15L34.44,100.85A20.07,20.07,0,0,0,28,115.55V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V164h24v44a20,20,0,0,0,20,20h48a20,20,0,0,0,20-20V115.55A20.07,20.07,0,0,0,221.56,100.85ZM204,204H164V160a20,20,0,0,0-20-20H112a20,20,0,0,0-20,20v44H52V117.28l76-71.75,76,71.75Z" />
+                </svg>
+                <span class="btm-nav-label">Home</span>
+            </button>
 
-        <button
-            :class="(route.path === '/events/new') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
-            @click="navNewEvent">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
-                <path
-                    d="M208,28H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28Zm-4,176H52V52H204ZM76,128a12,12,0,0,1,12-12h28V88a12,12,0,0,1,24,0v28h28a12,12,0,0,1,0,24H140v28a12,12,0,0,1-24,0V140H88A12,12,0,0,1,76,128Z" />
-            </svg>
-            <span class="btm-nav-label">New Event</span>
-        </button>
+            <button
+                :class="(route.path === '/events/new') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
+                @click="navNewEvent">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
+                    <path
+                        d="M208,28H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28Zm-4,176H52V52H204ZM76,128a12,12,0,0,1,12-12h28V88a12,12,0,0,1,24,0v28h28a12,12,0,0,1,0,24H140v28a12,12,0,0,1-24,0V140H88A12,12,0,0,1,76,128Z" />
+                </svg>
+                <span class="btm-nav-label">New Event</span>
+            </button>
 
-        <button
-            :class="(route.path === '/events') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
-            @click="navEvents">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
-                <path
-                    d="M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM68,52a12,12,0,0,0,24,0h72a12,12,0,0,0,24,0h16V76H52V52ZM52,204V100H204V204Zm120.49-84.49a12,12,0,0,1,0,17l-48,48a12,12,0,0,1-17,0l-24-24a12,12,0,0,1,17-17L116,159l39.51-39.52A12,12,0,0,1,172.49,119.51Z" />
-            </svg>
+            <button
+                :class="(route.path === '/events') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
+                @click="navEvents">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
+                    <path
+                        d="M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM68,52a12,12,0,0,0,24,0h72a12,12,0,0,0,24,0h16V76H52V52ZM52,204V100H204V204Zm120.49-84.49a12,12,0,0,1,0,17l-48,48a12,12,0,0,1-17,0l-24-24a12,12,0,0,1,17-17L116,159l39.51-39.52A12,12,0,0,1,172.49,119.51Z" />
+                </svg>
             <span class="btm-nav-label">Your Events</span>
         </button>
     </div>
-    </div>
+</div>
 </template>

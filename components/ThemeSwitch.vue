@@ -21,6 +21,7 @@ watchEffect(() => {
     mode.value = state.value as any;
     themeCookie.value = state.value as any;
 });
+
 // ----------------------------------------------------------------
 </script>
 

@@ -2,8 +2,8 @@
 const emit = defineEmits(['coverPicInput', 'modalState']);
 const gifs = ref<string[]>([]);
 const pics = ref<string[]>([]);
-const coverSelect = ref('');
 
+const coverSelect = ref<string>('');
 const coverQuery = ref<string>('');
 const storedQuery = reactive({
     giphy: '',
@@ -182,6 +182,7 @@ async function selectCover(img: string, pop: boolean) {
     emit('modalState', pop);
     console.log('COVER PIC:', coverSelect.value);
 }
+// ----------------------------------------------------------------
 </script>
 
 <template>

@@ -1,32 +1,20 @@
 <script setup lang="ts">
-import { shortDate } from '~/utils/misc';
-
 definePageMeta({
     middleware: ['auth'],
 });
 
-const client = useStrapiClient();
-const { id: myId } = useStrapiUser().value as any;
-const { strapi: { url: appHost }, weatherAPI } = useRuntimeConfig().public;
-
-const { path } = useRoute();
-const { toast } = useMisc();
+const { myId, appHost, client } = useAuth();
+const { shortDate } = useDateTime();
 
 const myEvents: Record<string, any> = ref([]);
 const inviteCount = ref<number>();
 const eventTab = ref<string>('all');
-
 const isLoading = ref<boolean>(true);
 // ----------------------------------------------------------------
 onMounted(() => {
     isLoading.value = true;
     getMyEvents(myId);
 });
-
-watchEffect(() => {
-    console.log('myEvents.value', myEvents.value);
-});
-
 // ----------------------------------------------------------------
 async function getMyEvents(userId: number) {
     isLoading.value = true;
