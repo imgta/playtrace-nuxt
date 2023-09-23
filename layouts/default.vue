@@ -103,11 +103,11 @@ function navNewEvent() {
 
                             <div class="focus:text-base-content bg-none">
 
-                                <label class="label-text text-neutral-content/80">Username</label>
+                                <label class="label-text text-xs text-neutral-content/80">username or email</label>
                                 <input v-model="loginData.username" type="text" name="username"
                                     class="form-control input input-bordered form-input auth-input"
                                     @keyup.enter="onLogin" />
-                                <label class="label-text text-neutral-content/80">Password</label>
+                                <label class="label-text text-xs text-neutral-content/80">password</label>
                                 <input v-model="loginData.password" type="password" name="password"
                                     class="form-control input input-bordered form-input auth-input"
                                     @keyup.enter="onLogin" />
@@ -169,16 +169,16 @@ function navNewEvent() {
 
                         <div class="card-body pt-5 pb-1.5 bg-none">
                             <div class="focus:text-base-content bg-none">
-                                <label class="label-text text-neutral-content/80">Full Name</label>
+                                <label class="label-text text-xs text-neutral-content/80">full name</label>
                                 <input v-model="signupData.fullname" required type="text" name="fullname"
                                     class="form-control input input-bordered form-input auth-input" />
-                                <label class="label-text text-neutral-content/80">Email</label>
+                                <label class="label-text text-xs text-neutral-content/80">email</label>
                                 <input v-model="signupData.email" required type="email" name="email"
                                     class="form-control input input-bordered form-input auth-input" />
-                                <label class="label-text text-neutral-content/80">Username</label>
+                                <label class="label-text text-xs text-neutral-content/80">username</label>
                                 <input v-model="signupData.username" required type="text" name="username"
                                     class="form-control input input-bordered form-input auth-input" />
-                                <label class="label-text text-neutral-content/80">Password</label>
+                                <label class="label-text text-xs text-neutral-content/80">password</label>
                                 <input v-model="signupData.password" required type="password" name="password"
                                     class="form-control input input-bordered form-input auth-input"
                                     @keyup.enter="onRegister" />

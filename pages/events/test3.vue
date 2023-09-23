@@ -4,15 +4,12 @@ definePageMeta({
 });
 const { brevoMailAPI } = useRuntimeConfig().public;
 const { inviteEmail } = useBrevo(brevoMailAPI);
-const fromEmail = '200okteam@gmail.com';
 const toEmail = 'gphamta@gmail.com';
 const fullName = 'Gordon T';
-const message = 'hello';
 
 // ----------------------------------------------------------------
 onMounted(() => {
     // console.log('brevoMailAPI', brevoMailAPI);
-    // inviteEmail(fromEmail, toEmail, fullName, message);
 });
 // ----------------------------------------------------------------
 
@@ -21,6 +18,8 @@ onMounted(() => {
 
 <template>
 <div>
-
+    <!-- <button @click="inviteEmail">
+        Email Notify
+    </button> -->
 </div>
 </template>

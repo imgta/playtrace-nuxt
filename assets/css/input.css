@@ -16,7 +16,8 @@ img:not([src]) {
     color: hsl(var(--bc) / 0.9);
 }
 .auth-input {
-    color: hsl(var(--bc) / 0.9);
+    color: hsl(var(--bc));
+    font-weight: 500;
 }
 .form-input, .invite-search {
     background-color: transparent;

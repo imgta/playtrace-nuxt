@@ -5,35 +5,18 @@ definePageMeta({
 
 const { toast } = useMisc();
 const { client, appHost, myId } = useAuth();
+const { shortDate } = useDateTime();
+const { isLoading, eventData, getEvent } = useEvent();
+
 const themeCookie = useCookie('selectedTheme');
 const pageTheme = ref(themeCookie).value as any;
 const { formBg } = useTheme(pageTheme);
 
 const eventId = Number(useRoute().params.id);
 
-const { shortDate } = useDateTime();
-
 const userRsvp = ref();
 const inviteId = ref();
 const eventObj = ref();
-
-const eventData = reactive({
-    creatorId: '',
-    creatorUser: '',
-    title: '',
-    startDate: '',
-    partySize: '',
-    coverCharge: '',
-    info: '',
-    eventPic: '',
-    location: [],
-    categories: [],
-    eventInvites: [],
-    userInvites: [],
-    newInvites: [],
-    receipts: [],
-    spots: '',
-}) as any;
 
 const popDelete = ref<any | null>(null);
 const popRsvp = ref<any | null>(null);
@@ -44,7 +27,7 @@ const eventBtnClass = ref('');
 const createInviteAPI = ref<boolean>(false);
 
 const inputClass = ref('w-[10rem]');
-const isLoading = ref<boolean>(true);
+
 // ----------------------------------------------------------------
 onMounted(() => {
     getEvent(eventId);
@@ -56,7 +39,6 @@ watchEffect(() => {
     } else {
         eventBtnClass.value = 'before:rounded-[100rem]';
     }
-    console.log('eventData', eventData);
 });
 const inputValid = computed(() => {
     if (eventData.newInvites.length < 1) {
@@ -68,53 +50,6 @@ const inputValid = computed(() => {
     return inputClass.value;
 });
 // ----------------------------------------------------------------
-async function getEvent(eventId: number) {
-    isLoading.value = true;
-    try {
-        const eventRes: Record<string, any> = await client(`${appHost}api/events/${eventId}?populate[0]=initiator.avatar&populate[1]=initiator.wallets&populate[2]=eventPic&populate[3]=location&populate[4]=eventReceipt.receiptItem&populate[5]=invited_users.users_permissions_user`, {
-            method: 'GET'
-        });
-        const {
-            title, startDate, partySize, coverCharge, info, location, eventReceipt,
-            eventPic: { data: { attributes: { url: eventPic } } },
-            initiator: { data: { id: initiatorId } },
-            initiator: { data: { attributes: { username: initiatorUser } } },
-            invited_users: { data: invites },
-        } = await eventRes.data.attributes;
-
-        eventData.creatorId = await initiatorId;
-        eventData.creatorUser = await initiatorUser;
-        eventData.title = await title;
-        eventData.startDate = await startDate;
-        eventData.partySize = await partySize;
-        eventData.coverCharge = await coverCharge;
-        eventData.info = await info;
-        eventData.eventPic = await eventPic;
-        eventData.location = await location;
-        eventData.eventInvites = await invites;
-        eventData.receipts.value = await eventReceipt;
-
-        eventData.categories.push(eventData.location[0]?.category.split(', '));
-
-        // Calculate remaining open spots
-        // Push all invited usernames from eventInvites to userInvites array
-        let going = 0;
-        eventData.eventInvites.forEach(async (invite: Record<string, any>) => {
-            if (invite.attributes.eventStatus === 'going') {
-                going++;
-            }
-            const invitedUser = invite.attributes.users_permissions_user.data.attributes.username;
-            (eventData.userInvites).push({ 'username': invitedUser });
-        });
-        eventData.spots = eventData.partySize - going;
-
-        console.log('eventData.userInvites', eventData.userInvites);
-    } catch (error) {
-        console.error(error);
-    } finally {
-        isLoading.value = false;
-    }
-}
 
 async function getInvite(eventId: number, myId: number) {
     isLoading.value = true;

@@ -1,5 +1,5 @@
 export default function (brevoAPI: any) {
-    async function inviteEmail(fromEmail: string, toEmail: string, toName: string, message: string) {
+    async function inviteEmail(toEmail: string, toName: string) {
         const response = await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
             headers: {
@@ -10,15 +10,15 @@ export default function (brevoAPI: any) {
             body: JSON.stringify({
                 sender: {
                     name: 'playTrace',
-                    email: fromEmail,
+                    email: '200okteam@gmail.com',
                 },
                 to: [{ email: toEmail, name: toName }],
                 replyTo: {
-                    email: fromEmail,
+                    email: '200okteam@gmail.com',
                     name: 'playTrace',
                 },
                 subject: 'playTrace: An invitation awaits',
-                textContent: message,
+                textContent: `Hello ${toName} you have been invited!`,
             }),
         });
 
