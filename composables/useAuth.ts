@@ -9,6 +9,7 @@ export default function () {
         const token = useStrapiToken().value;
         return token;
     });
+    const { username: myUsername } = useStrapiUser().value as any;
 
     const { value: myId } = computed(() => {
         if (token) {
@@ -26,6 +27,7 @@ export default function () {
         fullName: '',
         initials: '',
         avatar: '',
+        profileUrl: '',
     }) as Record<string, any>;
 
     const loginData = reactive({
@@ -85,6 +87,7 @@ export default function () {
             userData.username = username;
             userData.fullName = fullName;
             userData.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
+            userData.profileUrl = `/${userData.username}`;
         } catch (error) {
             console.error(error);
         } finally {
@@ -175,6 +178,7 @@ export default function () {
         appHost,
         client,
         userData,
+        myUsername,
         loginData,
         signupData,
         popLogin,

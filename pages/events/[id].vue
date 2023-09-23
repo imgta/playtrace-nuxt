@@ -3,10 +3,9 @@ definePageMeta({
     middleware: ['auth'],
 });
 
-const { toast } = useMisc();
-const { client, appHost, myId } = useAuth();
+const { myId } = useAuth();
 const { shortDate } = useDateTime();
-const { isLoading, eventData, getEvent } = useEvent();
+const { isLoading, createInviteAPI, popDelete, popRsvp, openRsvp, closeRsvp, rsvpModal, getEvent, eventData, getInvite, rsvpEvent, deleteEvent, openDelete, closeDelete, userRsvp, inviteId, eventObj, createInvites, inviteUser, removeInvite, userSearch } = useEvent();
 
 const themeCookie = useCookie('selectedTheme');
 const pageTheme = ref(themeCookie).value as any;
@@ -14,17 +13,7 @@ const { formBg } = useTheme(pageTheme);
 
 const eventId = Number(useRoute().params.id);
 
-const userRsvp = ref();
-const inviteId = ref();
-const eventObj = ref();
-
-const popDelete = ref<any | null>(null);
-const popRsvp = ref<any | null>(null);
-const rsvpModal = ref(false);
-
-const userSearch = ref('');
 const eventBtnClass = ref('');
-const createInviteAPI = ref<boolean>(false);
 
 const inputClass = ref('w-[10rem]');
 
@@ -51,202 +40,6 @@ const inputValid = computed(() => {
 });
 // ----------------------------------------------------------------
 
-async function getInvite(eventId: number, myId: number) {
-    isLoading.value = true;
-    try {
-        const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users?populate=*&filters[$and][0][collection][$eq]=event&filters[$and][1][users_permissions_user][id][$eq]=${myId}&filters[$and][2][event][id][$eq]=${eventId}`);
-        const {
-            id,
-            attributes: { eventStatus },
-            attributes: { event },
-        } = await inviteRes.data[0];
-
-        userRsvp.value = eventStatus;
-        inviteId.value = id;
-        eventObj.value = event.data;
-    } catch (error) {
-        console.error(error);
-    } finally {
-        isLoading.value = false;
-    }
-}
-
-async function rsvpEvent(eventId: number, inviteId: number, rsvp: string) {
-    const rsvpForm = new FormData();
-    const rsvpObj = {
-        eventStatus: `${rsvp}`
-    };
-    rsvpForm.append('data', JSON.stringify(rsvpObj));
-    try {
-        const rsvpRes: Record<string, any> = await client(`${appHost}api/invited-users/${inviteId}`, {
-            method: 'PUT',
-            body: rsvpForm,
-        });
-        const rsvpData = await rsvpRes.data;
-        closeRsvp();
-    } catch (error) {
-        console.error(error);
-    } finally {
-        if (rsvp === 'going') {
-            toast.info('RSVP: Going!', { timeout: 1500 });
-        } else if (rsvp === 'maybe') {
-            toast.warning('RSVP: Maybe?', { timeout: 1500 });
-        } else if (rsvp === 'noGo') {
-            toast.error('RSVP: Not going.', { timeout: 1500 });
-        }
-        await getInvite(eventId, myId);
-    }
-};
-
-// TODO: add intermediary loader during delete cascade
-async function deleteEvent(eventId: number) {
-    try {
-        closeDelete();
-        // (1) Fetch and isolate target event data for cascade deletion
-        const delEventRes: Record<string, any> = await client(`${appHost}api/events?populate=deep,3&filters[id][$eq]=${eventId}`, {
-            method: 'GET'
-        });
-        const {
-            id: delEventId,
-            attributes: { eventPic: { data: { id: delEventPicId } } },
-        } = await delEventRes.data[0];
-        const delInviteIds = delEventRes.data[0].attributes.invited_users.data.map((invite: any) => invite.id);
-
-        // (2a) Delete upload media file for eventPic (Strapi + AWS S3)
-        try {
-            const delEventPicRes: any = await client(`${appHost}api/upload/files/${delEventPicId}`, {
-                method: 'DELETE',
-            });
-            console.log('delEventPicRes', await delEventPicRes);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            toast.info('Event picture deleted!', { timeout: 1500 });
-        }
-
-        // (2b) Delete each invitedUser relational instance for target event
-        try {
-            const delInviteRequests = delInviteIds.map(async (id: number) => {
-                const delInvitesRes: any = await client(`${appHost}api/invited-users/${id}`, {
-                    method: 'DELETE',
-                });
-                const delInviteResult = await delInvitesRes.data;
-                console.log('delInviteResult', delInviteResult);
-            });
-            await Promise.all(delInviteRequests);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            toast.info('All event invites deleted!', { timeout: 1500 });
-        }
-
-        // (2c) Finally, delete target event
-        try {
-            const delEventRes: any = await client(`${appHost}api/events/${delEventId}`, {
-                method: 'DELETE',
-            });
-            const delEventResult = await delEventRes.data;
-            console.log('delEventResult', delEventResult);
-        } catch (error) {
-            console.error(error);
-        }
-    } catch (error) {
-        console.error(error);
-    } finally {
-        toast.info('Event deleted!', { timeout: 1500 });
-        getInvite(eventId, myId);
-        await navigateTo('/events');
-    }
-}
-
-function openDelete() {
-    popDelete.value.showModal();
-}
-function closeDelete() {
-    popDelete.value.close();
-}
-function openRsvp() {
-    popRsvp.value.showModal();
-    rsvpModal.value = true;
-}
-function closeRsvp() {
-    popRsvp.value.close();
-    rsvpModal.value = false;
-}
-
-async function createInvites(eventObj: Record<string, any>) {
-    try {
-        createInviteAPI.value = true;
-        for (const inviteUser of eventData.newInvites) {
-            const inviteForm = new FormData();
-            const inviteObj = {
-                users_permissions_user: inviteUser,
-                collection: 'event',
-                event: eventObj,
-                eventStatus: 'invited',
-            };
-            inviteForm.append('data', JSON.stringify(inviteObj));
-
-            try {
-                createInviteAPI.value = true;
-                const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
-                    method: 'POST',
-                    body: inviteForm,
-                });
-                const inviteData = await inviteRes.data;
-                console.log('inviteData', inviteData);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                toast.info(`${inviteUser.username} invited!`, { timeout: 1200 });
-                removeInvite(inviteUser);
-            }
-        }
-    } catch (error) {
-        console.error(error);
-    } finally {
-        createInviteAPI.value = false;
-    }
-}
-
-async function inviteUser() {
-    try {
-        const username = userSearch.value.trim();
-        // Check if user has already been added to userInvites array
-        // Note: invitation for initiator (host) will already be created on event creation
-        if (eventData.userInvites.some((user: any) => user.username === username)) {
-            toast.info('User is already on the invite list!', { timeout: 1700 });
-            userSearch.value = '';
-            return;
-        }
-        // Check if username exists in database
-        const userRes: Record<string, any> = await client(`${appHost}api/users?filters[username][$eq]=${username}`, {
-            method: 'GET'
-        });
-        console.log('userRes', userRes);
-        const inputUser = userRes[0];
-        if (userRes && inputUser) {
-            try {
-                eventData.userInvites.push({ 'username': inputUser.username });
-                eventData.newInvites.push(inputUser);
-                userSearch.value = '';
-            } catch (error) {
-                console.error(error);
-            }
-        } else {
-            toast.error('User not found!', { timeout: 1700 });
-            userSearch.value = '';
-        }
-    } catch (error) {
-        console.error(error);
-    } finally {
-        console.log('newInvites', eventData.newInvites);
-    }
-}
-function removeInvite(index: any) {
-    eventData.newInvites.splice(index, 1);
-}
-
 function googleMaps(address: string) {
     return `https://www.google.com/maps/place/${address.replaceAll(' ', '+')}`;
 }
@@ -255,7 +48,7 @@ function googleMaps(address: string) {
 
 <template>
     <div class="px-10 pt-5 md:px-10">
-        <div class="max-w-[50rem] mx-auto bg-base-100 md:max-h-[27.75rem] md:max-w-[60rem]">
+        <div class="event-dash">
             <div class="md:flex">
 
                 <!-- COVER PIC -->
@@ -269,18 +62,18 @@ function googleMaps(address: string) {
                 <div class="md:grow pl-5 pr-3 py-2.5">
 
                     <!-- TOP RIGHT MODALS -->
-                    <div class="flex justify-end pt-0.5 pb-4">
+                    <div class="flex justify-end pt-0.5 pb-2">
                         <!-- INVITE RSVP MODAL -->
                         <div v-if="myId !== eventData.creatorId" class="self-end shake">
                             <svg v-if="!rsvpModal" class="w-4 hover:cursor-pointer"
-                                :class="(userRsvp === 'going') ? 'fill-info' : (userRsvp === 'maybe') ? 'fill-accent' : (userRsvp === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-info'"
+                                :class="(userRsvp === 'going') ? 'fill-info' : (userRsvp === 'maybe') ? 'fill-warning' : (userRsvp === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-info'"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" @click="openRsvp()">
                                 <path
                                     d="M224,44H32A12,12,0,0,0,20,56V192a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A12,12,0,0,0,224,44ZM193.15,68,128,127.72,62.85,68ZM44,188V83.28l75.89,69.57a12,12,0,0,0,16.22,0L212,83.28V188Z">
                                 </path>
                             </svg>
                             <svg v-if="rsvpModal" class="w-4"
-                                :class="(userRsvp === 'going') ? 'fill-info' : (userRsvp === 'maybe') ? 'fill-accent' : (userRsvp === 'noGo') ? 'fill-error' : 'fill-info/75'"
+                                :class="(userRsvp === 'going') ? 'fill-info' : (userRsvp === 'maybe') ? 'fill-warning' : (userRsvp === 'noGo') ? 'fill-error' : 'fill-info/75'"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
                                 <path
                                     d="M230.66,86l-96-64a12,12,0,0,0-13.32,0l-96,64A12,12,0,0,0,20,96V200a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V96A12,12,0,0,0,230.66,86ZM128,46.42l74.86,49.91L141.61,140H114.39L53.14,96.33ZM44,196V119.29l59.58,42.48a12,12,0,0,0,7,2.23h34.9a12,12,0,0,0,7-2.23L212,119.29V196Z">
@@ -288,7 +81,7 @@ function googleMaps(address: string) {
                             </svg>
                         </div>
                         <dialog ref="popRsvp" class="modal">
-                            <div :class="formBg" method="dialog" class="modal-box w-auto max-fit px-9 pt-6shadow-none">
+                            <div :class="formBg" method="dialog" class="modal-box w-auto max-fit px-9 pt-6 shadow-none">
                                 <h3 className="text-neutral-content font-medium text-sm absolute left-3.5 top-3">
                                     RSVP</h3>
                                 <button
@@ -428,14 +221,14 @@ function googleMaps(address: string) {
                     <div class="pb-2">
                         <div v-if="isLoading">
                             <div
-                                class="flex justify-center text-center tracking-wide text-xl md:text-2xl lg:text-3xl text-primary font-semibold blur-md animate-pulse">
+                                class="flex justify-center text-center tracking-wide text-3xl md:text-2xl lg:text-3xl text-primary font-semibold blur-md animate-pulse">
                                 Event Title</div>
                             <div
                                 class="flex justify-center font-medium text-xs lg:text-sm text-base-content/80 blur-md animate-pulse">
                                 Next Sun • 12:45AM</div>
                         </div>
                         <div :class="isLoading ? 'hidden' : ''"
-                            class="flex justify-center text-center tracking-wide text-xl md:text-2xl lg:text-3xl text-primary font-semibold">
+                            class="flex justify-center text-center tracking-wide text-3xl md:text-2xl lg:text-3xl text-primary font-semibold">
                             {{ eventData.title }}</div>
                         <div :class="isLoading ? 'hidden' : ''"
                             class="flex justify-center font-medium text-xs lg:text-sm text-base-content/80">{{
@@ -598,6 +391,30 @@ function googleMaps(address: string) {
                 </div>
             </div>
         </div>
+
+        <div class="divider m-0 px-2"></div>
+
+        <!-- <div class="event-dash comments">
+            <div class="flex p-2 justify-between">
+
+                <div class="items-center align-middle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="inline w-6 fill-base-content/75" viewBox="0 0 256 256"><path d="M128,20a108,108,0,1,0,31.74,211.26,12,12,0,0,0,5-3l63.57-63.57a12.05,12.05,0,0,0,3-5A108.08,108.08,0,0,0,128,20Zm81.12,129.91-59.2,59.2a83.87,83.87,0,1,1,59.2-59.2ZM76,108a16,16,0,1,1,16,16A16,16,0,0,1,76,108Zm104,0a16,16,0,1,1-16-16A16,16,0,0,1,180,108Zm-1.61,50c-11,19.06-29.39,30-50.39,30s-39.36-10.93-50.39-30a12,12,0,0,1,20.78-12c3.89,6.73,12.91,18,29.61,18s25.72-11.28,29.61-18a12,12,0,1,1,20.78,12Z"></path></svg>
+                    <span class="inline align-middle pl-1 font-normal">React</span>
+                </div>
+
+                <div class="items-center align-middle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="inline w-6 fill-base-content/75 -scale-x-100" viewBox="0 0 256 256"><path d="M216,44H40A20,20,0,0,0,20,64V224A19.82,19.82,0,0,0,31.56,242.1a20.14,20.14,0,0,0,8.49,1.9,19.91,19.91,0,0,0,12.82-4.72l.19-.16L84,212H216a20,20,0,0,0,20-20V64A20,20,0,0,0,216,44Zm-4,144H82.5a20,20,0,0,0-12.87,4.69l-.19.16L44,215.14V68H212ZM84,108A12,12,0,0,1,96,96h64a12,12,0,1,1,0,24H96A12,12,0,0,1,84,108Zm0,40a12,12,0,0,1,12-12h64a12,12,0,0,1,0,24H96A12,12,0,0,1,84,148Z"></path></svg>
+                    <span class="inline align-middle pl-1">Comment</span>
+                </div>
+
+                <div class="items-center align-middle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="inline w-6 fill-base-content/75" viewBox="0 0 256 256"><path d="M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM68,52a12,12,0,0,0,24,0h72a12,12,0,0,0,24,0h16V76H52V52ZM52,204V100H204V204Zm112-52a12,12,0,0,1-12,12H140v12a12,12,0,0,1-24,0V164H104a12,12,0,0,1,0-24h12V128a12,12,0,0,1,24,0v12h12A12,12,0,0,1,164,152Z"></path></svg>
+                    <span class="inline align-middle pl-1">Add</span>
+                </div>
+
+            </div>
+        </div> -->
+
     </div>
 </div>
 </template>

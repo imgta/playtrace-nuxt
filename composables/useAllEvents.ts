@@ -71,8 +71,9 @@ export default function () {
                 const goingCount = invites.filter((invite: Record<string, any>) => {
                     return invite.attributes.eventStatus === 'going';
                 }).length;
+                const hostUrl = `/${host}`;
 
-                return { eventId, eventStatus, title, host, hostName, hostFirstName, hostLastName, hostInitials, hostId, hostAvatar, startDate, coverUrl, partySize, goingCount, zipcode };
+                return { eventId, eventStatus, title, host, hostName, hostFirstName, hostLastName, hostInitials, hostId, hostAvatar, hostUrl, startDate, coverUrl, partySize, goingCount, zipcode };
             });
         } catch (error) {
             console.error(error);
