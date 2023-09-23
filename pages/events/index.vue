@@ -97,6 +97,7 @@ function clickEventDisplay(type: string) {
 
                     <div class="flex justify-between pb-1.5">
 
+                        <NuxtLink :to="ev.hostUrl">
                         <div class="flex justify-center items-center text-sm font-medium">
                             <div class="con-hint top-none sm:order-first ">
                                 <div class="hint">
@@ -123,13 +124,13 @@ function clickEventDisplay(type: string) {
                                     </div>
                                 </div>
                             </div>
-
                             <span class="align-super pl-1.5 font-semibold">
-                                {{ ev.hostFirstName }}
-                                <span v-if="myId !== ev.hostId && ev.eventStatus === 'going'" class="font-medium">
+                                {{ myId === ev.hostId ? 'You!' : ev.hostFirstName }}
+                                <span v-if="myId !== ev.hostId && ev.eventStatus !== 'going'" class="font-medium">
                                     <span class="text-accent"> invited you!</span></span>
                             </span>
                         </div>
+                    </NuxtLink>
 
                         <div class="flex items-center text-xs font-semibold">
                             <!-- <svg xmlns="http://www.w3.org/2000/svg" class="inline-flex fill-base-content/80 w-5"

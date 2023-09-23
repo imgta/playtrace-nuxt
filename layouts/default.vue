@@ -294,7 +294,7 @@ function navNewEvent() {
                                 class="menu p-2 w-36 min-h-full bg-base-200 text-primary/80 content-center text-xs md:text-sm">
                                 <!-- Sidebar content here -->
                                 <li>
-                                    <NuxtLink to="/user/me" class="hover:text-primary link link-hover hover:bg-transparent">
+                                    <NuxtLink :to="userData.profileUrl" class="hover:text-primary link link-hover hover:bg-transparent">
                                         Profile
                                     </NuxtLink>
                                 </li>
