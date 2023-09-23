@@ -113,7 +113,7 @@ function navNewEvent() {
                                     @keyup.enter="onLogin" />
                                 <label class="label">
                                     <span class="label-text-alt"></span>
-                                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.40]"
+                                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.25]"
                                         @click="onDemo">
                                         Demo?
                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -184,7 +184,7 @@ function navNewEvent() {
                                     @keyup.enter="onRegister" />
                                 <label class="label">
                                     <span class="label-text-alt"></span>
-                                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.40]"
+                                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.25]"
                                         @click="onDemo">
                                         Demo?
                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg"

@@ -79,8 +79,8 @@ function clickEventDisplay(type: string) {
                     :class="((ev.eventStatus === 'invited') && pastEventCheck(ev.startDate)) ? 'grayscale' : (ev.eventStatus === 'invited') ? 'blur-[1.83px]' : pastEventCheck(ev.startDate) ? 'grayscale' : ''"
                     @click="clickEventPage(ev.eventId)">
 
-                        <img :src="ev.coverUrl" class="h-[200px] lg:h-[225px] w-full object-cover" />
-                        <!-- <span class="absolute top-2 right-4 text-xl font-medium text-accent" :class="ev.eventStatus === 'invited' ? '' : 'hidden'">Invited</span> -->
+                    <img :src="ev.coverUrl" class="h-[200px] lg:h-[225px] w-full object-cover" />
+                    <!-- <span class="absolute top-2 right-4 text-xl font-medium text-accent" :class="ev.eventStatus === 'invited' ? '' : 'hidden'">Invited</span> -->
 
                 </figure>
 
@@ -98,39 +98,39 @@ function clickEventDisplay(type: string) {
                     <div class="flex justify-between pb-1.5">
 
                         <NuxtLink :to="ev.hostUrl">
-                        <div class="flex justify-center items-center text-sm font-medium">
-                            <div class="con-hint top-none sm:order-first ">
-                                <div class="hint">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 fill-warning" viewBox="0 0 256 256">
-                                        <path
-                                            d="M246.46,73.17a16,16,0,0,0-17.74-2.26l-46.9,23.38-40-66.49a16.11,16.11,0,0,0-27.6,0l-40,66.49L27.31,70.92A16.1,16.1,0,0,0,4.82,90.35l37,113.35a12,12,0,0,0,17.51,6.61C59.57,210.17,84.39,196,128,196s68.43,14.19,68.62,14.3a12,12,0,0,0,17.57-6.58l37-113.29A16,16,0,0,0,246.46,73.17ZM195.53,183.52C182.18,178.4,159.2,172,128,172s-54.18,6.42-67.53,11.54l-27-82.71L70,119a16.18,16.18,0,0,0,21-6.11l37-61.49,37,61.5a16.18,16.18,0,0,0,21,6.1l36.52-18.2Zm-19.67-31A12,12,0,0,1,164,162.69a12.91,12.91,0,0,1-1.85-.14,229.32,229.32,0,0,0-68.34,0,12,12,0,0,1-3.66-23.72,253.38,253.38,0,0,1,75.66,0A12,12,0,0,1,175.86,152.52Z">
-                                        </path>
-                                    </svg>
-                                </div>
-
-                                <div v-if="ev.hostAvatar" class="inline avatar hover:cursor-pointer">
-                                    <div class="w-8 rounded-full">
-                                        <img :src="ev.hostAvatar" class="object-contain" />
+                            <div class="flex justify-center items-center text-sm font-medium">
+                                <div class="con-hint top-none sm:order-first ">
+                                    <div class="hint">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 fill-warning"
+                                            viewBox="0 0 256 256">
+                                            <path
+                                                d="M246.46,73.17a16,16,0,0,0-17.74-2.26l-46.9,23.38-40-66.49a16.11,16.11,0,0,0-27.6,0l-40,66.49L27.31,70.92A16.1,16.1,0,0,0,4.82,90.35l37,113.35a12,12,0,0,0,17.51,6.61C59.57,210.17,84.39,196,128,196s68.43,14.19,68.62,14.3a12,12,0,0,0,17.57-6.58l37-113.29A16,16,0,0,0,246.46,73.17ZM195.53,183.52C182.18,178.4,159.2,172,128,172s-54.18,6.42-67.53,11.54l-27-82.71L70,119a16.18,16.18,0,0,0,21-6.11l37-61.49,37,61.5a16.18,16.18,0,0,0,21,6.1l36.52-18.2Zm-19.67-31A12,12,0,0,1,164,162.69a12.91,12.91,0,0,1-1.85-.14,229.32,229.32,0,0,0-68.34,0,12,12,0,0,1-3.66-23.72,253.38,253.38,0,0,1,75.66,0A12,12,0,0,1,175.86,152.52Z">
+                                            </path>
+                                        </svg>
                                     </div>
-                                </div>
 
-                                <div v-else class="flex items-center avatar hover:cursor-pointer">
-                                    <div class="inline avatar placeholder w-8 rounded-full text-sm hover:cursor-pointer">
-                                        <div class="bg-secondary">
-                                            <span class="">{{ ev.hostInitials }}</span>
+                                    <div v-if="ev.hostAvatar" class="inline avatar hover:cursor-pointer">
+                                        <div class="w-8 rounded-full">
+                                            <img :src="ev.hostAvatar" class="object-contain" />
                                         </div>
                                     </div>
-                                    <div class="flex bg-transparent font-medium text-primary text-xs md:text-sm">
+
+                                    <div v-else class="flex items-center avatar hover:cursor-pointer">
+                                        <div
+                                            class="inline avatar placeholder w-8 rounded-full text-sm hover:cursor-pointer">
+                                            <div class="bg-secondary">
+                                                <span class="">{{ ev.hostInitials }}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                                <span class="align-super pl-1.5 font-semibold">
+                                    {{ myId === ev.hostId ? 'You!' : ev.hostFirstName }}
+                                    <span v-if="myId !== ev.hostId && ev.eventStatus !== 'going'" class="font-medium">
+                                        <span class="text-accent"> invited you!</span></span>
+                                </span>
                             </div>
-                            <span class="align-super pl-1.5 font-semibold">
-                                {{ myId === ev.hostId ? 'You!' : ev.hostFirstName }}
-                                <span v-if="myId !== ev.hostId && ev.eventStatus !== 'going'" class="font-medium">
-                                    <span class="text-accent"> invited you!</span></span>
-                            </span>
-                        </div>
-                    </NuxtLink>
+                        </NuxtLink>
 
                         <div class="flex items-center text-xs font-semibold">
                             <!-- <svg xmlns="http://www.w3.org/2000/svg" class="inline-flex fill-base-content/80 w-5"

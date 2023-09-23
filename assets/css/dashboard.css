@@ -101,3 +101,7 @@
     max-width: 33rem;
     border-radius: var(--rounded-btn, 0.5rem);
 }
+
+.avatar.placeholder div span {
+    color: hsl(var(--nc));
+}
