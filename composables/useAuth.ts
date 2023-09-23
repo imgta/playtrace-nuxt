@@ -9,7 +9,8 @@ export default function () {
         const token = useStrapiToken().value;
         return token;
     });
-    const { username: myUsername } = useStrapiUser() as any;
+    const user = useStrapiUser();
+    const myUsername = user.value?.username;
 
     const { value: myId } = computed(() => {
         if (token) {

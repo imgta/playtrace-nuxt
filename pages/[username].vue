@@ -13,8 +13,8 @@ onMounted(() => {
     userByUsername(pageUsername); ;
 });
 watchEffect(() => {
-    // console.log('pageUsername', pageUsername);
-    // console.log('myUsername', myUsername);
+    console.log('pageUsername', pageUsername);
+    console.log('myUsername', myUsername);
 });
 // ----------------------------------------------------------------
 function openAvatar() {
