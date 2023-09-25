@@ -103,7 +103,7 @@ function openAvatar() {
                 <p class="text-3xl font-medium tracking-tight text-primary pb-0.5">{{ profile.fullName }}</p>
 
                 <div class="inline pl-1.5">
-                    <a :href="socials.linkedin">
+                    <a :href="socials.linkedin" target="_blank">
                         <svg v-if="socials.linkedin" xmlns="http://www.w3.org/2000/svg"
                             class="inline w-[1.55rem] fill-base-content hover:animate-pulse hover:scale-125 hover:fill-primary hover:cursor-pointer duration-300 ease-in-out mr-2"
                             viewBox="0 0 24 24">
@@ -112,7 +112,7 @@ function openAvatar() {
                         </svg>
                     </a>
 
-                    <a :href="socials.github">
+                    <a :href="socials.github" target="_blank">
                         <svg v-if="socials.github"
                             class="inline w-7 fill-base-content hover:animate-pulse hover:scale-125 hover:fill-primary hover:cursor-pointer duration-300 ease-in-out mr-2"
                             xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 64 64">
@@ -121,7 +121,7 @@ function openAvatar() {
                             </path>
                         </svg>
                     </a>
-                    <a :href="socials.instagram">
+                    <a :href="socials.instagram" target="_blank">
                         <svg v-if="socials.instagram"
                             class="inline w-7 fill-base-content hover:animate-pulse hover:scale-125 hover:fill-primary hover:cursor-pointer duration-300 ease-in-out"
                             xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 256 256">

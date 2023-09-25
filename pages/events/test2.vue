@@ -172,7 +172,7 @@ async function textSearch(radius: number) {
         {
             location: start.value,
             radius: radius,
-            query: 'club',
+            query: 'boba',
             // type: ['movie_theater'],
         },
         (results: Record<string, any>[]) => {
@@ -281,13 +281,14 @@ async function route(venues: Record<string, any>[]) {
 }
 
 function buildTag(types: string[], index: number): string {
-    // Map types to corresponding icons and colors
+    // Map types to corresponding icons (colors not set up yet)
     const typeMap: Record<string, { icon: string; color: string }> = {
         'drugstore': { icon: drugPath(), color: 'primary' },
         'night_club': { icon: nightclubPath(), color: 'accent' },
         'museum': { icon: artPath(), color: 'neutral-content' },
         'art_gallery': { icon: artPath(), color: 'neutral-content' },
         'restaurant': { icon: restaurantPath(), color: 'neutral-content' },
+        'bar': { icon: barPath(), color: 'primary' },
         'movie': { icon: moviePath(), color: 'neutral-content' },
         'car': { icon: carPath(), color: 'neutral-content' },
         'default': { icon: storePath(), color: 'neutral-content' },
@@ -297,7 +298,7 @@ function buildTag(types: string[], index: number): string {
     const { icon, color } = typeMap[matchedType || 'default'];
 
     return `
-        <div class="bg-neutral rounded-full opacity-[0.9] hover:opacity-100 p-0.5 hover:scale-125">
+        <div class="bg-neutral rounded-full opacity-[0.9] hover:opacity-100 p-1 hover:scale-125">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 fill-primary" viewBox="0 0 256 256">${icon}</svg>
             <div class="absolute top-[90%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-0 h-0 border-l-[0.9rem] border-r-[0.9rem] border-t-[1.33rem] border-solid border-r-transparent border-l-transparent border-t-neutral -z-10"></div>
             <div class="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 text-neutral-content text-xs font-medium opacity-100">
@@ -311,7 +312,7 @@ function buildTag(types: string[], index: number): string {
 </script>
 
 <template>
-    <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" class="w-20" viewBox="0 0 32 32"><path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z" /></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 fill-base-content"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" /><path d="M0 0h24v24H0z" fill="none" /></svg>
     <div class="stats h-fit w-fit">
         <div class="stat p-1 pb-0 pt-0 pr-2">
             <div class="col-start-1 text-lg text-base-content font-medium">1. <span class="text-primary">NAME</span></div>
@@ -329,7 +330,7 @@ function buildTag(types: string[], index: number): string {
                 class="form-control input input-bordered form-input mb-2" />
             <button class="btn btn-primary" @click="getStart(startAddress)">Start Address</button>
             <button class="btn btn-primary" @click="nearby(150, aType)">Nearby Search</button>
-            <button class="btn btn-primary" @click="textSearch(300)">Text Search</button>
+            <button class="btn btn-primary" @click="textSearch(1610)">Text Search</button>
             <button class="btn btn-primary" @click="route(circuit)">Route</button>
 
             <div id="nearby"></div>
@@ -341,7 +342,7 @@ function buildTag(types: string[], index: number): string {
         <div id="map"></div>
         <div class="inline pl-2">
             <ul>
-                <li v-for="(data, index) in textSearchData" :key="index">
+                <li v-for="(data, index) in circuit" :key="index">
                     {{ `${index + 1}. ${data.name}` }}
                 </li>
             </ul>
