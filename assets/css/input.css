@@ -2,6 +2,40 @@ html, body {
     overflow-x: hidden;
 }
 
+/* Set the size of the div element that contains the map */
+#map {
+    height: 50rem;
+    width: 75%;
+    font-weight: 600;
+}
+.gm-style, .gm-style .gm-style-iw {
+    background-color: hsl(var(--b1));
+}
+.gm-style .gm-style-iw-c {
+    padding: 1px;
+}
+div.gm-style-iw-d {
+    padding: 8px;
+    color: hsl(var(--nc));
+}
+.gm-style .gm-style-iw-d::-webkit-scrollbar-track, .gm-style .gm-style-iw-d::-webkit-scrollbar-track-piece, .gm-style .gm-style-iw-tc::after {
+    background: hsl(var(--b1));
+}
+.gm-ui-hover-effect>span {
+    background-color: hsl(var(--nc));
+}
+.gm-ui-hover-effect {
+    opacity: 1;
+}
+div.address-line.full-width, div.title.full-width, div.gm-iw {
+    background-color: hsl(var(--b1));
+    color: hsl(var(--nc));
+}
+div.view-link, div.view-link a, div.gm-style-iw-d div {
+    background-color: hsl(var(--b1));
+}
+
+
 /* Prevent broken image thumbnails */
 img[src=""],
 img:not([src]) {
