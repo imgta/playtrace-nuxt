@@ -48,9 +48,9 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
     if (fetchDelay) {
         try {
             clearTimeout(fetchDelay);
-            console.log('delay', fetchDelay);
-        } catch (e) {
-            console.error(e);
+            // console.log('delay', fetchDelay);
+        } catch (error) {
+            console.error(error);
         }
     }
     // Search query: has no bordering whitespaces, is not empty, at least 1 character
@@ -68,18 +68,17 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
                             const imgs = await unSplash(userQuery, splashPage.value, splashPerPage);
                             pics.value = imgs;
                             storedQuery.splash = userQuery;
-                            console.log('stored:', storedQuery.splash);
                         } catch (e) {
                             console.error(e);
                         } finally {
                             loadingAPI.value = false;
                         }
                     } else {
-                        console.log('stored:', storedQuery.splash);
+                        // console.log('stored:', storedQuery.splash);
                         loadingAPI.value = false;
                     }
-                    console.log('pics.value.length', pics.value.length);
-                    console.log('splashPage.value', splashPage.value);
+                    // console.log('pics.value.length', pics.value.length);
+                    // console.log('splashPage.value', splashPage.value);
                 }, oneCharDelay);
             }
             if (coverAPI === 'giphy') {
@@ -92,20 +91,18 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
                             const webpUrls = await getGiphy(userQuery, giphyOffset.value, giphyLimit);
                             gifs.value = webpUrls;
                             storedQuery.giphy = userQuery;
-
-                            console.log('stored:', storedQuery.giphy);
                         } catch (e) {
                             console.error(e);
                         } finally {
                             loadingAPI.value = false;
                         }
                     } else {
-                        console.log('stored:', storedQuery.giphy);
+                        // console.log('stored:', storedQuery.giphy);
                         loadingAPI.value = false;
                     }
 
-                    console.log('gifs.value.length', gifs.value.length);
-                    console.log('giphyOffset.value', giphyOffset.value);
+                    // console.log('gifs.value.length', gifs.value.length);
+                    // console.log('giphyOffset.value', giphyOffset.value);
                 }, oneCharDelay);
             }
         } catch (e) {
@@ -119,9 +116,6 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
     console.log('user query:', userQuery);
 });
 
-watchEffect(() => {
-    console.log(pics.value, pics.value);
-});
 // ----------------------------------------------------------------
 async function getGiphy(query: string, offset: number, limit: number): Promise<string[]> {
     loadingAPI.value = true;
@@ -143,7 +137,7 @@ async function getGiphy(query: string, offset: number, limit: number): Promise<s
         console.error(e);
         return e.message;
     } finally {
-        giphyOffset.value += 1;
+        giphyOffset.value += giphyLimit;
         countAPI.value += 1;
         loadingAPI.value = false;
         console.log('countAPI.value', countAPI.value);
@@ -187,8 +181,8 @@ async function unSplash(query: string, page: number, perPage: number): Promise<s
         splashPage.value += 1;
         countAPI.value += 1;
         loadingAPI.value = false;
-        console.log('countAPI.value', countAPI.value);
-        console.log('splashPage.value', splashPage.value);
+        // console.log('countAPI.value', countAPI.value);
+        // console.log('splashPage.value', splashPage.value);
     }
 }
 async function unSplashMore() {
