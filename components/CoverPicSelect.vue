@@ -23,7 +23,6 @@ const clickAPI = ref<string>('splash');
 const countAPI = ref(0);
 
 // ----------------------------------------------------------------
-// Change onMounted to watch to prevent loading 'party' query after open/close
 onMounted(async () => {
     if (!pics.value.length) {
         splashPage.value = 0;
@@ -64,26 +63,23 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
                     if (userQuery !== storedQuery.splash || !pics.value.length) {
                         // Reset Unsplash page offset when query changes
                         splashPage.value = 0;
+                        loadingAPI.value = true;
                         try {
-                            loadingAPI.value = true;
                             const imgs = await unSplash(userQuery, splashPage.value, splashPerPage);
                             pics.value = imgs;
                             storedQuery.splash = userQuery;
-
                             console.log('stored:', storedQuery.splash);
                         } catch (e) {
                             console.error(e);
                         } finally {
-                            loadingAPI.value = true;
+                            loadingAPI.value = false;
                         }
                     } else {
                         console.log('stored:', storedQuery.splash);
                         loadingAPI.value = false;
                     }
-
-                    console.log('PICs Length:', pics.value.length);
-                    console.log('PIC offset:', splashPage.value);
-                    console.log('total pics:', (splashPage.value * splashPerPage));
+                    console.log('pics.value.length', pics.value.length);
+                    console.log('splashPage.value', splashPage.value);
                 }, oneCharDelay);
             }
             if (coverAPI === 'giphy') {
@@ -91,8 +87,8 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
                     if (userQuery !== storedQuery.giphy || !gifs.value.length) {
                         // Reset GIPHY offset when query changes
                         giphyOffset.value = 0;
+                        loadingAPI.value = true;
                         try {
-                            loadingAPI.value = true;
                             const webpUrls = await getGiphy(userQuery, giphyOffset.value, giphyLimit);
                             gifs.value = webpUrls;
                             storedQuery.giphy = userQuery;
@@ -101,16 +97,15 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
                         } catch (e) {
                             console.error(e);
                         } finally {
-                            loadingAPI.value = true;
+                            loadingAPI.value = false;
                         }
                     } else {
                         console.log('stored:', storedQuery.giphy);
                         loadingAPI.value = false;
                     }
 
-                    console.log('GIFs Length:', gifs.value.length);
-                    console.log('GIF offset:', giphyOffset.value);
-                    console.log('total gifs:', (giphyLimit * giphyOffset.value));
+                    console.log('gifs.value.length', gifs.value.length);
+                    console.log('giphyOffset.value', giphyOffset.value);
                 }, oneCharDelay);
             }
         } catch (e) {
@@ -124,8 +119,12 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
     console.log('user query:', userQuery);
 });
 
+watchEffect(() => {
+    console.log(pics.value, pics.value);
+});
 // ----------------------------------------------------------------
 async function getGiphy(query: string, offset: number, limit: number): Promise<string[]> {
+    loadingAPI.value = true;
     try {
         const { giphyAPI } = useRuntimeConfig().public;
         const giphyRes: any = (await $fetch(`https://api.giphy.com/v1/gifs/search?q=${query}&api_key=${giphyAPI}&limit=${limit}&offset=${offset}&bundle=clips_grid_picker`));
@@ -146,13 +145,31 @@ async function getGiphy(query: string, offset: number, limit: number): Promise<s
     } finally {
         giphyOffset.value += 1;
         countAPI.value += 1;
-
-        console.log('+API CALL:', countAPI.value);
-        console.log('GIPHY Offset:', giphyOffset.value);
+        loadingAPI.value = false;
+        console.log('countAPI.value', countAPI.value);
+        console.log('giphyOffset.value', giphyOffset.value);
     }
+}
+async function giphyMore() {
+    loadingAPI.value = true;
+    try {
+        const moreGifs: any = await getGiphy(storedQuery.giphy, giphyOffset.value, giphyLimit);
+        // Note: Masonry wall requires new items to be added this way, (non-reactive to .push(item))
+        gifs.value = [...gifs.value, ...moreGifs];
+
+        // Pseudo-refresh so Masonry wall renders without column gaps
+        clickAPI.value = '';
+        clickAPI.value = 'giphy';
+    } catch (error) {
+        console.error(error);
+    } finally {
+        loadingAPI.value = false;
+    }
+    return false;
 }
 
 async function unSplash(query: string, page: number, perPage: number): Promise<string[]> {
+    loadingAPI.value = true;
     try {
         const { unSplashAPI } = useRuntimeConfig().public;
         const splashRes: any = (await $fetch(`https://api.unsplash.com/search/photos?client_id=${unSplashAPI}&query=${query}&page=${page}&per_page=${perPage}`));
@@ -169,9 +186,26 @@ async function unSplash(query: string, page: number, perPage: number): Promise<s
     } finally {
         splashPage.value += 1;
         countAPI.value += 1;
-        console.log('+API CALL:', countAPI.value);
-        console.log('PICs Offset:', splashPage.value);
+        loadingAPI.value = false;
+        console.log('countAPI.value', countAPI.value);
+        console.log('splashPage.value', splashPage.value);
     }
+}
+async function unSplashMore() {
+    loadingAPI.value = true;
+    try {
+        const moreImgs: any = await unSplash(storedQuery.splash, splashPage.value + 1, splashPerPage);
+        pics.value = [...pics.value, ...moreImgs];
+
+        // Pseudo-refresh so Masonry wall renders without column gaps
+        clickAPI.value = '';
+        clickAPI.value = 'splash';
+    } catch (error) {
+        console.error(error);
+    } finally {
+        loadingAPI.value = false;
+    }
+    return false;
 }
 
 async function selectCover(img: string, pop: boolean) {
@@ -181,6 +215,17 @@ async function selectCover(img: string, pop: boolean) {
     emit('coverPicInput', rawImg);
     emit('modalState', pop);
     console.log('COVER PIC:', coverSelect.value);
+}
+
+function unSplashClick() {
+    if (clickAPI.value === 'giphy') {
+        clickAPI.value = 'splash';
+    }
+}
+function giphyClick() {
+    if (clickAPI.value === 'splash') {
+        clickAPI.value = 'giphy';
+    }
 }
 // ----------------------------------------------------------------
 </script>
@@ -193,39 +238,29 @@ async function selectCover(img: string, pop: boolean) {
                 <h1 class="text-primary text-3xl text-center pt-4">
                     Select your event cover!
                 </h1>
-                <p class="text-base-content font-medium text-center text-sm">
-                    Feeling GIPHY?
+                <p class="text-base-content/80 text-center text-sm">
+                    Images from Unsplash and GIPHY.
                 </p>
             </div>
         </div>
 
-        <div class="radio-tile-group pl-2">
-            <div class="input-container cursor-pointer mx-5" @click="clickAPI = 'splash'">
-                <input id="photos" class="radio-button" type="radio" name="radio-pic" :checked="clickAPI === 'splash'">
+        <div class="radio-tile-group pl-3">
+            <div class="input-container cursor-pointer mx-5">
+                <input id="photos" class="radio-button h-full w-full cursor-pointer" type="radio" name="radio-pic" :checked="clickAPI === 'splash'" @click="unSplashClick" />
                 <div class="radio-tile">
                     <div class="icon photos-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="fill-base-content w-20 group-hover:fill-primary"
-                            viewBox="0 0 256 256">
-                            <path
-                                d="M216,40H72A16,16,0,0,0,56,56V72H40A16,16,0,0,0,24,88V200a16,16,0,0,0,16,16H184a16,16,0,0,0,16-16V184h16a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM72,56H216v62.75l-10.07-10.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L72,109.37ZM184,200H40V88H56v80a16,16,0,0,0,16,16H184Zm32-32H72V132l36-36,49.66,49.66a8,8,0,0,0,11.31,0L194.63,120,216,141.38V168ZM160,84a12,12,0,1,1,12,12A12,12,0,0,1,160,84Z">
-                            </path>
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" class="group-hover:fill-primary pt-1" viewBox="0 0 26 26"><path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z" /></svg>
                     </div>
-                    <label for="photos" class="radio-tile-label cursor-pointer">Photo</label>
+                    <label for="photos" class="radio-tile-label cursor-pointer pt-1">Photo</label>
                 </div>
             </div>
-            <div class="input-container cursor-pointer mx-5" @click="clickAPI = 'giphy'">
-                <input id="gifs" class="radio-button" type="radio" name="radio-gif" :checked="clickAPI === 'giphy'">
+            <div class="input-container cursor-pointer mx-5">
+                <input id="gifs" class="radio-button h-full w-full cursor-pointer" type="radio" name="radio-gif" :checked="clickAPI === 'giphy'" @click="giphyClick" />
                 <div class="radio-tile">
                     <div class="icon gifs-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="fill-primary w-20 group-hover:fill-base-content"
-                            viewBox="0 0 256 256">
-                            <path
-                                d="M111.49,52.63a15.8,15.8,0,0,0-26,5.77L33,202.78A15.83,15.83,0,0,0,47.76,224a16,16,0,0,0,5.46-1l144.37-52.5a15.8,15.8,0,0,0,5.78-26Zm-8.33,135.21-35-35,13.16-36.21,58.05,58.05Zm-55,20,14-38.41,24.45,24.45ZM156,168.64,87.36,100l13-35.87,91.43,91.43ZM160,72a37.8,37.8,0,0,1,3.84-15.58C169.14,45.83,179.14,40,192,40c6.7,0,11-2.29,13.65-7.21A22,22,0,0,0,208,23.94,8,8,0,0,1,224,24c0,12.86-8.52,32-32,32-6.7,0-11,2.29-13.65,7.21A22,22,0,0,0,176,72.06,8,8,0,0,1,160,72ZM136,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm101.66,82.34a8,8,0,1,1-11.32,11.31l-16-16a8,8,0,0,1,11.32-11.32Zm4.87-42.75-24,8a8,8,0,0,1-5.06-15.18l24-8a8,8,0,0,1,5.06,15.18Z">
-                            </path>
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 31 34" class="group-hover:fill-base-content pt-1"><g fill-rule="evenodd" clip-rule="evenodd"><path fill="#00ff99" d="M0 3h4v29H0z"></path><path fill="#9933ff" d="M24 11h4v21h-4z"></path><path fill="#00ccff" d="M0 31h28v4H0z"></path><path fill="#fff35c" d="M0 0h16v4H0z"></path><path fill="#ff6666" d="M24 8V4h-4V0h-4v12h12V8"></path><path fill="#121212" opacity="0.4" d="M24 16v-4h4M16 0v4h-4"></path></g></svg>
                     </div>
-                    <label for="gifs" class="radio-tile-label cursor-pointer">GIFs</label>
+                    <label for="gifs" class="radio-tile-label cursor-pointer pt-1">GIPHY</label>
                 </div>
             </div>
         </div>
@@ -248,7 +283,7 @@ async function selectCover(img: string, pop: boolean) {
 
         <div class="pt-6">
             <div v-if="clickAPI === 'splash'">
-                <MasonryWall :items="pics" :ssr-columns="3" :min-columns="3" :column-width="250" :gap="2">
+                <MasonryWall :items="pics" :ssr-columns="3" :min-columns="3" :column-width="275" :gap="2">
                     <template #default="{ item }">
                         <button>
                             <img :src="item" alt="PICs"
@@ -257,9 +292,12 @@ async function selectCover(img: string, pop: boolean) {
                         </button>
                     </template>
                 </MasonryWall>
+                <div class="flex justify-center pt-1">
+                    <button class="btn btn-sm" @click="unSplashMore">Load More</button>
+                </div>
             </div>
             <div v-if="clickAPI === 'giphy'">
-                <MasonryWall :items="gifs" :ssr-columns="3" :min-columns="3" :column-width="250" :gap="2">
+                <MasonryWall :items="gifs" :ssr-columns="3" :min-columns="3" :column-width="275" :gap="2">
                     <template #default="{ item }">
                         <button>
                             <img :src="item" alt="GIFs"
@@ -268,6 +306,9 @@ async function selectCover(img: string, pop: boolean) {
                         </button>
                     </template>
                 </MasonryWall>
+                <div class="flex justify-center pt-1">
+                    <button class="btn btn-sm" @click="giphyMore">Load More</button>
+                </div>
             </div>
         </div>
 
