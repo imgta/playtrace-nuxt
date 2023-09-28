@@ -70,7 +70,7 @@ function scramble() {
 </script>
 
 <template>
-    <div class="text-primary normal-case font-mono md:font-medium font-normal text-lg md:text-xl"
+    <div class="text-primary normal-case font-mono md:font-medium font-normal text-xl"
         @mouseenter="startScramble"
         @mouseleave="stopScramble">
             {{ scrambledText }}
