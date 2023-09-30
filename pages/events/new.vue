@@ -27,6 +27,7 @@ const eventData = reactive({
     userInvites: [] as any,
 });
 const userSearch = ref('');
+const matchingUsers = ref([]);
 const { username: myUsername } = useStrapiUser().value as any;
 const user = useStrapiUser().value;
 
@@ -54,6 +55,7 @@ const validInvite = computed(() => {
     const isValidInvite = eventData.userInvites.some((user: any) => user.Invite === username) || username === myUsername;
     return isValidInvite ? 'input input-bordered form-input' : 'input input-bordered form-input inputshake';
 });
+
 // ----------------------------------------------------------------
 async function locationInput() {
     if (autoResult.value) {
@@ -134,7 +136,7 @@ function chargeBlur() {
         if (isNaN(coverDmg.value)) {
             toast.error('Cover charge must be a valid number!', { timeout: 1500 });
             coverDmg.value = '';
-        // eslint-disable-next-line unicorn/prefer-number-properties
+            // eslint-disable-next-line unicorn/prefer-number-properties
         } else if (!isNaN(coverDmg.value)) {
             const floatVal = Number.parseFloat(coverDmg.value).toFixed(2);
             eventData.coverCharge = floatVal;
@@ -155,7 +157,7 @@ function partyBlur() {
         if (isNaN(partyCap.value)) {
             toast.error('Party cap must be a valid number!', { timeout: 1500 });
             partyCap.value = '';
-        // eslint-disable-next-line unicorn/prefer-number-properties
+            // eslint-disable-next-line unicorn/prefer-number-properties
         } else if (!isNaN(partyCap.value)) {
             eventData.size = partyCap.value;
             const cap = Number(partyCap.value);
@@ -335,6 +337,37 @@ function removeUser(index: any) {
     eventData.userInvites.splice(index, 1);
     console.log(eventData.userInvites);
 }
+
+async function usernameSearch() {
+    if (userSearch.value.length > 2) {
+        const inviteUsername = userSearch.value;
+        try {
+            const searchRes: Record<string, any> = await client(`${appHost}api/users?filters[username][$startsWithi]=${inviteUsername}`, {
+                method: 'GET'
+            });
+            const searchUsers = searchRes.map((user: Record<string, any>) => user.username);
+            matchingUsers.value = searchUsers;
+        } catch (error) {
+            console.error(error);
+        }
+    } else {
+        matchingUsers.value = [];
+    }
+}
+
+function selectInviteUser(username: string) {
+    try {
+        userSearch.value = username;
+        inviteUser();
+        matchingUsers.value = [];
+    } catch (error) {
+        console.error(error);
+    }
+}
+function checkInvited(username: string) {
+    const isInvited = eventData.userInvites.some((user: any) => user.username === username);
+    return isInvited ? 'hidden' : '';
+}
 // ----------------------------------------------------------------
 </script>
 
@@ -404,25 +437,29 @@ function removeUser(index: any) {
                         </div>
 
                         <div class="lg:hidden  pb-0 lg:pb-2">
-                            <div
-                                class="w-full lg:w-[80%] h-full lg:h-[90%] con-hint left">
+                            <div class="w-full lg:w-[80%] h-full lg:h-[90%] con-hint left">
                                 <div class="hint">
-                                    <p>Friends</p>
+                                    <p>Invites</p>
                                 </div>
                                 <input v-model="userSearch" placeholder="Invite by username" name="title" type="text"
-                                    :class="validInvite" @keyup.enter="inviteUser" />
+                                    :class="validInvite" @keyup.enter="inviteUser" @input="usernameSearch" />
                             </div>
+
+                            <ul v-if="matchingUsers.length > 0" class="menu w-full rounded-box">
+                                <li v-for="username in matchingUsers" :key="username" class="text-accent" @click="selectInviteUser(username)"><a class="p-1.5 text-center" :class="checkInvited(username)">{{ username }}</a></li>
+                            </ul>
+
                             <div v-if="eventData.userInvites.length > 0" class="py-0.5">
                                 <span class="text-sm font-medium">Inviting</span>
                                 <div v-for="(user, index) in eventData.userInvites" :key="index"
                                     class="inline-block whitespace-nowrap pl-1">
-                                <span
-                                    class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
-                                        user.username }}
                                     <span
-                                        class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
-                                        @click="removeUser(index)"><span class="text-[10px]">✕</span></span>
-                                </span>
+                                        class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
+                                            user.username }}
+                                        <span
+                                            class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
+                                            @click="removeUser(index)"><span class="text-[10px]">✕</span></span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -477,17 +514,19 @@ function removeUser(index: any) {
                             </dialog>
                         </div>
 
-                        <div
-                            class="w-full lg:w-[80%] h-full lg:h-[90%] con-hint right pt-4">
+                        <div class="w-full lg:w-[80%] h-full lg:h-[90%] con-hint right pt-4">
                             <div class="hint lg:pt-3">
                                 <p>Invite Friends</p>
                             </div>
                             <input v-model="userSearch" placeholder="Invite by username" name="title" type="text"
-                                :class="validInvite" @keyup.enter="inviteUser" />
+                                :class="validInvite" @keyup.enter="inviteUser" @input="usernameSearch" />
                         </div>
 
-                        <div v-if="eventData.userInvites.length > 0" class="flex items-center pt-2.5 w-full lg:w-[80%]">
+                        <ul v-if="matchingUsers.length > 0" class="menu w-fit rounded-box">
+                            <li v-for="username in matchingUsers" :key="username" class="text-accent" @click="selectInviteUser(username)"><a class="p-1.5 text-center" :class="checkInvited(username)">{{ username }}</a></li>
+                        </ul>
 
+                        <div v-if="eventData.userInvites.length > 0" class="flex items-center pt-2.5 w-full lg:w-[80%]">
                             <div v-for="(user, index) in eventData.userInvites" :key="index"
                                 class="grid grid-flow-col-dense gap-1 pl-1">
                                 <span
@@ -497,9 +536,7 @@ function removeUser(index: any) {
                                         class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
                                         @click="removeUser(index)"><span class="text-[10px]">✕</span></span>
                                 </span>
-
                             </div>
-
                         </div>
                     </div>
 
@@ -515,7 +552,8 @@ function removeUser(index: any) {
         <div class="sm:px-24 sm:pb-10 lg:pl-0">
 
             <div class="flex items-center justify-center place-content-center">
-                <button v-if="!createEventAPI && !createInviteAPI" class="event-create" :class="eventBtnClass" type="submit" @click="createEvent">
+                <button v-if="!createEventAPI && !createInviteAPI" class="event-create" :class="eventBtnClass" type="submit"
+                    @click="createEvent">
                     <span>Create</span>
                     <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
                         <path d="M1,5 L11,5"></path>

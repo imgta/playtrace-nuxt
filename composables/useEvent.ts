@@ -9,8 +9,14 @@ export default function () {
     const userSearch = ref('');
 
     const eventData = reactive({
-        creatorId: '',
-        creatorUser: '',
+        hostId: '',
+        hostUser: '',
+        hostAvatar: '',
+        hostName: '',
+        hostFirstName: '',
+        hostLastName: '',
+        hostInitials: '',
+        hostUrl: '',
         title: '',
         startDate: '',
         partySize: '',
@@ -60,13 +66,14 @@ export default function () {
             const {
                 title, startDate, partySize, coverCharge, info, location, eventReceipt,
                 eventPic: { data: { attributes: { url: eventPic } } },
-                initiator: { data: { id: initiatorId } },
-                initiator: { data: { attributes: { username: initiatorUser } } },
+                initiator: { data: { id: initiatorId, attributes: { username: initiatorUser, fullName: hostName } } },
                 invited_users: { data: invites },
             } = await eventRes.data.attributes;
 
-            eventData.creatorId = await initiatorId;
-            eventData.creatorUser = await initiatorUser;
+            eventData.hostId = await initiatorId;
+            eventData.hostUser = await initiatorUser;
+            eventData.hostName = await hostName;
+
             eventData.title = await title;
             eventData.startDate = await startDate;
             eventData.partySize = await partySize;
@@ -76,6 +83,16 @@ export default function () {
             eventData.location = await location;
             eventData.eventInvites = await invites;
             eventData.receipts.value = await eventReceipt;
+
+            eventData.hostAvatar = await eventRes.data.attributes.initiator.data.attributes.avatar?.data?.attributes?.url;
+
+            const [hostFirstName, ...rest] = hostName.split(/\s+/);
+            const hostLastName = rest.join(' ');
+            eventData.hostFirstName = hostFirstName;
+            eventData.hostLastName = hostLastName;
+            const hostInitials = hostName.split(/\s+/).map((name: string) => name[0].toUpperCase()).join('');
+            eventData.hostInitials = hostInitials;
+            eventData.hostUrl = `/${initiatorUser}`;
 
             eventData.categories.push(eventData.location[0]?.category.split(', '));
 

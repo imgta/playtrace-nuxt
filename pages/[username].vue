@@ -23,7 +23,8 @@ function openAvatar() {
     if (myUsername === pageUsername) {
         popAvatar.value.showModal();
     } else {
-        toast.error('Invalid user.', { timeout: 1500 });
+
+        // toast.error('Invalid user.', { timeout: 1500 });
     }
 }
 
@@ -34,8 +35,8 @@ function openAvatar() {
     <div class="flex justif-center">
 
         <div v-if="!profile.avatar" class="avatar placeholder pl-10 pt-5">
-            <div class="bg-secondary text-4xl font-normal rounded-full hover:opacity-70 cursor-pointer min-w-fit h-44 sm:h-48 md:h-56 lg:h-64 tracking-widest"
-                @click="openAvatar" @mouseenter="showEdit = true" @mouseleave="showEdit = false">
+            <div class="bg-secondary text-4xl font-normal rounded-full hover:opacity-70 min-w-fit h-44 sm:h-48 md:h-56 lg:h-64 tracking-widest"
+            :class="pageUsername === myUsername ? 'cursor-pointer' : ''" @click="openAvatar" @mouseenter="showEdit = true" @mouseleave="showEdit = false">
                 <span>{{ profile.initials }}</span>
 
                 <div v-if="showEdit && pageUsername === myUsername"
@@ -83,7 +84,7 @@ function openAvatar() {
         </div>
 
         <div v-if="profile.avatar" class="avatar pl-10 pt-5">
-            <div class="rounded-full cursor-pointer min-w-fit h-44 sm:h-48 md:h-56 lg:h-64" @click="openAvatar"
+            <div class="rounded-full min-w-fit h-44 sm:h-48 md:h-56 lg:h-64" :class="pageUsername === myUsername ? 'cursor-pointer' : ''" @click="openAvatar"
                 @mouseenter="showEdit = true" @mouseleave="showEdit = false">
                 <div class="h-full">
                     <img :src="profile.avatar" class="object-cover" />

@@ -243,7 +243,7 @@ function giphyClick() {
                 <input id="photos" class="radio-button h-full w-full cursor-pointer" type="radio" name="radio-pic" :checked="clickAPI === 'splash'" @click="unSplashClick" />
                 <div class="radio-tile">
                     <div class="icon photos-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" class="group-hover:fill-primary pt-1" viewBox="0 0 26 26"><path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" class="group-hover:fill-primary pt-1 pl-0.5" viewBox="0 0 26 26"><path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z" /></svg>
                     </div>
                     <label for="photos" class="radio-tile-label cursor-pointer pt-1">Photo</label>
                 </div>

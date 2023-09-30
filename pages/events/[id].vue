@@ -64,7 +64,7 @@ function googleMaps(address: string) {
                     <!-- TOP RIGHT MODALS -->
                     <div class="flex justify-end pt-0.5 pb-2">
                         <!-- INVITE RSVP MODAL -->
-                        <div v-if="myId !== eventData.creatorId" class="self-end shake">
+                        <div v-if="myId !== eventData.hostId" class="self-end shake">
                             <svg v-if="!rsvpModal" class="w-4 hover:cursor-pointer"
                                 :class="(userRsvp === 'going') ? 'fill-info' : (userRsvp === 'maybe') ? 'fill-warning' : (userRsvp === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-info'"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" @click="openRsvp()">
@@ -158,7 +158,7 @@ function googleMaps(address: string) {
                         </dialog>
 
                         <!-- DELETE EVENT MODAL -->
-                        <div v-if="myId === eventData.creatorId" class="con-hint event-card" @click="openDelete()">
+                        <div v-if="myId === eventData.hostId" class="con-hint event-card" @click="openDelete()">
                             <svg class="w-3.5 fill-base-content/75 hover:fill-error hover:cursor-pointer"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
                                 <path
@@ -240,15 +240,48 @@ function googleMaps(address: string) {
 
                         <!-- HOSTS -->
                         <div class="flex">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 md:w-[1.2rem]"
-                                :class="myId === eventData.creatorId ? 'fill-accent-focus/90' : 'fill-base-content/75'"
+                            <!-- <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 md:w-[1.2rem]"
+                                :class="myId === eventData.hostId ? 'fill-accent-focus/90' : 'fill-base-content/75'"
                                 viewBox="0 0 256 256">
                                 <path
                                     d="M246.46,73.17a16,16,0,0,0-17.74-2.26l-46.9,23.38-40-66.49a16.11,16.11,0,0,0-27.6,0l-40,66.49L27.31,70.92A16.1,16.1,0,0,0,4.82,90.35l37,113.35a12,12,0,0,0,17.51,6.61C59.57,210.17,84.39,196,128,196s68.43,14.19,68.62,14.3a12,12,0,0,0,17.57-6.58l37-113.29A16,16,0,0,0,246.46,73.17ZM195.53,183.52C182.18,178.4,159.2,172,128,172s-54.18,6.42-67.53,11.54l-27-82.71L70,119a16.18,16.18,0,0,0,21-6.11l37-61.49,37,61.5a16.18,16.18,0,0,0,21,6.1l36.52-18.2Zm-19.67-31A12,12,0,0,1,164,162.69a12.91,12.91,0,0,1-1.85-.14,229.32,229.32,0,0,0-68.34,0,12,12,0,0,1-3.66-23.72,253.38,253.38,0,0,1,75.66,0A12,12,0,0,1,175.86,152.52Z">
                                 </path>
-                            </svg>
+                            </svg> -->
                             <span v-if="isLoading" class="inline pl-2 blur-sm animate-pulse pt-2">Someone you know?</span>
-                            <span :class="isLoading ? 'hidden' : ''" class="inline pl-2">{{ eventData.creatorUser }}</span>
+                            <NuxtLink :to="eventData.hostUrl">
+                                <div class="flex justify-center items-center pb-1.5" :class="isLoading ? 'hidden' : ''">
+                                    <div class="con-hint top-none sm:order-first ">
+                                        <div class="hint">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 fill-warning"
+                                                viewBox="0 0 256 256">
+                                                <path
+                                                    d="M246.46,73.17a16,16,0,0,0-17.74-2.26l-46.9,23.38-40-66.49a16.11,16.11,0,0,0-27.6,0l-40,66.49L27.31,70.92A16.1,16.1,0,0,0,4.82,90.35l37,113.35a12,12,0,0,0,17.51,6.61C59.57,210.17,84.39,196,128,196s68.43,14.19,68.62,14.3a12,12,0,0,0,17.57-6.58l37-113.29A16,16,0,0,0,246.46,73.17ZM195.53,183.52C182.18,178.4,159.2,172,128,172s-54.18,6.42-67.53,11.54l-27-82.71L70,119a16.18,16.18,0,0,0,21-6.11l37-61.49,37,61.5a16.18,16.18,0,0,0,21,6.1l36.52-18.2Zm-19.67-31A12,12,0,0,1,164,162.69a12.91,12.91,0,0,1-1.85-.14,229.32,229.32,0,0,0-68.34,0,12,12,0,0,1-3.66-23.72,253.38,253.38,0,0,1,75.66,0A12,12,0,0,1,175.86,152.52Z">
+                                                </path>
+                                            </svg>
+                                        </div>
+
+                                        <div v-if="eventData.hostAvatar" class="inline avatar hover:cursor-pointer">
+                                            <div class="w-[1.95rem] rounded-full">
+                                                <img :src="eventData.hostAvatar" class="object-contain" />
+                                            </div>
+                                        </div>
+
+                                        <div v-else class="flex items-center avatar hover:cursor-pointer">
+                                            <div
+                                                class="inline avatar placeholder w-[1.85rem] rounded-full text-sm hover:cursor-pointer">
+                                                <div class="bg-secondary">
+                                                    <span class="">{{ eventData.hostInitials }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="align-super pl-1.5 text-primary">
+                                        {{ myId === eventData.hostId ? 'You!' : eventData.hostFirstName }}
+                                        <span v-if="myId !== eventData.hostId && userRsvp !== 'going'" class="font-medium">
+                                            <span class="text-accent"> invited you!</span></span>
+                                    </span>
+                                </div>
+                            </NuxtLink>
                         </div>
 
                         <!-- ADDRESS -->
@@ -267,7 +300,8 @@ function googleMaps(address: string) {
                                 <span v-if="userRsvp !== 'going'">RSVP to reveal.</span>
 
                                 <span v-else-if="eventData.location[0]?.venue && userRsvp === 'going'" class="">
-                                    <a :href="googleMaps(eventData.location[0]?.address)" target="_blank" class="hover-link hover:link">
+                                    <a :href="googleMaps(eventData.location[0]?.address)" target="_blank"
+                                        class="hover-link hover:link">
                                         {{ eventData.location[0]?.venue }}
                                     </a>
                                 </span>
@@ -356,7 +390,7 @@ function googleMaps(address: string) {
                             eventData.info }}</p>
 
                         <!-- INVITATIONS -->
-                        <div v-if="myId === eventData.creatorId">
+                        <div v-if="myId === eventData.hostId">
                             <div class="flex justify-center h-full pb-0.5">
                                 <input v-model="userSearch" class="input input-bordered invite-search text-center h-10"
                                     placeholder="Send more invites" name="invites" type="text" :class="inputValid"
@@ -383,18 +417,18 @@ function googleMaps(address: string) {
                                         <span
                                             class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
                                             @click="removeInvite(index)"><span class="text-[10px]">✕</span></span>
-                                </span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="divider m-0 px-2"></div>
+            <div class="divider m-0 px-2"></div>
 
-        <!-- <div class="event-dash comments">
+            <!-- <div class="event-dash comments">
             <div class="flex p-2 justify-between">
 
                 <div class="items-center align-middle">
@@ -415,6 +449,6 @@ function googleMaps(address: string) {
             </div>
         </div> -->
 
+        </div>
     </div>
-</div>
 </template>
