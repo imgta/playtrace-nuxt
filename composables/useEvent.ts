@@ -262,7 +262,11 @@ export default function () {
             // Check if user has already been added to userInvites array
             // Note: invitation for initiator (host) will already be created on event creation
             if (eventData.userInvites.some((user: any) => user.username === username)) {
-                toast.info('User is already on the invite list!', { timeout: 1700 });
+                toast.error('User is already invited!', { timeout: 1700 });
+                userSearch.value = '';
+                return;
+            } else if (eventData.userInvites.some((user: any) => user.username === username)) {
+                toast.error('User is already on invite list!', { timeout: 1700 });
                 userSearch.value = '';
                 return;
             }
@@ -274,7 +278,7 @@ export default function () {
             const inputUser = userRes[0];
             if (userRes && inputUser) {
                 try {
-                    eventData.userInvites.push({ 'username': inputUser.username });
+                    // eventData.userInvites.push({ 'username': inputUser.username });
                     eventData.newInvites.push(inputUser);
                     userSearch.value = '';
                 } catch (error) {

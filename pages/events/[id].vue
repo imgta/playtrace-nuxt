@@ -3,7 +3,7 @@ definePageMeta({
     middleware: ['auth'],
 });
 
-const { myId } = useAuth();
+const { myId, appHost, client } = useAuth();
 const { shortDate } = useDateTime();
 const { isLoading, createInviteAPI, popDelete, popRsvp, openRsvp, closeRsvp, rsvpModal, getEvent, eventData, getInvite, rsvpEvent, deleteEvent, openDelete, closeDelete, userRsvp, inviteId, eventObj, createInvites, inviteUser, removeInvite, userSearch } = useEvent();
 
@@ -16,7 +16,7 @@ const eventId = Number(useRoute().params.id);
 const eventBtnClass = ref('');
 
 const inputClass = ref('w-[10rem]');
-
+const matchingUsers = ref([]);
 // ----------------------------------------------------------------
 onMounted(() => {
     getEvent(eventId);
@@ -43,11 +43,58 @@ const inputValid = computed(() => {
 function googleMaps(address: string) {
     return `https://www.google.com/maps/place/${address.replaceAll(' ', '+')}`;
 }
+
+async function usernameSearch() {
+    if (userSearch.value.length > 2) {
+        const inviteUsername = userSearch.value;
+        try {
+            const searchRes: Record<string, any> = await client(`${appHost}api/users?filters[username][$startsWithi]=${inviteUsername}`, {
+                method: 'GET'
+            });
+            const searchUsers = searchRes.map((user: Record<string, any>) => user.username);
+            matchingUsers.value = searchUsers;
+        } catch (error) {
+            console.error(error);
+        }
+    } else {
+        matchingUsers.value = [];
+    }
+}
+
+function selectInviteUser(username: string) {
+    try {
+        userSearch.value = username;
+        inviteUser();
+        matchingUsers.value = [];
+    } catch (error) {
+        console.error(error);
+    }
+}
+function checkInvited(username: string) {
+    const isInvited = eventData.userInvites.some((user: any) => user.username === username);
+    return isInvited ? 'hidden' : '';
+}
 // ----------------------------------------------------------------
 </script>
 
 <template>
-    <div class="px-10 pt-5 md:px-10">
+    <div class="pt-4">
+        <div v-if="isLoading">
+            <div
+                class="flex justify-center text-center tracking-wide text-3xl md:text-2xl lg:text-3xl text-primary font-semibold blur-md animate-pulse">
+                Event Title</div>
+            <div class="flex justify-center font-medium text-xs lg:text-sm text-base-content/80 blur-md animate-pulse">
+                Next Sun • 12:45AM</div>
+        </div>
+        <div :class="isLoading ? 'hidden' : ''"
+            class="flex justify-center text-center tracking-wide text-3xl md:text-2xl lg:text-3xl text-primary font-semibold">
+            {{ eventData.title }}</div>
+        <div :class="isLoading ? 'hidden' : ''"
+            class="flex justify-center font-medium text-xs lg:text-sm text-base-content/80">{{
+                shortDate(eventData.startDate) }}</div>
+    </div>
+
+    <div class="px-10 pt-3 md:px-10">
         <div class="event-dash">
             <div class="md:flex">
 
@@ -64,7 +111,7 @@ function googleMaps(address: string) {
                     <!-- TOP RIGHT MODALS -->
                     <div class="flex justify-end pt-0.5 pb-2">
                         <!-- INVITE RSVP MODAL -->
-                        <div v-if="myId !== eventData.hostId" class="self-end shake">
+                        <!-- <div v-if="myId !== eventData.hostId" class="self-end shake">
                             <svg v-if="!rsvpModal" class="w-4 hover:cursor-pointer"
                                 :class="(userRsvp === 'going') ? 'fill-info' : (userRsvp === 'maybe') ? 'fill-warning' : (userRsvp === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-info'"
                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" @click="openRsvp()">
@@ -155,7 +202,7 @@ function googleMaps(address: string) {
                             <form method="dialog" class="modal-backdrop">
                                 <button @click="closeRsvp()">close</button>
                             </form>
-                        </dialog>
+                        </dialog> -->
 
                         <!-- DELETE EVENT MODAL -->
                         <div v-if="myId === eventData.hostId" class="con-hint event-card" @click="openDelete()">
@@ -218,7 +265,7 @@ function googleMaps(address: string) {
                     </div>
 
                     <!-- CARD HEADER -->
-                    <div class="pb-2">
+                    <!-- <div class="pb-2">
                         <div v-if="isLoading">
                             <div
                                 class="flex justify-center text-center tracking-wide text-3xl md:text-2xl lg:text-3xl text-primary font-semibold blur-md animate-pulse">
@@ -233,11 +280,65 @@ function googleMaps(address: string) {
                         <div :class="isLoading ? 'hidden' : ''"
                             class="flex justify-center font-medium text-xs lg:text-sm text-base-content/80">{{
                                 shortDate(eventData.startDate) }}</div>
-                    </div>
+                    </div> -->
 
                     <!-- EVENT INFO -->
-                    <div class="self-start text-sm lg:text-base font-medium text-base-content/75">
 
+                    <!-- RSVP -->
+                    <div class="flex justify-center">
+                        <div class="grid grid-cols-7 w-full text-neutral-content/75 pb-4 pt-1">
+                            <div class="col-start-2 hover:cursor-pointer w-full group hover:text-primary"
+                                :class="(userRsvp === 'going') ? 'text-primary font-semibold' : ''"
+                                @click="rsvpEvent(eventId, inviteId, 'going')">
+                                <div class="flex justify-center row-start-1">
+                                    <svg class="w-5 pb-[0.2rem] "
+                                        :class="(userRsvp === 'going') ? 'fill-primary' : 'fill-neutral-content/75 group-hover:fill-primary group-hover:animate-bounce'"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                                        <path
+                                            d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div class="flex justify-center">
+                                    <span>Going</span>
+                                </div>
+                            </div>
+
+                            <div class="col-start-4 hover:cursor-pointer w-full group hover:text-warning"
+                                :class="(userRsvp === 'maybe') ? 'text-warning font-semibold' : ''"
+                                @click="rsvpEvent(eventId, inviteId, 'maybe')">
+                                <div class="flex justify-center row-start-1">
+                                    <svg :class="(userRsvp === 'maybe') ? 'fill-warning' : 'fill-neutral-content/75 group-hover:fill-warning group-hover:animate-bounce'"
+                                        class="w-5 pb-[0.2rem]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                                        <path
+                                            d="M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Zm52-52a12,12,0,0,1-12,12H88a12,12,0,0,1,0-24h80A12,12,0,0,1,180,160ZM76,108a16,16,0,1,1,16,16A16,16,0,0,1,76,108Zm104,0a16,16,0,1,1-16-16A16,16,0,0,1,180,108Z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div class="flex justify-center">
+                                    <span>Maybe</span>
+                                </div>
+                            </div>
+
+                            <div class="col-start-6 hover:cursor-pointer w-full group hover:text-error"
+                                :class="(userRsvp === 'noGo') ? 'text-error font-semibold' : ''"
+                                @click="rsvpEvent(eventId, inviteId, 'noGo')">
+                                <div class="flex justify-center row-start-1">
+                                    <svg :class="(userRsvp === 'noGo') ? 'fill-error' : 'fill-neutral-content/75 group-hover:fill-error group-hover:animate-bounce'"
+                                        class="w-5 pb-[0.2rem]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+                                        <path
+                                            d="M188,84a32,32,0,0,0-8,1V60a32,32,0,0,0-43.21-30A32,32,0,0,0,76,44v1A32,32,0,0,0,36,76v76a92,92,0,0,0,184,0V116A32,32,0,0,0,188,84Zm8,68a68,68,0,0,1-136,0V76a8,8,0,0,1,16,0v44a12,12,0,0,0,24,0V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V60a8,8,0,0,1,16,0v65.4A52.09,52.09,0,0,0,116,176a12,12,0,0,0,24,0,28,28,0,0,1,28-28,12,12,0,0,0,12-12V116a8,8,0,0,1,16,0Z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div class="flex justify-center">
+                                    <span>Flake</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="self-start text-sm lg:text-base font-medium text-base-content/75">
                         <!-- HOSTS -->
                         <div class="flex">
                             <!-- <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 md:w-[1.2rem]"
@@ -394,11 +495,27 @@ function googleMaps(address: string) {
                             <div class="flex justify-center h-full pb-0.5">
                                 <input v-model="userSearch" class="input input-bordered invite-search text-center h-10"
                                     placeholder="Send more invites" name="invites" type="text" :class="inputValid"
-                                    @keyup.enter="inviteUser" />
+                                    @keyup.enter="inviteUser" @input="usernameSearch" />
                             </div>
+                            <ul v-if="matchingUsers.length > 0" class="menu w-fit rounded-box">
+                                <li v-for="username in matchingUsers" :key="username" class="text-accent" @click="selectInviteUser(username)"><a class="p-1.5 text-center" :class="checkInvited(username)">{{ username }}</a></li>
+                            </ul>
+
                             <Loader v-if="createInviteAPI" />
-                            <div v-if="eventData.newInvites.length > 0" class="flex justify-center align-top py-4 md:pt-4">
-                                <div class="inline-flex justify-start py-1.5 pr-2 h-[2.2rem]">
+                            <div v-if="eventData.newInvites.length > 0" class="align-top py-2 md:pt-2">
+
+                                <div v-for="(user, index) in eventData.newInvites" :key="index"
+                                    class="inline-grid grid-cols-4 gap-0.5 pl-2">
+                                    <span
+                                        class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
+                                            user.username }}
+                                        <span
+                                            class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
+                                            @click="removeInvite(index)"><span class="text-[10px]">✕</span></span>
+                                    </span>
+                                </div>
+
+                                <div class="flex justify-center py-1.5 pr-2 h-[2.2rem] w-full">
                                     <button v-if="!createInviteAPI" class="invite max-h-[2.2rem]" :class="eventBtnClass"
                                         type="submit" @click="createInvites(eventObj)">
                                         <span>Invite</span>
@@ -409,16 +526,6 @@ function googleMaps(address: string) {
                                     </button>
                                 </div>
 
-                                <div v-for="(user, index) in eventData.newInvites" :key="index"
-                                    class="inline-grid grid-cols-3 gap-0.5 pl-2">
-                                    <span
-                                        class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
-                                            user.username }}
-                                        <span
-                                            class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
-                                            @click="removeInvite(index)"><span class="text-[10px]">✕</span></span>
-                                    </span>
-                                </div>
                             </div>
                         </div>
 
