@@ -11,6 +11,7 @@ const textQuery = ref<string>('');
 const queryPool = ref<string[]>([]);
 const queryCount = ref<number>(0);
 const circuit: any = ref([]);
+const travelTime: any = ref([]);
 const idPool = ref<string[]>([]);
 
 const aType = [''];
@@ -21,6 +22,7 @@ watchEffect(() => {
     console.log('queryPool.value.length', queryPool.value.length);
     console.log('queryCount.value', queryCount.value);
     console.log('traceStep.value', traceStep.value);
+    console.log('travelTime.value', travelTime.value);
 });
 // ----------------------------------------------------------------
 function getLatLong(data: Record<string, any>) {
@@ -111,82 +113,82 @@ async function getStart(address: string) {
     }
 }
 
-// 2) NEARBY SEARCH: for places of given ['type'] and 'radius'
-async function nearby(radius: number, type: string | string[]) {
-    // @ts-expect-error googleAPI
-    const { AdvancedMarkerElement: Marker } = await google.maps.importLibrary('marker') as google.maps.MarkerLibrary;
-    // @ts-expect-error googleAPI
-    const { InfoWindow, places: { PlacesService: Places } } = await google.maps;
+// // 2) NEARBY SEARCH: for places of given ['type'] and 'radius'
+// async function nearby(radius: number, type: string | string[]) {
+//     // @ts-expect-error googleAPI
+//     const { AdvancedMarkerElement: Marker } = await google.maps.importLibrary('marker') as google.maps.MarkerLibrary;
+//     // @ts-expect-error googleAPI
+//     const { InfoWindow, places: { PlacesService: Places } } = await google.maps;
 
-    const nearby = await new Places(document.getElementById('nearby'));
-    await nearby.nearbySearch(
-        {
-            location: start.value,
-            radius: radius,
-            type: type,
-            // rankBy: google.maps.places.RankBy.DISTANCE,
-            // Note: Nearby Search does NOT allow concurrent use of rankBy(distance) + radius fields
-        },
-        (results: Record<string, any>[]) => {
-            console.log('results', results);
+//     const nearby = await new Places(document.getElementById('nearby'));
+//     await nearby.nearbySearch(
+//         {
+//             location: start.value,
+//             radius: radius,
+//             type: type,
+//             // rankBy: google.maps.places.RankBy.DISTANCE,
+//             // Note: Nearby Search does NOT allow concurrent use of rankBy(distance) + radius fields
+//         },
+//         (results: Record<string, any>[]) => {
+//             console.log('results', results);
 
-            const venues: any = results
-                .filter(res => res.business_status === 'OPERATIONAL')
-                .map(res => ({
-                    name: res.name,
-                    types: res.types,
-                    rating: res.rating,
-                    totalReviews: res.user_ratings_total,
-                    price: res.price_level,
-                    position: getLatLong(res),
-                    distance: getDistance(start.value, getLatLong(res)),
-                }));
+//             const venues: any = results
+//                 .filter(res => res.business_status === 'OPERATIONAL')
+//                 .map(res => ({
+//                     name: res.name,
+//                     types: res.types,
+//                     rating: res.rating,
+//                     totalReviews: res.user_ratings_total,
+//                     price: res.price_level,
+//                     position: getLatLong(res),
+//                     distance: getDistance(start.value, getLatLong(res)),
+//                 }));
 
-            // Use Tim Sort to sort by distance (closest to farthest)
-            timSort(venues, (venue: any) => venue.distance);
-            console.log('VENUES', venues);
-            nearbyData.value = venues;
+//             // Use Tim Sort to sort by distance (closest to farthest)
+//             timSort(venues, (venue: any) => venue.distance);
+//             console.log('VENUES', venues);
+//             nearbyData.value = venues;
 
-            const infoWindow = new InfoWindow();
+//             const infoWindow = new InfoWindow();
 
-            venues.forEach(({ position, name, rating, totalReviews, types }, i) => {
-                const markerTag = document.createElement('div');
-                markerTag.innerHTML = buildTag(types, i);
+//             venues.forEach(({ position, name, rating, totalReviews, types }, i) => {
+//                 const markerTag = document.createElement('div');
+//                 markerTag.innerHTML = buildTag(types, i);
 
-                const markerInfo = document.createElement('div');
-                markerInfo.innerHTML = `
-                <div class="stats">
-                    <div class="stat p-1 pb-0 pt-0">
-                        <div class="col-start-1 text-lg text-primary font-medium">${i + 1}. ${name}</div>
-                        <div class="col-start-1 text-lg font-semibold"><span class="text-accent">${rating}</span> / 5</div>
-                        <div class="col-start-1 text-xs text-base-content/80 font-medium">Based on ${totalReviews} reviews</div>
-                </div>
-                `;
+//                 const markerInfo = document.createElement('div');
+//                 markerInfo.innerHTML = `
+//                 <div class="stats">
+//                     <div class="stat p-1 pb-0 pt-0">
+//                         <div class="col-start-1 text-lg text-primary font-medium">${i + 1}. ${name}</div>
+//                         <div class="col-start-1 text-lg font-semibold"><span class="text-accent">${rating}</span> / 5</div>
+//                         <div class="col-start-1 text-xs text-base-content/80 font-medium">Based on ${totalReviews} reviews</div>
+//                 </div>
+//                 `;
 
-                const marker = new Marker({
-                    map,
-                    position,
-                    title: `${i + 1}. ${name}`,
-                    content: markerTag,
-                });
-                marker.addListener('click', () => {
-                    infoWindow.close();
-                    infoWindow.setContent(markerInfo);
-                    infoWindow.open(marker.map, marker);
-                    map.panTo(marker.position);
-                });
-            });
+//                 const marker = new Marker({
+//                     map,
+//                     position,
+//                     title: `${i + 1}. ${name}`,
+//                     content: markerTag,
+//                 });
+//                 marker.addListener('click', () => {
+//                     infoWindow.close();
+//                     infoWindow.setContent(markerInfo);
+//                     infoWindow.open(marker.map, marker);
+//                     map.panTo(marker.position);
+//                 });
+//             });
 
-            console.log('nearbyData.value', nearbyData.value);
-        }
-    );
-}
+//             console.log('nearbyData.value', nearbyData.value);
+//         }
+//     );
+// }
 
+// 2) TEXT SEARCH: query is more versatile than providing strict 'types'
 // @ts-expect-error googleAPI
 let allMarkers: Record<string, google.maps.Marker[]> = {};
 // @ts-expect-error googleAPI
 const selectMarkers: Record<string, google.maps.Marker[]> = {};
-// 3) TEXT SEARCH: query is more versatile than providing strict 'types'
 // TODO: On 1st query added, remove query(1) markers, populate query(2) markers... etc
 async function textSearch(query: string, radius: number) {
     // @ts-expect-error googleAPI
@@ -236,13 +238,13 @@ async function textSearch(query: string, radius: number) {
                 const { position, name, address, rating, totalReviews, types, id, distance } = venue;
 
                 const markerTag = document.createElement('div');
-                markerTag.innerHTML = buildTag(types, i);
+                markerTag.innerHTML = buildTag(types, rating);
 
                 const markerInfo = document.createElement('div');
                 markerInfo.innerHTML = `
                 <div class="stats">
                     <div class="stat p-1 pb-0 pt-0">
-                        <div class="col-start-1 text-lg text-base-content font-medium">${i + 1}. <span class="text-primary">${name}</span>
+                        <div class="col-start-1 text-lg text-base-content font-medium"><span class="text-primary">${name}</span>
                         </div>
                         <div class="col-start-1 text-xs font-normal">${address}<span class="text-xs font-normal"> - (${Math.floor(distance)}m)</span></div>
                         <div class="col-start-1 text-lg font-semibold"><span class="text-accent">${rating}</span> / 5</div>
@@ -266,6 +268,7 @@ async function textSearch(query: string, radius: number) {
                 }
                 allMarkers[query].push(marker);
 
+                // ADD button for circuit builds
                 const button = markerInfo.querySelector(`#toCircuit-${i}`);
                 if (button) {
                     button.addEventListener('click', () => {
@@ -290,6 +293,8 @@ async function textSearch(query: string, radius: number) {
                         // Continue Text Search for next query in queue
                         if (queryCount.value < queryPool.value.length) {
                             textSearch(queryPool.value[queryCount.value], 1610);
+                        } else if (queryCount.value === queryPool.value.length) {
+                            trace(circuit.value);
                         }
                     });
                 } else {
@@ -338,6 +343,7 @@ async function trace(venues: Record<string, any>[]) {
     const routeService = await new google.maps.DirectionsService();
     // @ts-expect-error googleAPI
     const routeRender = await new google.maps.DirectionsRenderer();
+
     routeRender.setMap(map);
 
     const waypoints = venues
@@ -347,6 +353,7 @@ async function trace(venues: Record<string, any>[]) {
             location: venue.position,
             stopover: true,
         }));
+
     await routeService.route(
         {
             origin: start.value,
@@ -355,9 +362,13 @@ async function trace(venues: Record<string, any>[]) {
             travelMode: 'WALKING', // 'DRIVING' 'BICYCLING'
         },
         (res: Record<string, any>, status: string) => {
-            console.log('res', res);
+            console.log('ROUTE res', res);
             if (status === 'OK') {
                 routeRender.setDirections(res);
+                const { legs } = res.routes[0];
+                legs.forEach((leg: Record<string, any>) => {
+                    travelTime.value.push(leg.duration.text);
+                });
             } else {
                 console.error(`Routing failed: ${status}`);
             }
@@ -365,7 +376,17 @@ async function trace(venues: Record<string, any>[]) {
     );
 }
 
-function buildTag(types: string[], index: number): string {
+function formatTravelTime(seconds: number): string {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+        return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} min${minutes > 1 ? 's' : ''}`;
+    } else {
+        return `${minutes} min${minutes > 1 ? 's' : ''}`;
+    }
+}
+
+function buildTag(types: string[], rating: number): string {
     // Map types to corresponding icons (colors not set up yet)
     const typeMap: Record<string, { icon: string; color: string }> = {
         'drugstore': { icon: drugPath(), color: 'primary' },
@@ -387,7 +408,7 @@ function buildTag(types: string[], index: number): string {
         <div class="bg-neutral rounded-full opacity-[0.9] hover:opacity-100 p-1 hover:scale-125">
             ${icon}
             <div class="absolute top-[50%] left-[49%] -translate-x-1/2 -translate-y-1/2 text-neutral-content text-xs font-medium opacity-100">
-                ${index + 1}
+                ${rating}
             </div>
         </div>
     `;
@@ -468,13 +489,18 @@ function removeQuery(delQuery: string, queryIdx: number) {
 
             <div v-for="(query, index) in queryPool" id="checklist" :key="index">
                 <input :id="`0${index + 1}`" :checked="Object.keys(selectMarkers).length > index" :value="index + 1" type="checkbox" />
-                <label :for="`0${index + 1}`"><span class="whitespace-nowrap">{{ `${index + 1}. ${query}` }}</span></label>
+                <label :for="`0${index + 1}`">
+                    <span class="whitespace-nowrap">{{ `${index + 1}. ${query}` }}
+                    </span>
+                </label>
             </div>
 
             <h1 class="text-primary text-xl">Circuit:</h1>
             <ul>
                 <li v-for="(venue, index) in circuit" :key="index" class="text-sm">
-                    <span class="font-semibold leading-relaxed tracking-wide">{{ `${index + 1}. ${venue.name}` }}</span>
+                    <span class="font-semibold leading-relaxed tracking-wide">{{ `${index + 1}. ${venue.name}` }}
+                        <span v-if="travelTime[index]">({{ travelTime[index] }})</span>
+                    </span>
                 </li>
             </ul>
         </div>
