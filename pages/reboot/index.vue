@@ -154,11 +154,16 @@ async function submitForm() {
                     </label>
                 </div>
 
-                <div v-if="rebootForm.option === 'Venmo'" class="row-start-6 flex justify-center pb-4">
+                <div v-if="rebootForm.option === 'Venmo'" class="row-start-auto flex justify-center pt-2 pb-1">
                     <img
                         src="https://lh3.googleusercontent.com/ghtiHGfFvm6sQYrg0W2uwq0f9TxHBKAVtxYYNWBgCuNiuh97zc7_ffI6F02avgXqo8O_q0fy3j0xVZdNRDUiIvANmoG8L7vCXU8-9OM38X3swRt6Yu7NTZasE8NjX-yxpw=w591" />
                 </div>
             </div>
+
+            <div v-if="rebootForm.option === 'Venmo'" class="flex justify-center pb-6">
+                <span class="text-primary font-bold">@Christine-Nguyen-66</span>
+            </div>
+
         </form>
     </div>
 
@@ -173,7 +178,11 @@ async function submitForm() {
             </button>
         </div>
         <div v-if="submitted">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" class="fill-primary" viewBox="0 0 256 256"><path d="M246.15,65.46l-.07-.07L222.15,41.85a20,20,0,0,0-28.22-.06l-90,88.62L70,97.76a20,20,0,0,0-28.19.1l-24,24a20,20,0,0,0,0,28.26l71.62,72a20,20,0,0,0,28.29,0L246.15,93.74A20,20,0,0,0,246.15,65.46ZM103.61,202.33,37.64,136,56.05,117.6,90,150.24a20,20,0,0,0,28.12,0L208,61.61l18.32,18Z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" class="fill-primary" viewBox="0 0 256 256">
+                <path
+                    d="M246.15,65.46l-.07-.07L222.15,41.85a20,20,0,0,0-28.22-.06l-90,88.62L70,97.76a20,20,0,0,0-28.19.1l-24,24a20,20,0,0,0,0,28.26l71.62,72a20,20,0,0,0,28.29,0L246.15,93.74A20,20,0,0,0,246.15,65.46ZM103.61,202.33,37.64,136,56.05,117.6,90,150.24a20,20,0,0,0,28.12,0L208,61.61l18.32,18Z">
+                </path>
+            </svg>
         </div>
-    </div>
+</div>
 </template>
