@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 const { toast } = useMisc();
 const name = ref('');
 const classes = ref('');
@@ -185,4 +185,4 @@ async function submitForm() {
             </svg>
         </div>
 </div>
-</template>
+</template> -->
