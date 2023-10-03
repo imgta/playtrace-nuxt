@@ -1,12 +1,13 @@
 export default function () {
     const { toast } = useMisc();
-    const { myId, appHost, client } = useAuth();
+    const { myId, appHost, client, myUsername } = useAuth();
     const isLoading = ref<boolean>(true);
     const popDelete = ref<any | null>(null);
     const popRsvp = ref<any | null>(null);
     const rsvpModal = ref<boolean>(false);
     const createInviteAPI = ref<boolean>(false);
     const userSearch = ref('');
+    const matchingUsers = ref<string[]>([]);
 
     const eventData = reactive({
         hostId: '',
@@ -19,14 +20,14 @@ export default function () {
         hostUrl: '',
         title: '',
         startDate: '',
-        partySize: '',
+        partySize: 0,
         coverCharge: '',
         info: '',
         eventPic: '',
         location: [],
         categories: [],
         eventInvites: [],
-        userInvites: [],
+        invitedUsers: [],
         newInvites: [],
         receipts: [],
         spots: '',
@@ -97,14 +98,14 @@ export default function () {
             eventData.categories.push(eventData.location[0]?.category.split(', '));
 
             // Calculate remaining open spots
-            // Push all invited usernames from eventInvites to userInvites array
             let going = 0;
             eventData.eventInvites.forEach(async (invite: Record<string, any>) => {
                 if (invite.attributes.eventStatus === 'going') {
                     going++;
                 }
+                // Push all invited usernames from eventInvites to invitedUsers array
                 const invitedUser = invite.attributes.users_permissions_user.data.attributes.username;
-                (eventData.userInvites).push({ 'username': invitedUser });
+                (eventData.invitedUsers).push({ 'username': invitedUser });
             });
             eventData.spots = eventData.partySize - going;
         } catch (error) {
@@ -179,7 +180,6 @@ export default function () {
                 const delEventPicRes: any = await client(`${appHost}api/upload/files/${delEventPicId}`, {
                     method: 'DELETE',
                 });
-                console.log('delEventPicRes', await delEventPicRes);
             } catch (error) {
                 console.error(error);
             } finally {
@@ -193,7 +193,6 @@ export default function () {
                         method: 'DELETE',
                     });
                     const delInviteResult = await delInvitesRes.data;
-                    console.log('delInviteResult', delInviteResult);
                 });
                 await Promise.all(delInviteRequests);
             } catch (error) {
@@ -208,7 +207,6 @@ export default function () {
                     method: 'DELETE',
                 });
                 const delEventResult = await delEventRes.data;
-                console.log('delEventResult', delEventResult);
             } catch (error) {
                 console.error(error);
             }
@@ -221,52 +219,55 @@ export default function () {
         }
     }
 
-    async function createInvites(eventObj: Record<string, any>) {
-        try {
-            createInviteAPI.value = true;
-            for (const inviteUser of eventData.newInvites) {
-                const inviteForm = new FormData();
-                const inviteObj = {
-                    users_permissions_user: inviteUser,
-                    collection: 'event',
-                    event: eventObj,
-                    eventStatus: 'invited',
-                };
-                inviteForm.append('data', JSON.stringify(inviteObj));
-
-                try {
-                    createInviteAPI.value = true;
-                    const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
-                        method: 'POST',
-                        body: inviteForm,
-                    });
-                    const inviteData = await inviteRes.data;
-                    console.log('inviteData', inviteData);
-                } catch (error) {
-                    console.error(error);
-                } finally {
-                    toast.info(`${inviteUser.username} invited!`, { timeout: 1200 });
-                    removeInvite(inviteUser);
-                }
+    async function usernameSearch() {
+        if (userSearch.value.length > 2) {
+            const inviteUsername = userSearch.value;
+            try {
+                const searchRes: Record<string, any> = await client(`${appHost}api/users?filters[username][$startsWithi]=${inviteUsername}`, {
+                    method: 'GET'
+                });
+                const searchUsers = searchRes
+                    .map((user: Record<string, any>) => user.username)
+                    // Filter out users in invitedUsers (already invited) or newInvites (queued for invite)
+                    .filter((username: string) => ![...eventData.newInvites, ...eventData.invitedUsers].some((inviteUser: Record<string, any>) => inviteUser.username === username || myUsername === username));
+                matchingUsers.value = searchUsers;
+            } catch (error) {
+                console.error(error);
             }
+        } else {
+            matchingUsers.value = [];
+        }
+    }
+
+    function selectInviteUser(username: string) {
+        try {
+            const inviteQuery = userSearch.value;
+            userSearch.value = username;
+            inviteUser();
+
+            // Remove selected user from matchingUsers.value array
+            matchingUsers.value = matchingUsers.value.filter((user: string) => user !== username);
+            userSearch.value = inviteQuery;
         } catch (error) {
             console.error(error);
-        } finally {
-            createInviteAPI.value = false;
         }
+    }
+
+    function removeInvite(index: any) {
+        // Re-search to update matchingUsers array
+        usernameSearch();
+
+        // Remove uninvited user from newInvites (invite queue)
+        eventData.newInvites.splice(index, 1);
     }
 
     async function inviteUser() {
         try {
             const username = userSearch.value.trim();
-            // Check if user has already been added to userInvites array
-            // Note: invitation for initiator (host) will already be created on event creation
-            if (eventData.userInvites.some((user: any) => user.username === username)) {
+            // Check if user is in newInvites array (already invited)
+            // Note: invitation for initiator (host) will be created on event creation
+            if (eventData.invitedUsers.some((user: any) => user.username === username)) {
                 toast.error('User is already invited!', { timeout: 1700 });
-                userSearch.value = '';
-                return;
-            } else if (eventData.userInvites.some((user: any) => user.username === username)) {
-                toast.error('User is already on invite list!', { timeout: 1700 });
                 userSearch.value = '';
                 return;
             }
@@ -274,30 +275,58 @@ export default function () {
             const userRes: Record<string, any> = await client(`${appHost}api/users?filters[username][$eq]=${username}`, {
                 method: 'GET'
             });
-            console.log('userRes', userRes);
+
             const inputUser = userRes[0];
             if (userRes && inputUser) {
                 try {
-                    // eventData.userInvites.push({ 'username': inputUser.username });
                     eventData.newInvites.push(inputUser);
-                    userSearch.value = '';
                 } catch (error) {
                     console.error(error);
                 }
             } else {
                 toast.error('User not found!', { timeout: 1700 });
-                userSearch.value = '';
             }
         } catch (error) {
             console.error(error);
-        } finally {
-            console.log('newInvites', eventData.newInvites);
         }
     }
 
-    function removeInvite(index: any) {
-        eventData.newInvites.splice(index, 1);
+    async function createInvites(eventObj: Record<string, any>) {
+        for (const inviteUser of eventData.newInvites) {
+            const inviteForm = new FormData();
+            const inviteObj = {
+                users_permissions_user: inviteUser,
+                collection: 'event',
+                event: eventObj,
+                eventStatus: 'invited',
+            };
+            inviteForm.append('data', JSON.stringify(inviteObj));
+
+            try {
+                createInviteAPI.value = true;
+                const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
+                    method: 'POST',
+                    body: inviteForm,
+                });
+                const inviteData = await inviteRes.data;
+
+                // Update invitedUsers array to include newly invited users
+                eventData.invitedUsers.push({ 'username': inviteUser.username });
+            } catch (error) {
+                console.error(error);
+            } finally {
+                // Reset user invite search and matchingUsers array
+                userSearch.value = '';
+                matchingUsers.value = [];
+
+                createInviteAPI.value = false;
+                toast.info(`${inviteUser.username} invited!`, { timeout: 1200 });
+            }
+        }
+
+        // Remove users that were just invited from eventData.newInvites array
+        eventData.newInvites = eventData.newInvites.filter((inviteUser: Record<string, any>) => !eventData.invitedUsers.some((user: Record<string, any>) => user.username === inviteUser.username));
     }
 
-    return { isLoading, createInviteAPI, popDelete, popRsvp, openRsvp, closeRsvp, rsvpModal, userRsvp, inviteId, eventObj, rsvpEvent, getInvite, eventData, getEvent, deleteEvent, openDelete, closeDelete, createInvites, inviteUser, removeInvite, userSearch };
+    return { myUsername, isLoading, createInviteAPI, popDelete, popRsvp, openRsvp, closeRsvp, rsvpModal, userRsvp, inviteId, eventObj, rsvpEvent, getInvite, eventData, getEvent, deleteEvent, openDelete, closeDelete, createInvites, inviteUser, removeInvite, userSearch, usernameSearch, selectInviteUser, matchingUsers };
 }
