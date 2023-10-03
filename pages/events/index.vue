@@ -4,12 +4,10 @@ definePageMeta({
 });
 
 const { shortDate } = useDateTime();
-
 const { myId, isLoading, eventTab, inviteCount, pastEventCheck, getMyEvents, eventDisplay, mapEventsDestruct } = useAllEvents();
 
 // ----------------------------------------------------------------
 onMounted(() => {
-    isLoading.value = true;
     getMyEvents(myId);
 });
 // ----------------------------------------------------------------
@@ -32,7 +30,6 @@ function clickEventPage(eventId: number) {
 function clickEventDisplay(type: string) {
     eventTab.value = type;
 }
-
 // ----------------------------------------------------------------
 </script>
 

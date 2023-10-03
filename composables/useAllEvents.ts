@@ -36,6 +36,7 @@ export default function () {
         } catch (error) {
             console.error(error);
         }
+        isLoading.value = false;
     }
 
     function mapEventsDestruct(userId: number) {
@@ -77,8 +78,6 @@ export default function () {
             });
         } catch (error) {
             console.error(error);
-        } finally {
-            isLoading.value = false;
         }
     }
 
