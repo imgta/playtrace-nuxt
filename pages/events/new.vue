@@ -2,34 +2,23 @@
 definePageMeta({
     middleware: ['auth'],
 });
+
 const { toast } = useMisc();
 const { appHost, client } = useAuth();
-const themeCookie = useCookie('selectedTheme');
+const { eventData, userSearch, usernameSearch, matchingUsers, selectInviteUser, removeInvite, myUsername } = useEvent();
+const user = useStrapiUser().value;
 
+const themeCookie = useCookie('selectedTheme');
 const eventBtnClass = ref('');
 const showModal = ref(false);
+
 const createEventAPI = ref<boolean>(false);
 const createInviteAPI = ref<boolean>(false);
 
 const autoResult: any = ref(null);
 const locationAddress = ref('');
-
 const partyCap = ref<string>() as any;
 const coverDmg = ref<string>() as any;
-const eventData = reactive({
-    title: '' as string,
-    startDate: '' as string,
-    location: [] as any,
-    size: 0 as number,
-    coverCharge: '' as string,
-    info: '' as string,
-    img: '' as string,
-    userInvites: [] as any,
-});
-const userSearch = ref('');
-const matchingUsers = ref([]);
-const { username: myUsername } = useStrapiUser().value as any;
-const user = useStrapiUser().value;
 
 // ----------------------------------------------------------------
 onMounted(() => {
@@ -52,10 +41,9 @@ watchEffect(() => {
 
 const validInvite = computed(() => {
     const username = userSearch.value.trim();
-    const isValidInvite = eventData.userInvites.some((user: any) => user.Invite === username) || username === myUsername;
+    const isValidInvite = eventData.newInvites.some((user: any) => user.Invite === username) || username === myUsername;
     return isValidInvite ? 'input input-bordered form-input' : 'input input-bordered form-input inputshake';
 });
-
 // ----------------------------------------------------------------
 async function locationInput() {
     if (autoResult.value) {
@@ -63,7 +51,7 @@ async function locationInput() {
         try {
             const address = await locationData.formatted_address.replace(', USA', '');
 
-            console.log('locationData.types', locationData.types);
+            // console.log('locationData.types', locationData.types);
 
             // Filter out and replace irrelevant/redundant types from the types array
             const typeFilter = ['tourist_attraction', 'point_of_interest', 'establishment', 'street_address', 'meal_delivery', 'meal_takeaway', 'health', 'premise'];
@@ -96,8 +84,6 @@ async function locationInput() {
             // Find zipcode => last or second to last index of address_components
             const addyArr = locationData.address_components;
             const zipcode = addyArr[addyArr.length - 1].types[0] === 'postal_code' ? addyArr[addyArr.length - 1].long_name : addyArr[addyArr.length - 2].long_name;
-
-            console.log('zipcode', zipcode);
 
             const locationObj = {
                 fullAddress: `${locationData.name} - ${address}`,
@@ -159,7 +145,7 @@ function partyBlur() {
             partyCap.value = '';
             // eslint-disable-next-line unicorn/prefer-number-properties
         } else if (!isNaN(partyCap.value)) {
-            eventData.size = partyCap.value;
+            eventData.partySize = partyCap.value;
             const cap = Number(partyCap.value);
             partyCap.value = cap > 1 ? `${partyCap.value} spots` : `${partyCap.value} spot`;
         }
@@ -184,7 +170,7 @@ async function startDateEmit(data: any) {
 async function coverPicEmit(data: any) {
     const subString = '&crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=70&w=600';
     const rawImg = data.replace(subString, '');
-    eventData.img = rawImg;
+    eventData.eventPic = rawImg;
 }
 async function coverModalEmit(data: any) {
     showModal.value = data;
@@ -202,8 +188,8 @@ async function createEvent(e: Event) {
             eventData.coverCharge = zeroFloat;
             coverDmg.value = `$${zeroFloat}`;
         }
-        if (!eventData.size) {
-            eventData.size = 0;
+        if (!eventData.partySize) {
+            eventData.partySize = 0;
             partyCap.value = 'Unlimited spots';
         }
         if (!eventData.title) {
@@ -212,7 +198,7 @@ async function createEvent(e: Event) {
         } else if (!eventData.startDate) {
             toast.error('Start Date required!', { timeout: 1500 });
             return;
-        } else if (!eventData.img) {
+        } else if (!eventData.eventPic) {
             toast.error('Cover Picture required!', { timeout: 1500 });
             return;
         }
@@ -229,12 +215,12 @@ async function createEvent(e: Event) {
             title: eventData.title,
             startDate: eventData.startDate,
             location: eventData.location,
-            partySize: eventData.size,
+            partySize: eventData.partySize,
             coverCharge: eventData.coverCharge,
             info: eventData.info,
         };
         // Fetch img URL, convert response to blob
-        const imgRes = await (fetch(eventData.img));
+        const imgRes = await (fetch(eventData.eventPic));
         const imgBlob = await imgRes.blob();
         const imgName = `${eventData.title}_eventPic`;
         // Append event fields and image
@@ -246,9 +232,8 @@ async function createEvent(e: Event) {
             body: formData,
         });
         const eventResult = await eventRes.data;
-        // console.log('eventResult', eventResult);
 
-        // (2) Create an 'accepted' event invitation for event host (initiator)
+        // (2) Create an 'going' invite for event host (initiator)
         const hostInviteForm = new FormData();
         const hostInviteObj = {
             users_permissions_user: user,
@@ -257,19 +242,17 @@ async function createEvent(e: Event) {
             eventStatus: 'going',
         };
         hostInviteForm.append('data', JSON.stringify(hostInviteObj));
-        // console.log('hostInviteForm', hostInviteForm);
 
         const hostInviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
             method: 'POST',
             body: hostInviteForm,
         });
         const hostInviteData = await hostInviteRes.data;
-        // console.log('hostInviteData', hostInviteData);
-
-        // (3) Create 'invited' event invitation for each user in userInvites array
-        createInvites(await eventResult);
 
         createEventAPI.value = false;
+
+        // (3) Create 'invited' invitate for each user in newInvites array
+        createInvites(await eventResult);
     } catch (error: any) {
         console.error(error);
     } finally {
@@ -278,38 +261,12 @@ async function createEvent(e: Event) {
     }
 }
 
-async function createInvites(eventRes: any) {
-    for (const user of eventData.userInvites) {
-        const inviteForm = new FormData();
-        const inviteObj = {
-            users_permissions_user: user,
-            collection: 'event',
-            event: eventRes,
-            eventStatus: 'invited',
-        };
-        inviteForm.append('data', JSON.stringify(inviteObj));
-        try {
-            createInviteAPI.value = true;
-            const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
-                method: 'POST',
-                body: inviteForm,
-            });
-            const inviteData = await inviteRes.data;
-        } catch (error) {
-            console.error(error);
-        } finally {
-            createInviteAPI.value = false;
-        }
-    }
-}
-
 async function inviteUser() {
     try {
         const username = userSearch.value.trim();
-
-        // Check if user has already been added to userInvites array
-        // Note: invitation for initiator (host) will already be created on event creation
-        if (eventData.userInvites.some((user: any) => user.username === username) || username === myUsername) {
+        // Check if user is in newInvites array (already invited)
+        // Note: invitation for initiator (host) will be created on event creation
+        if (eventData.newInvites.some((user: any) => user.username === username) || username === myUsername) {
             toast.error('User is already on the invite list!', { timeout: 1700 });
             userSearch.value = '';
             return;
@@ -319,55 +276,43 @@ async function inviteUser() {
         const userRes: Record<string, any> = await client(`${appHost}api/users?filters[username][$eq]=${username}`, {
             method: 'GET'
         });
+
         const user = userRes[0];
         if (userRes && user) {
-            eventData.userInvites.push(user);
-            userSearch.value = '';
+            eventData.newInvites.push(user);
         } else {
-            console.log('User not found!');
             toast.error('User not found!', { timeout: 1700 });
-            userSearch.value = '';
         }
     } catch (error) {
         console.error(error);
     }
 }
 
-function removeUser(index: any) {
-    eventData.userInvites.splice(index, 1);
-    console.log(eventData.userInvites);
-}
+async function createInvites(eventRes: any) {
+    createInviteAPI.value = true;
+    for (const user of eventData.newInvites) {
+        const inviteForm = new FormData();
+        const inviteObj = {
+            users_permissions_user: user,
+            collection: 'event',
+            event: eventRes,
+            eventStatus: 'invited',
+        };
+        inviteForm.append('data', JSON.stringify(inviteObj));
 
-async function usernameSearch() {
-    if (userSearch.value.length > 2) {
-        const inviteUsername = userSearch.value;
         try {
-            const searchRes: Record<string, any> = await client(`${appHost}api/users?filters[username][$startsWithi]=${inviteUsername}`, {
-                method: 'GET'
+            const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
+                method: 'POST',
+                body: inviteForm,
             });
-            const searchUsers = searchRes.map((user: Record<string, any>) => user.username);
-            matchingUsers.value = searchUsers;
+            const inviteData = await inviteRes.data;
         } catch (error) {
             console.error(error);
         }
-    } else {
-        matchingUsers.value = [];
     }
+    createInviteAPI.value = false;
 }
 
-function selectInviteUser(username: string) {
-    try {
-        userSearch.value = username;
-        inviteUser();
-        matchingUsers.value = [];
-    } catch (error) {
-        console.error(error);
-    }
-}
-function checkInvited(username: string) {
-    const isInvited = eventData.userInvites.some((user: any) => user.username === username);
-    return isInvited ? 'hidden' : '';
-}
 // ----------------------------------------------------------------
 </script>
 
@@ -401,10 +346,10 @@ function checkInvited(username: string) {
 
                         <div class="lg:hidden">
                             <div @click="toggleModal">
-                                <button v-if="!showModal && !eventData.img"
+                                <button v-if="!showModal && !eventData.eventPic"
                                     class="edit edit-primary min-w-[100%] lg:min-w-[80%] h-full lg:h-[90%]">
                                     Cover Picture</button>
-                                <img v-if="!showModal && eventData.img" :src="eventData.img" alt="Cover"
+                                <img v-if="!showModal && eventData.eventPic" :src="eventData.eventPic" alt="Cover"
                                     class="edit edit-primary object-cover h-[19rem] w-[100%] lg:w-[80%]" />
                             </div>
                             <div v-if="showModal">
@@ -419,7 +364,7 @@ function checkInvited(username: string) {
                             </div>
                         </div>
 
-                        <div class="w-full con-hint left">
+                        <div class="w-full con-hint left py-0">
                             <div class="hint">
                                 <p>Location</p>
                             </div>
@@ -427,40 +372,12 @@ function checkInvited(username: string) {
                                 placeholder="Where at?" class="input input-bordered form-input" @blur="locationInput" />
                         </div>
 
-                        <div class="w-full con-hint left py-0">
+                        <div class="w-full con-hint left pb-0">
                             <div class="hint">
                                 <p>Start Date</p>
                             </div>
                             <div class="">
                                 <VPicker @startDateInput="startDateEmit" />
-                            </div>
-                        </div>
-
-                        <div class="lg:hidden  pb-0 lg:pb-2">
-                            <div class="w-full lg:w-[80%] h-full lg:h-[90%] con-hint left">
-                                <div class="hint">
-                                    <p>Invites</p>
-                                </div>
-                                <input v-model="userSearch" placeholder="Invite by username" name="title" type="text"
-                                    :class="validInvite" @keyup.enter="inviteUser" @input="usernameSearch" />
-                            </div>
-
-                            <ul v-if="matchingUsers.length > 0" class="menu w-full rounded-box">
-                                <li v-for="username in matchingUsers" :key="username" class="text-accent" @click="selectInviteUser(username)"><a class="p-1.5 text-center" :class="checkInvited(username)">{{ username }}</a></li>
-                            </ul>
-
-                            <div v-if="eventData.userInvites.length > 0" class="py-0.5">
-                                <span class="text-sm font-medium">Inviting</span>
-                                <div v-for="(user, index) in eventData.userInvites" :key="index"
-                                    class="inline-block whitespace-nowrap pl-1">
-                                    <span
-                                        class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
-                                            user.username }}
-                                        <span
-                                            class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
-                                            @click="removeUser(index)"><span class="text-[10px]">✕</span></span>
-                                    </span>
-                                </div>
                             </div>
                         </div>
 
@@ -489,17 +406,42 @@ function checkInvited(username: string) {
                                 class="textarea text-bordered textarea-neutral form-input h-20 resize whitespace-normal" />
                         </div>
 
+                        <div class="lg:hidden">
+                            <input v-model="userSearch" placeholder="Invite by username" name="title" type="text"
+                                :class="validInvite" @keyup.enter="inviteUser" @input="usernameSearch" />
+
+                            <ul v-if="matchingUsers.length > 0" class="menu w-full rounded-box py-0 pt-1">
+                                <li v-for="username in matchingUsers" :key="username" class="text-accent py-0 my-0"
+                                    @click="selectInviteUser(username)"><a
+                                        class="px-1.5 py-[0.175rem] text-xs text-center w-fit">{{ username }}</a></li>
+                            </ul>
+
+                            <div v-if="eventData.newInvites.length > 0" class="align-top"
+                                :class="matchingUsers.length > 0 ? '' : 'pt-0.5'">
+                                <div v-for="(user, index) in eventData.newInvites" :key="index"
+                                    class="inline-block whitespace-nowrap pl-1">
+                                    <span
+                                        class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
+                                            user.username }}
+                                        <span
+                                            class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
+                                            @click="removeInvite(index)"><span class="text-[10px]">✕</span></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
-                <div class="w-full h-full pt-8 px-8 lg:px-0">
+                <div class="hidden md:block w-full h-full pt-8 px-8 lg:px-0">
 
                     <div class="justify-center content-center self-center items-center max-h-full hidden lg:block">
                         <div @click="toggleModal">
-                            <button v-if="!showModal && !eventData.img"
+                            <button v-if="!showModal && !eventData.eventPic"
                                 class="edit edit-primary min-w-[100%] lg:min-w-[80%] h-full lg:h-[90%]">
                                 Cover Picture</button>
-                            <img v-if="!showModal && eventData.img" :src="eventData.img" alt="Cover"
+                            <img v-if="!showModal && eventData.eventPic" :src="eventData.eventPic" alt="Cover"
                                 class="edit edit-primary object-cover h-[19rem] w-[100%] lg:w-[80%]" />
                         </div>
 
@@ -523,33 +465,44 @@ function checkInvited(username: string) {
                         </div>
 
                         <ul v-if="matchingUsers.length > 0" class="menu w-fit rounded-box">
-                            <li v-for="username in matchingUsers" :key="username" class="text-accent" @click="selectInviteUser(username)"><a class="p-1.5 text-center" :class="checkInvited(username)">{{ username }}</a></li>
+                            <li v-for="username in matchingUsers" :key="username" class="text-accent"
+                                @click="selectInviteUser(username)"><a
+                                    class="px-1.5 py-[0.175rem] text-xs text-center w-fit">{{ username }}</a></li>
                         </ul>
 
-                        <div v-if="eventData.userInvites.length > 0" class="flex items-center pt-2.5 w-full lg:w-[80%]">
-                            <div v-for="(user, index) in eventData.userInvites" :key="index"
+                        <div v-if="eventData.newInvites.length > 0" class="flex items-center w-full lg:w-[80%]"
+                            :class="matchingUsers.length > 0 ? '' : 'pt-2.5'">
+                            <div v-for="(user, index) in eventData.newInvites" :key="index"
                                 class="grid grid-flow-col-dense gap-1 pl-1">
                                 <span
                                     class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
                                         user.username }}
                                     <span
                                         class="badge badge-sm bg-transparent cursor-pointer hover:opacity-100 hover:font-bold hover:badge-error border-0"
-                                        @click="removeUser(index)"><span class="text-[10px]">✕</span></span>
+                                        @click="removeInvite(index)"><span class="text-[10px]">✕</span></span>
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    <div
+                    <!-- <div
                         class="absolute top-32 sm:top-60 lg:right-36 md:right-32 sm:right-32 max-sm:-translate-x-full max-sm:left-14 pointer-events-none z-0">
                         <Bubbles />
-                    </div>
+                    </div> -->
 
                 </div>
+
+                <div class="">
+                    <div
+                        class="absolute top-32 sm:top-40 sm:right-28 lg:right-36 md:right-32 max-sm:-translate-x-full max-sm:left-14 pointer-events-none z-0">
+                        <Bubbles />
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <div class="sm:px-24 sm:pb-10 lg:pl-0">
+        <div class="sm:px-24 pb-10 lg:pl-0">
 
             <div class="flex items-center justify-center place-content-center">
                 <button v-if="!createEventAPI && !createInviteAPI" class="event-create" :class="eventBtnClass" type="submit"

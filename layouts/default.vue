@@ -46,11 +46,9 @@ watchEffect(() => {
         loginTheme.value = 'login auth-modal';
         signupTheme.value = 'signup auth-modal';
     }
-    console.log('signupData', signupData);
 });
 
 // ----------------------------------------------------------------
-
 function toggleSide() {
     popRef.drawer = !popRef.drawer;
 }

@@ -5,18 +5,15 @@ definePageMeta({
 
 const { myId, appHost, client } = useAuth();
 const { shortDate } = useDateTime();
-const { isLoading, createInviteAPI, popDelete, popRsvp, openRsvp, closeRsvp, rsvpModal, getEvent, eventData, getInvite, rsvpEvent, deleteEvent, openDelete, closeDelete, userRsvp, inviteId, eventObj, createInvites, inviteUser, removeInvite, userSearch } = useEvent();
+const { isLoading, createInviteAPI, popDelete, popRsvp, openRsvp, closeRsvp, rsvpModal, getEvent, eventData, getInvite, rsvpEvent, deleteEvent, openDelete, closeDelete, userRsvp, inviteId, eventObj, createInvites, inviteUser, removeInvite, userSearch, usernameSearch, selectInviteUser, matchingUsers } = useEvent();
 
 const themeCookie = useCookie('selectedTheme');
 const pageTheme = ref(themeCookie).value as any;
 const { formBg } = useTheme(pageTheme);
+const eventBtnClass = ref('');
+const inputClass = ref('w-[10rem]');
 
 const eventId = Number(useRoute().params.id);
-
-const eventBtnClass = ref('');
-
-const inputClass = ref('w-[10rem]');
-const matchingUsers = ref([]);
 // ----------------------------------------------------------------
 onMounted(() => {
     getEvent(eventId);
@@ -34,45 +31,13 @@ const inputValid = computed(() => {
         inputClass.value = 'w-[10rem]';
     }
     const username = userSearch.value.trim();
-    (eventData.userInvites.some((user: any) => user.username === username)) ? inputClass.value += ' inputshake' : (eventData.newInvites.length > 0) ? inputClass.value += ' w-[23.5rem]' : inputClass.value += ' ';
+    (eventData.invitedUsers.some((user: any) => user.username === username)) ? inputClass.value += ' inputshake' : (eventData.newInvites.length > 0) ? inputClass.value += ' w-[23.5rem]' : inputClass.value += ' ';
     ;
     return inputClass.value;
 });
 // ----------------------------------------------------------------
-
 function googleMaps(address: string) {
     return `https://www.google.com/maps/place/${address.replaceAll(' ', '+')}`;
-}
-
-async function usernameSearch() {
-    if (userSearch.value.length > 2) {
-        const inviteUsername = userSearch.value;
-        try {
-            const searchRes: Record<string, any> = await client(`${appHost}api/users?filters[username][$startsWithi]=${inviteUsername}`, {
-                method: 'GET'
-            });
-            const searchUsers = searchRes.map((user: Record<string, any>) => user.username);
-            matchingUsers.value = searchUsers;
-        } catch (error) {
-            console.error(error);
-        }
-    } else {
-        matchingUsers.value = [];
-    }
-}
-
-function selectInviteUser(username: string) {
-    try {
-        userSearch.value = username;
-        inviteUser();
-        matchingUsers.value = [];
-    } catch (error) {
-        console.error(error);
-    }
-}
-function checkInvited(username: string) {
-    const isInvited = eventData.userInvites.some((user: any) => user.username === username);
-    return isInvited ? 'hidden' : '';
 }
 // ----------------------------------------------------------------
 </script>
@@ -110,100 +75,6 @@ function checkInvited(username: string) {
 
                     <!-- TOP RIGHT MODALS -->
                     <div class="flex justify-end pt-0.5 pb-2">
-                        <!-- INVITE RSVP MODAL -->
-                        <!-- <div v-if="myId !== eventData.hostId" class="self-end shake">
-                            <svg v-if="!rsvpModal" class="w-4 hover:cursor-pointer"
-                                :class="(userRsvp === 'going') ? 'fill-info' : (userRsvp === 'maybe') ? 'fill-warning' : (userRsvp === 'noGo') ? 'fill-error' : 'fill-base-content/75 hover:fill-info'"
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" @click="openRsvp()">
-                                <path
-                                    d="M224,44H32A12,12,0,0,0,20,56V192a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V56A12,12,0,0,0,224,44ZM193.15,68,128,127.72,62.85,68ZM44,188V83.28l75.89,69.57a12,12,0,0,0,16.22,0L212,83.28V188Z">
-                                </path>
-                            </svg>
-                            <svg v-if="rsvpModal" class="w-4"
-                                :class="(userRsvp === 'going') ? 'fill-info' : (userRsvp === 'maybe') ? 'fill-warning' : (userRsvp === 'noGo') ? 'fill-error' : 'fill-info/75'"
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-                                <path
-                                    d="M230.66,86l-96-64a12,12,0,0,0-13.32,0l-96,64A12,12,0,0,0,20,96V200a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V96A12,12,0,0,0,230.66,86ZM128,46.42l74.86,49.91L141.61,140H114.39L53.14,96.33ZM44,196V119.29l59.58,42.48a12,12,0,0,0,7,2.23h34.9a12,12,0,0,0,7-2.23L212,119.29V196Z">
-                                </path>
-                            </svg>
-                        </div>
-                        <dialog ref="popRsvp" class="modal">
-                            <div :class="formBg" method="dialog" class="modal-box w-auto max-fit px-9 pt-6 shadow-none">
-                                <h3 className="text-neutral-content font-medium text-sm absolute left-3.5 top-3">
-                                    RSVP</h3>
-                                <button
-                                    class="btn btn-xs btn-circle btn-ghost focus:outline-none absolute right-2 top-2 opacity-75 hover:opacity-100 text-neutral-content/75"
-                                    @click="closeRsvp()"><span class="">✕</span></button>
-                                <h1 class="text-primary text-2xl text-center pt-6">
-                                    {{ eventData.title }}
-                                </h1>
-                                <div
-                                    class="grid justify-center items-center w-full pb-7 text-neutral-content/75 text-center text-xs font-medium">
-                                    <span>Hosted by {{
-                                        eventData.initiatorUser
-                                    }}</span>
-                                    <span>{{ shortDate(eventData.startDate) }}</span>
-                                </div>
-
-                                <div class="grid grid-cols-5 w-full text-neutral-content/75 pb-6">
-
-                                    <div class="col-start-1 hover:cursor-pointer w-full group hover:text-primary"
-                                        :class="(userRsvp === 'going') ? 'text-primary font-semibold' : ''"
-                                        @click="rsvpEvent(eventId, inviteId, 'going')">
-                                        <div class="flex justify-center row-start-1">
-                                            <svg class="w-5 pb-[0.2rem] "
-                                                :class="(userRsvp === 'going') ? 'fill-primary' : 'fill-neutral-content/75 group-hover:fill-primary group-hover:animate-bounce'"
-                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-                                                <path
-                                                    d="M234.49,111.07,90.41,22.94A20,20,0,0,0,60,39.87V216.13a20,20,0,0,0,30.41,16.93l144.08-88.13a19.82,19.82,0,0,0,0-33.86ZM84,208.85V47.15L216.16,128Z">
-                                                </path>
-                                            </svg>
-                                        </div>
-                                        <div class="flex justify-center">
-                                            <span>Going</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-start-3 hover:cursor-pointer w-full group hover:text-warning"
-                                        :class="(userRsvp === 'maybe') ? 'text-warning font-semibold' : ''"
-                                        @click="rsvpEvent(eventId, inviteId, 'maybe')">
-                                        <div class="flex justify-center row-start-1">
-                                            <svg :class="(userRsvp === 'maybe') ? 'fill-warning' : 'fill-neutral-content/75 group-hover:fill-warning group-hover:animate-bounce'"
-                                                class="w-5 pb-[0.2rem]" xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 256 256">
-                                                <path
-                                                    d="M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Zm52-52a12,12,0,0,1-12,12H88a12,12,0,0,1,0-24h80A12,12,0,0,1,180,160ZM76,108a16,16,0,1,1,16,16A16,16,0,0,1,76,108Zm104,0a16,16,0,1,1-16-16A16,16,0,0,1,180,108Z">
-                                                </path>
-                                            </svg>
-                                        </div>
-                                        <div class="flex justify-center">
-                                            <span>Maybe</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-start-5 hover:cursor-pointer w-full group hover:text-error"
-                                        :class="(userRsvp === 'noGo') ? 'text-error font-semibold' : ''"
-                                        @click="rsvpEvent(eventId, inviteId, 'noGo')">
-                                        <div class="flex justify-center row-start-1">
-                                            <svg :class="(userRsvp === 'noGo') ? 'fill-error' : 'fill-neutral-content/75 group-hover:fill-error group-hover:animate-bounce'"
-                                                class="w-5 pb-[0.2rem]" xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 256 256">
-                                                <path
-                                                    d="M188,84a32,32,0,0,0-8,1V60a32,32,0,0,0-43.21-30A32,32,0,0,0,76,44v1A32,32,0,0,0,36,76v76a92,92,0,0,0,184,0V116A32,32,0,0,0,188,84Zm8,68a68,68,0,0,1-136,0V76a8,8,0,0,1,16,0v44a12,12,0,0,0,24,0V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V60a8,8,0,0,1,16,0v65.4A52.09,52.09,0,0,0,116,176a12,12,0,0,0,24,0,28,28,0,0,1,28-28,12,12,0,0,0,12-12V116a8,8,0,0,1,16,0Z">
-                                                </path>
-                                            </svg>
-                                        </div>
-                                        <div class="flex justify-center">
-                                            <span>Flake</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <form method="dialog" class="modal-backdrop">
-                                <button @click="closeRsvp()">close</button>
-                            </form>
-                        </dialog> -->
-
                         <!-- DELETE EVENT MODAL -->
                         <div v-if="myId === eventData.hostId" class="con-hint event-card" @click="openDelete()">
                             <svg class="w-3.5 fill-base-content/75 hover:fill-error hover:cursor-pointer"
@@ -285,7 +156,7 @@ function checkInvited(username: string) {
                     <!-- EVENT INFO -->
 
                     <!-- RSVP -->
-                    <div class="flex justify-center">
+                    <div v-if="myId !== eventData.hostId" class="flex justify-center">
                         <div class="grid grid-cols-7 w-full text-neutral-content/75 pb-4 pt-1">
                             <div class="col-start-2 hover:cursor-pointer w-full group hover:text-primary"
                                 :class="(userRsvp === 'going') ? 'text-primary font-semibold' : ''"
@@ -437,10 +308,9 @@ function checkInvited(username: string) {
                             </svg>
                             <div v-if="isLoading" class="inline pl-2 blur-sm animate-pulse">open</div>
                             <div class="inline pl-2" :class="isLoading ? 'hidden' : ''">
-                                <span v-if="eventData.partySize"><span class="text-primary/80">{{ eventData.spots
-                                }}</span>/{{
-    eventData.partySize }}
-                                    spots left!</span>
+                                <span v-if="eventData.partySize">
+                                    <span class="text-primary/80">{{ eventData.spots }}</span>
+                                    /{{ eventData.partySize }}spots left!</span>
                                 <span v-else-if="!eventData.partySize">open</span>
                                 <span v-else-if="!eventData.spots" class="text-base-content/50"><s>{{ eventData.spots }}/{{
                                     eventData.partySize }} full </s></span>
@@ -497,15 +367,19 @@ function checkInvited(username: string) {
                                     placeholder="Send more invites" name="invites" type="text" :class="inputValid"
                                     @keyup.enter="inviteUser" @input="usernameSearch" />
                             </div>
-                            <ul v-if="matchingUsers.length > 0" class="menu w-fit rounded-box">
-                                <li v-for="username in matchingUsers" :key="username" class="text-accent" @click="selectInviteUser(username)"><a class="p-1.5 text-center" :class="checkInvited(username)">{{ username }}</a></li>
+                            <ul v-if="matchingUsers.length > 0" class="menu w-fit rounded-box py-0 pt-1.5">
+                                <li v-for="username in matchingUsers" :key="username" class="text-accent"
+                                    @click="selectInviteUser(username)"><a
+                                        class="px-1.5 py-[0.175rem] text-xs text-center w-fit">{{ username }}</a></li>
                             </ul>
 
                             <Loader v-if="createInviteAPI" />
-                            <div v-if="eventData.newInvites.length > 0" class="align-top py-2 md:pt-2">
+
+                            <div v-if="eventData.newInvites.length > 0" class="align-top pl-1"
+                                :class="matchingUsers.length > 0 ? '' : 'pt-2.5'">
 
                                 <div v-for="(user, index) in eventData.newInvites" :key="index"
-                                    class="inline-grid grid-cols-4 gap-0.5 pl-2">
+                                    class="inline-grid grid-flow-col-dense gap-1 pl-1 pb-4">
                                     <span
                                         class="badge badge-md border-primary border-[1.75px] gap-1 text-xs text-primary font-semibold pl-2 pr-[0.05rem]">{{
                                             user.username }}

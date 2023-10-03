@@ -38,7 +38,7 @@ async function dateInput(startDate: any) {
 <template>
     <div class="collapse">
         <input type="checkbox" />
-        <div class="collapse-title px-0 py-1.5">
+        <div class="collapse-title px-0 pt-1.5 pb-0">
             <input v-model="formatDate" placeholder="When were you thinking?" class="input input-bordered form-input" />
         </div>
         <div class="collapse-content">
