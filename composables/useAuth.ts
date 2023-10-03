@@ -1,7 +1,7 @@
 export default function () {
     const { toast } = useMisc();
-    const client = useStrapiClient();
     const { logout, login, register } = useStrapiAuth();
+    const client = useStrapiClient();
     const { strapi: { url: appHost }, weatherAPI } = useRuntimeConfig().public;
     const expiry = new Date(Date.now() + 86400000); // expiry set to +1 day
     const userCookie: any = useCookie('userCookie', { expires: expiry });
@@ -154,6 +154,10 @@ export default function () {
             toast.error((error.error.message as string), { timeout: 2000 });
             console.error(error);
         } finally {
+            signupData.fullName = '';
+            signupData.email = '';
+            signupData.username = '';
+            signupData.password = '';
             navigateTo('/events');
             popModal('close', 'signup');
             toast.success('User registered!', { timeout: 2000 });

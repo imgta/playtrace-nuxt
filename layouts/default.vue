@@ -46,6 +46,7 @@ watchEffect(() => {
         loginTheme.value = 'login auth-modal';
         signupTheme.value = 'signup auth-modal';
     }
+    console.log('signupData', signupData);
 });
 
 // ----------------------------------------------------------------
@@ -170,7 +171,7 @@ function navNewEvent() {
                         <div class="card-body pt-5 pb-1.5 bg-none">
                             <div class="focus:text-base-content bg-none">
                                 <label class="label-text text-xs text-neutral-content/80">full name</label>
-                                <input v-model="signupData.fullname" required type="text" name="fullname"
+                                <input v-model="signupData.fullName" required type="text" name="fullname"
                                     class="form-control input input-bordered form-input auth-input" />
                                 <label class="label-text text-xs text-neutral-content/80">email</label>
                                 <input v-model="signupData.email" required type="email" name="email"
