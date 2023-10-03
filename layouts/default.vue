@@ -28,6 +28,7 @@ watch(() => userData.id, () => {
         try {
             getUser(userData.id);
         } catch (error) {
+            toast.error((error.error.message as string), { timeout: 2000 });
             console.error(error);
         }
     }

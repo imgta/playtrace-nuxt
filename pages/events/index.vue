@@ -4,7 +4,8 @@ definePageMeta({
 });
 
 const { shortDate } = useDateTime();
-const { myId, isLoading, eventTab, inviteCount, pastEventCheck, getMyEvents, eventDisplay, mapEventsDestruct } = useAllEvents();
+const { myId } = useAuth();
+const { isLoading, eventTab, inviteCount, pastEventCheck, getMyEvents, eventDisplay, mapEventsDestruct } = useAllEvents();
 
 // ----------------------------------------------------------------
 onMounted(() => {
