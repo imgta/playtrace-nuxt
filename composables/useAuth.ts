@@ -96,17 +96,13 @@ export default function () {
         }
     }
 
-    async function onDemo() {
+    function onDemo() {
+        loginData.username = 'demo';
+        loginData.password = 'demo123';
         try {
-            const loginRes = await login({ identifier: 'demo', password: 'demo123' });
-            const newUserId = loginRes.user.value?.id;
-            userData.id = newUserId;
+            onLogin();
         } catch (error) {
             console.error(error);
-        } finally {
-            navigateTo('/events');
-            popModal('close', 'both');
-            toast.success('Demo account active!', { timeout: 2000 });
         }
     }
 
