@@ -1,4 +1,4 @@
-<!-- <script setup lang="ts">
+<script setup lang="ts">
 const { toast } = useMisc();
 const name = ref('');
 const classes = ref('');
@@ -74,7 +74,7 @@ async function submitForm() {
 }
 // ----------------------------------------------------------------
 </script>
-
+<!--
 <template>
     <div class="pb-10">
         <div class="flex items-center justify-center content-center bg-base-200">
