@@ -17,8 +17,7 @@ export default function () {
             try {
                 const { id } = useStrapiUser().value as any;
                 return id;
-            } catch (error: any) {
-                toast.error((error.error.message as string), { timeout: 2000 });
+            } catch (error) {
                 console.error(error);
             }
         }
@@ -90,12 +89,11 @@ export default function () {
             userData.fullName = fullName;
             userData.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
             userData.profileUrl = `/${userData.username}`;
-        } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
+        } catch (error) {
             console.error(error);
-            return;
+        } finally {
+            userCookie.value = userData;
         }
-        userCookie.value = userData;
     }
 
     function onDemo() {
@@ -123,11 +121,11 @@ export default function () {
         } catch (error: any) {
             toast.error((error.error.message as string), { timeout: 2000 });
             console.error(error);
-            return;
+        } finally {
+            popModal('close', 'login');
+            navigateTo('/events');
+            toast.success('User logged in!', { timeout: 2000 });
         }
-        popModal('close', 'login');
-        navigateTo('/events');
-        toast.success('User logged in!', { timeout: 2000 });
     }
 
     async function onRegister() {
@@ -151,29 +149,28 @@ export default function () {
         } catch (error: any) {
             toast.error((error.error.message as string), { timeout: 2000 });
             console.error(error);
-            return;
+        } finally {
+            signupData.fullName = '';
+            signupData.email = '';
+            signupData.username = '';
+            signupData.password = '';
+            navigateTo('/events');
+            popModal('close', 'signup');
+            toast.success('User registered!', { timeout: 2000 });
         }
-        signupData.fullName = '';
-        signupData.email = '';
-        signupData.username = '';
-        signupData.password = '';
-        navigateTo('/events');
-        popModal('close', 'signup');
-        toast.success('User registered!', { timeout: 2000 });
     }
 
     async function onLogout() {
         try {
             logout();
-        } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
+        } catch (error) {
             console.error(error);
-            return;
+        } finally {
+            userData.id = null;
+            popRef.drawer = false;
+            await navigateTo('/');
+            toast.info('User logged out.', { timeout: 1500 });
         }
-        userData.id = null;
-        popRef.drawer = false;
-        await navigateTo('/');
-        toast.info('User logged out.', { timeout: 1500 });
     }
 
     return {

@@ -108,12 +108,11 @@ export default function () {
                 (eventData.invitedUsers).push({ 'username': invitedUser });
             });
             eventData.spots = eventData.partySize - going;
-        } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
+        } catch (error) {
             console.error(error);
-            return;
+        } finally {
+            isLoading.value = false;
         }
-        isLoading.value = false;
     }
 
     async function rsvpEvent(eventId: number, inviteId: number, rsvp: string) {
@@ -129,19 +128,18 @@ export default function () {
             });
             const rsvpData = await rsvpRes.data;
             closeRsvp();
-        } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
+        } catch (error) {
             console.error(error);
-            return;
+        } finally {
+            if (rsvp === 'going') {
+                toast.info('RSVP: Going!', { timeout: 1500 });
+            } else if (rsvp === 'maybe') {
+                toast.warning('RSVP: Maybe?', { timeout: 1500 });
+            } else if (rsvp === 'noGo') {
+                toast.error('RSVP: Not going.', { timeout: 1500 });
+            }
+            await getInvite(eventId, myId);
         }
-        if (rsvp === 'going') {
-            toast.info('RSVP: Going!', { timeout: 1500 });
-        } else if (rsvp === 'maybe') {
-            toast.warning('RSVP: Maybe?', { timeout: 1500 });
-        } else if (rsvp === 'noGo') {
-            toast.error('RSVP: Not going.', { timeout: 1500 });
-        }
-        await getInvite(eventId, myId);
     };
 
     async function getInvite(eventId: number, myId: number) {
@@ -157,12 +155,11 @@ export default function () {
             inviteId.value = id;
             userRsvp.value = eventStatus;
             eventObj.value = event.data;
-        } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
+        } catch (error) {
             console.error(error);
-            return;
+        } finally {
+            isLoading.value = false;
         }
-        isLoading.value = false;
     }
 
     async function deleteEvent(eventId: number) {
@@ -183,12 +180,11 @@ export default function () {
                 const delEventPicRes: any = await client(`${appHost}api/upload/files/${delEventPicId}`, {
                     method: 'DELETE',
                 });
-            } catch (error: any) {
-                toast.error((error.error.message as string), { timeout: 2000 });
+            } catch (error) {
                 console.error(error);
-                return;
+            } finally {
+                toast.info('Event picture deleted!', { timeout: 1500 });
             }
-            toast.info('Event picture deleted!', { timeout: 1500 });
 
             // (2b) Delete each invitedUser relational instance for target event
             try {
@@ -235,8 +231,7 @@ export default function () {
                     // Filter out users in invitedUsers (already invited) or newInvites (queued for invite)
                     .filter((username: string) => ![...eventData.newInvites, ...eventData.invitedUsers].some((inviteUser: Record<string, any>) => inviteUser.username === username || myUsername === username));
                 matchingUsers.value = searchUsers;
-            } catch (error: any) {
-                toast.error((error.error.message as string), { timeout: 2000 });
+            } catch (error) {
                 console.error(error);
             }
         } else {
@@ -253,8 +248,7 @@ export default function () {
             // Remove selected user from matchingUsers.value array
             matchingUsers.value = matchingUsers.value.filter((user: string) => user !== username);
             userSearch.value = inviteQuery;
-        } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
+        } catch (error) {
             console.error(error);
         }
     }
@@ -286,15 +280,13 @@ export default function () {
             if (userRes && inputUser) {
                 try {
                     eventData.newInvites.push(inputUser);
-                } catch (error: any) {
-                    toast.error((error.error.message as string), { timeout: 2000 });
+                } catch (error) {
                     console.error(error);
                 }
             } else {
                 toast.error('User not found!', { timeout: 1700 });
             }
-        } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
+        } catch (error) {
             console.error(error);
         }
     }
@@ -320,17 +312,17 @@ export default function () {
 
                 // Update invitedUsers array to include newly invited users
                 eventData.invitedUsers.push({ 'username': inviteUser.username });
-            } catch (error: any) {
-                toast.error((error.error.message as string), { timeout: 2000 });
+            } catch (error) {
                 console.error(error);
-                return;
+            } finally {
+                // Reset user invite search and matchingUsers array
+                userSearch.value = '';
+                matchingUsers.value = [];
+
+                createInviteAPI.value = false;
+                toast.info(`${inviteUser.username} invited!`, { timeout: 1200 });
             }
-            toast.info(`${inviteUser.username} invited!`, { timeout: 1200 });
         }
-        // Reset user invite search and matchingUsers array
-        userSearch.value = '';
-        matchingUsers.value = [];
-        createInviteAPI.value = false;
 
         // Remove users that were just invited from eventData.newInvites array
         eventData.newInvites = eventData.newInvites.filter((inviteUser: Record<string, any>) => !eventData.invitedUsers.some((user: Record<string, any>) => user.username === inviteUser.username));

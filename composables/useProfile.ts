@@ -1,5 +1,4 @@
 export default function () {
-    const { toast } = useMisc();
     const { strapi: { url: appHost } } = useRuntimeConfig().public;
     const client = useStrapiClient();
     const profile = reactive({
@@ -30,8 +29,7 @@ export default function () {
 
             profile.socials = social;
             socialSplit();
-        } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
+        } catch (error) {
             console.error(error);
         }
     }

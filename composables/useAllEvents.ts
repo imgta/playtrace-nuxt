@@ -1,6 +1,5 @@
 export default function () {
     const { appHost, client, myId } = useAuth();
-    const { toast } = useMisc();
     const { isLoading } = useEvent();
 
     const eventTab = ref<string>('all');
@@ -34,10 +33,8 @@ export default function () {
             inviteCount.value = myEvents.value.filter((event: Record<string, any>) => {
                 return (event.attributes.initiator.data.id !== userId) && !pastEventCheck(event.attributes.startDate);
             }).length;
-        } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
+        } catch (error) {
             console.error(error);
-            return;
         }
         isLoading.value = false;
     }
@@ -79,8 +76,7 @@ export default function () {
 
                 return { eventId, eventStatus, title, host, hostName, hostFirstName, hostLastName, hostInitials, hostId, hostAvatar, hostUrl, startDate, coverUrl, partySize, goingCount, zipcode };
             });
-        } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
+        } catch (error) {
             console.error(error);
         }
     }
