@@ -128,9 +128,17 @@ export default function () {
         }
     }
 
+    function isFullName(fullName: string) {
+        const bothNames = fullName.split(' ');
+        return bothNames.length >= 2;
+    }
+
     async function onRegister() {
         if (!signupData.fullName) {
             toast.error('Full Name required!', { timeout: 1700 });
+            return;
+        } else if (!isFullName(signupData.fullName)) {
+            toast.error('First and last name required!', { timeout: 1700 });
             return;
         } else if (!signupData.email) {
             toast.error('Email required!', { timeout: 1700 });
