@@ -38,7 +38,7 @@ function clickEventDisplay(type: string) {
         <h1 class="text-primary text-4xl text-center pt-4 pb-0.5">
             Your Events
         </h1>
-        <p class="text-base-content/80 text-center text-sm">
+        <p class="text-base-content text-center text-sm">
             Someone's popular.
         </p>
     </div>
@@ -87,7 +87,7 @@ function clickEventDisplay(type: string) {
                             <h1 class="text-primary text-2xl xl:text-[1.4rem] font-medium">{{ ev.title }}</h1>
                         </div>
                         <div class="flex justify-center">
-                            <span class="font-semibold text-xs text-base-content/80 self-center">{{
+                            <span class="font-semibold text-xs text-base-content self-center">{{
                                 shortDate(ev.startDate) }}</span>
                         </div>
                     </div>
@@ -123,8 +123,7 @@ function clickEventDisplay(type: string) {
                                 </div>
                                 <span class="align-super pl-1.5 font-semibold">
                                     {{ myId === ev.hostId ? 'You!' : ev.hostFirstName }}
-                                    <span v-if="myId !== ev.hostId && ev.eventStatus !== 'going'" class="font-medium">
-                                        <span class="text-accent"> invited you!</span></span>
+                                    <span v-if="myId !== ev.hostId && ev.eventStatus !== 'going'" class="font-medium text-accent">(invited)</span>
                                 </span>
                             </div>
                         </NuxtLink>
@@ -141,7 +140,7 @@ function clickEventDisplay(type: string) {
                             </span> -->
                             <span v-if="ev.partySize !== 0" class="inline-flex pl-1.5">
                                 <span class="text-primary">{{ ev.partySize - ev.goingCount }}</span>/{{ ev.partySize }}
-                                <span class="font-medium pl-0.5"> spots</span>
+                                <span class="font-semibold pl-0.5"> spots</span>
                             </span>
                             <span v-else-if="(ev.partySize - ev.goingCount) === 0" class="pl-1.5">full</span>
                             <span v-else-if="!ev.partySize" class="pl-1.5">open</span>
