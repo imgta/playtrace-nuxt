@@ -46,13 +46,13 @@ function googleMaps(address: string) {
     <div class="pt-4">
         <div v-if="isLoading">
             <div
-                class="flex justify-center text-center tracking-wide text-3xl md:text-2xl lg:text-3xl text-primary font-semibold blur-md animate-pulse">
+                class="flex justify-center text-center tracking-wide text-3xl text-primary font-semibold blur-md animate-pulse">
                 Event Title</div>
             <div class="flex justify-center font-medium text-xs lg:text-sm text-base-content/80 blur-md animate-pulse">
                 Next Sun • 12:45AM</div>
         </div>
         <div :class="isLoading ? 'hidden' : ''"
-            class="flex justify-center text-center tracking-wide text-3xl md:text-2xl lg:text-3xl text-primary font-semibold">
+            class="flex justify-center text-center tracking-wide text-3xl text-primary font-semibold">
             {{ eventData.title }}</div>
         <div :class="isLoading ? 'hidden' : ''"
             class="flex justify-center font-medium text-xs lg:text-sm text-base-content/80">{{
@@ -209,7 +209,7 @@ function googleMaps(address: string) {
                         </div>
                     </div>
 
-                    <div class="self-start text-sm lg:text-base font-medium text-base-content/75">
+                    <div class="self-start text-sm lg:text-base font-medium text-base-content">
                         <!-- HOSTS -->
                         <div class="flex">
                             <!-- <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 md:w-[1.2rem]"
@@ -249,8 +249,7 @@ function googleMaps(address: string) {
                                     </div>
                                     <span class="align-super pl-1.5 text-primary">
                                         {{ myId === eventData.hostId ? 'You!' : eventData.hostFirstName }}
-                                        <span v-if="myId !== eventData.hostId && userRsvp !== 'going'" class="font-medium">
-                                            <span class="text-accent"> invited you!</span></span>
+                                        <span v-if="myId !== eventData.hostId && userRsvp !== 'going'" class="font-medium text-accent"> (host)</span>
                                     </span>
                                 </div>
                             </NuxtLink>
@@ -308,9 +307,7 @@ function googleMaps(address: string) {
                             </svg>
                             <div v-if="isLoading" class="inline pl-2 blur-sm animate-pulse">open</div>
                             <div class="inline pl-2" :class="isLoading ? 'hidden' : ''">
-                                <span v-if="eventData.partySize">
-                                    <span class="text-primary/80">{{ eventData.spots }}</span>
-                                    /{{ eventData.partySize }}spots left!</span>
+                                <span v-if="eventData.partySize" class="text-primary">{{ eventData.spots }}<span class="text-base-content">/{{ eventData.partySize }} spots left!</span></span>
                                 <span v-else-if="!eventData.partySize">open</span>
                                 <span v-else-if="!eventData.spots" class="text-base-content/50"><s>{{ eventData.spots }}/{{
                                     eventData.partySize }} full </s></span>
@@ -354,10 +351,10 @@ function googleMaps(address: string) {
                         </div>
 
                         <!-- EVENT DESCRIPTION -->
-                        <p v-if="isLoading" class="text-xs md:text-sm text-base-content/75 py-5 pb-8 blur-sm animate-pulse">
+                        <p v-if="isLoading" class="text-xs md:text-sm text-base-content py-5 pb-8 blur-sm animate-pulse">
                             Lorem ipsum dolor sit amet, consectetur adipisicing elit. Enim quia, fuga nostrum pariatur, sit
                             nemo dicta odit deserunt consequuntur similique exercitationem, labore optio!</p>
-                        <p :class="isLoading ? 'hidden' : ''" class="text-xs md:text-sm text-base-content/75 py-5 pb-8">{{
+                        <p :class="isLoading ? 'hidden' : ''" class="text-xs md:text-sm text-base-content py-5 pb-8">{{
                             eventData.info }}</p>
 
                         <!-- INVITATIONS -->

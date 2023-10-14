@@ -8,7 +8,7 @@ const myArr = ['Nuxt 3', 'Strapi', 'Vue.js'];
     <main>
         <div class="py-6 bg-base-100">
             <div class="flex-col max-w-5xl mx-auto hero-content lg:flex-row-reverse">
-                <img src="https://images.unsplash.com/photo-1518281053204-48de9654fb37"
+                <img src="https://images.unsplash.com/photo-1518281053204-48de9654fb37?ixid=M3w0OTMxOTB8MHwxfHNlYXJjaHw5fHxwYXJ0eWluZ3xlbnwwfHx8fDE2OTI4Njc1NDF8MA&ixlib=rb-4.0.3&crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=75"
                     class="rounded-lg shadow-2xl md:max-w-lg lg:max-w-md">
                 <div class="py-2 px-4 prose">
                     <span class="mb-0 font-bold text-2xl text-base-content">Your New Social Catalyst</span>

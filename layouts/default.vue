@@ -228,14 +228,14 @@ function navNewEvent() {
                 <div class="hidden md:inline-flex">
                     <NuxtLink to="/events/new">
                         <button
-                            class="btn btn-primary btn-xs text-primary bg-transparent hover:text-neutral-content border-none font-normal normal-case md:btn-sm">
+                            class="btn btn-primary btn-xs text-primary bg-transparent hover:text-neutral-content border-none font-medium normal-case md:btn-sm">
                             <span>Create</span>
                         </button>
                     </NuxtLink>
 
                     <NuxtLink to="/events">
                         <button
-                            class="btn btn-primary btn-xs text-primary bg-transparent hover:text-neutral-content border-none font-normal normal-case md:btn-sm">
+                            class="btn btn-primary btn-xs text-primary bg-transparent hover:text-neutral-content border-none font-medium normal-case md:btn-sm">
                             <span>Events</span>
                         </button>
                     </NuxtLink>
@@ -341,7 +341,7 @@ function navNewEvent() {
         <!-- BOTTOM NAV BAR -->
         <div class="btm-nav text-sm font-medium z-30 md:hidden">
             <button
-                :class="(route.path === '/') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
+                :class="(route.path === '/') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'"
                 @click="navHome">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
                     <path
@@ -351,7 +351,7 @@ function navNewEvent() {
             </button>
 
             <button
-                :class="(route.path === '/events/new') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
+                :class="(route.path === '/events/new') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'"
                 @click="navNewEvent">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
                     <path
@@ -361,7 +361,7 @@ function navNewEvent() {
             </button>
 
             <button
-                :class="(route.path === '/events') ? 'fill-primary text-primary active' : 'fill-base-content/75 text-base-content/75 hover:fill-primary hover:text-primary hover:active'"
+                :class="(route.path === '/events') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'"
                 @click="navEvents">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
                     <path
