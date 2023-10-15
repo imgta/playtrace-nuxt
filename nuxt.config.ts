@@ -54,8 +54,10 @@ export default defineNuxtConfig({
                             })(window,document,'script','dataLayer','${process.env.GTM_ID}');
                     `
                 },
-                { src: `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_KEY}&libraries=places` },
-            ]
+                {
+                    src: `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_KEY}&libraries=places`
+                },
+            ],
         },
     },
     // routeRules: {
