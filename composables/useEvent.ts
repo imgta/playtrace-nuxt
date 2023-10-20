@@ -71,19 +71,19 @@ export default function () {
                 invited_users: { data: invites },
             } = await eventRes.data.attributes;
 
-            eventData.hostId = await initiatorId;
-            eventData.hostUser = await initiatorUser;
-            eventData.hostName = await hostName;
+            eventData.hostId = initiatorId;
+            eventData.hostUser = initiatorUser;
+            eventData.hostName = hostName;
 
-            eventData.title = await title;
-            eventData.startDate = await startDate;
-            eventData.partySize = await partySize;
-            eventData.coverCharge = await coverCharge;
-            eventData.info = await info;
-            eventData.eventPic = await eventPic;
-            eventData.location = await location;
-            eventData.eventInvites = await invites;
-            eventData.receipts.value = await eventReceipt;
+            eventData.title = title;
+            eventData.startDate = startDate;
+            eventData.partySize = partySize;
+            eventData.coverCharge = coverCharge;
+            eventData.info = info;
+            eventData.eventPic = eventPic;
+            eventData.location = location;
+            eventData.eventInvites = invites;
+            eventData.receipts.value = eventReceipt;
 
             eventData.hostAvatar = await eventRes.data.attributes.initiator.data.attributes.avatar?.data?.attributes?.url;
 
@@ -94,8 +94,6 @@ export default function () {
             const hostInitials = hostName.split(/\s+/).map((name: string) => name[0].toUpperCase()).join('');
             eventData.hostInitials = hostInitials;
             eventData.hostUrl = `/${initiatorUser}`;
-
-            eventData.categories.push(eventData.location[0]?.category.split(', '));
 
             // Calculate remaining open spots
             let going = 0;
@@ -108,6 +106,8 @@ export default function () {
                 (eventData.invitedUsers).push({ 'username': invitedUser });
             });
             eventData.spots = eventData.partySize - going;
+
+            eventData.categories?.push(eventData.location[0]?.category?.split(', '));
         } catch (error) {
             console.error(error);
         } finally {
