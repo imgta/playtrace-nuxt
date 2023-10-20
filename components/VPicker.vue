@@ -41,7 +41,7 @@ async function dateInput(startDate: any) {
         <div class="collapse-title px-0 pt-1.5 pb-0">
             <input v-model="formatDate" placeholder="When were you thinking?" class="input input-bordered form-input" />
         </div>
-        <div class="collapse-content">
+        <div class="collapse-content pb-0">
             <div class="mycalendar grid justify-center">
                 <DatePicker v-model="startDate" mode="dateTime" :minute-increment="5" :min-date="new Date()" @input="dateInput" />
             </div>

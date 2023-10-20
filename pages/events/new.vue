@@ -44,15 +44,13 @@ const validInvite = computed(() => {
     const isValidInvite = eventData.newInvites.some((user: any) => user.Invite === username) || username === myUsername;
     return isValidInvite ? 'input input-bordered form-input' : 'input input-bordered form-input inputshake';
 });
+
 // ----------------------------------------------------------------
 async function locationInput() {
     if (autoResult.value) {
         const locationData = autoResult.value;
         try {
             const address = await locationData.formatted_address.replace(', USA', '');
-
-            // console.log('locationData.types', locationData.types);
-
             // Filter out and replace irrelevant/redundant types from the types array
             const typeFilter = ['tourist_attraction', 'point_of_interest', 'establishment', 'street_address', 'meal_delivery', 'meal_takeaway', 'health', 'premise'];
 
@@ -164,18 +162,18 @@ function partyFocus() {
     }
 }
 
-async function startDateEmit(data: any) {
+function startDateEmit(data: any) {
     eventData.startDate = data;
 }
-async function coverPicEmit(data: any) {
+function coverPicEmit(data: any) {
     const subString = '&crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=70&w=600';
     const rawImg = data.replace(subString, '');
     eventData.eventPic = rawImg;
 }
-async function coverModalEmit(data: any) {
+function coverModalEmit(data: any) {
     showModal.value = data;
 }
-async function toggleModal() {
+function toggleModal() {
     showModal.value = !showModal.value;
 }
 
@@ -194,6 +192,9 @@ async function createEvent(e: Event) {
         }
         if (!eventData.title) {
             toast.error('Title required!', { timeout: 1500 });
+            return;
+        } else if (!eventData.location[0]) {
+            toast.error('Location required!', { timeout: 1500 });
             return;
         } else if (!eventData.startDate) {
             toast.error('Start Date required!', { timeout: 1500 });
@@ -252,7 +253,7 @@ async function createEvent(e: Event) {
         createEventAPI.value = false;
 
         // (3) Create 'invited' invitate for each user in newInvites array
-        createInvites(await eventResult);
+        createInvites(eventResult);
     } catch (error: any) {
         console.error(error);
     } finally {
@@ -261,7 +262,7 @@ async function createEvent(e: Event) {
     }
 }
 
-async function inviteUser() {
+function inviteUser() {
     try {
         const username = userSearch.value.trim();
         // Check if user is in newInvites array (already invited)
@@ -273,10 +274,9 @@ async function inviteUser() {
         }
 
         // Check if username exists in database
-        const userRes: Record<string, any> = await client(`${appHost}api/users?filters[username][$eq]=${username}`, {
+        const userRes: Record<string, any> = client(`${appHost}api/users?filters[username][$eq]=${username}`, {
             method: 'GET'
         });
-
         const user = userRes[0];
         if (userRes && user) {
             eventData.newInvites.push(user);
@@ -288,7 +288,7 @@ async function inviteUser() {
     }
 }
 
-async function createInvites(eventRes: any) {
+function createInvites(eventRes: any) {
     createInviteAPI.value = true;
     for (const user of eventData.newInvites) {
         const inviteForm = new FormData();
@@ -301,11 +301,11 @@ async function createInvites(eventRes: any) {
         inviteForm.append('data', JSON.stringify(inviteObj));
 
         try {
-            const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
+            const inviteRes: Record<string, any> = client(`${appHost}api/invited-users`, {
                 method: 'POST',
                 body: inviteForm,
             });
-            const inviteData = await inviteRes.data;
+            const inviteData = inviteRes.data;
         } catch (error) {
             console.error(error);
         }
@@ -338,7 +338,7 @@ async function createInvites(eventRes: any) {
 
                         <div class="w-full con-hint top pb-2 sm:order-first">
                             <div class="hint">
-                                <p>Event Title</p>
+                                <p>Event Title*</p>
                             </div>
                             <input v-model="eventData.title" placeholder="Untitled Event" name="title" type="text"
                                 class="input input-bordered form-input" />
@@ -366,7 +366,7 @@ async function createInvites(eventRes: any) {
 
                         <div class="w-full con-hint left py-0">
                             <div class="hint">
-                                <p>Location</p>
+                                <p>Location*</p>
                             </div>
                             <input id="autocomplete" v-model="locationAddress" name="location" type="text"
                                 placeholder="Where at?" class="input input-bordered form-input" @blur="locationInput" />
@@ -374,11 +374,9 @@ async function createInvites(eventRes: any) {
 
                         <div class="w-full con-hint left pb-0">
                             <div class="hint">
-                                <p>Start Date</p>
+                                <p>Start Date*</p>
                             </div>
-                            <div class="">
-                                <VPicker @startDateInput="startDateEmit" />
-                            </div>
+                            <VPicker @startDateInput="startDateEmit" />
                         </div>
 
                         <div class="w-full con-hint left pb-0 lg:pb-2">
