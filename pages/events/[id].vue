@@ -361,7 +361,7 @@ function googleMaps(address: string) {
                         <div v-if="myId === eventData.hostId">
                             <div class="flex justify-center h-full pb-0.5">
                                 <input v-model="userSearch" class="input input-bordered invite-search text-center h-10"
-                                    placeholder="Send more invites" name="invites" type="text" :class="inputValid"
+                                    placeholder="Send more invites" name="invites" type="search" :class="inputValid"
                                     @keyup.enter="inviteUser" @input="debouncedUserSearch" />
                             </div>
                             <ul v-if="matchingUsers.length > 0" class="menu w-fit rounded-box py-0 pt-1.5">

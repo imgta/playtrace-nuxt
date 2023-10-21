@@ -166,7 +166,7 @@ export default function () {
         const { fullName, email, username, password } = signupData;
         try {
             const signupRes = await register({ username: username, email: email, fullName: fullName, password: password, });
-            userData.id = signupRes.user.value?.id;
+            userData.id = signupRes.user?.value?.id;
 
             // Clear signupData input fields
             Object.keys(signupData).forEach(key => signupData[key] = '');

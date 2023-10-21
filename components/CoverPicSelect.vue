@@ -48,7 +48,6 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
     if (fetchDelay) {
         try {
             clearTimeout(fetchDelay);
-            // console.log('delay', fetchDelay);
         } catch (error) {
             console.error(error);
         }
@@ -77,8 +76,6 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
                         // console.log('stored:', storedQuery.splash);
                         loadingAPI.value = false;
                     }
-                    // console.log('pics.value.length', pics.value.length);
-                    // console.log('splashPage.value', splashPage.value);
                 }, oneCharDelay);
             }
             if (coverAPI === 'giphy') {
@@ -100,9 +97,6 @@ watch([coverQuery, clickAPI, loadingAPI], async ([userQuery, coverAPI, loading])
                         // console.log('stored:', storedQuery.giphy);
                         loadingAPI.value = false;
                     }
-
-                    // console.log('gifs.value.length', gifs.value.length);
-                    // console.log('giphyOffset.value', giphyOffset.value);
                 }, oneCharDelay);
             }
         } catch (e) {
@@ -140,8 +134,6 @@ async function getGiphy(query: string, offset: number, limit: number): Promise<s
         giphyOffset.value += giphyLimit;
         countAPI.value += 1;
         loadingAPI.value = false;
-        // console.log('countAPI.value', countAPI.value);
-        // console.log('giphyOffset.value', giphyOffset.value);
     }
 }
 
@@ -164,8 +156,6 @@ async function unSplash(query: string, page: number, perPage: number): Promise<s
         splashPage.value += 1;
         countAPI.value += 1;
         loadingAPI.value = false;
-        // console.log('countAPI.value', countAPI.value);
-        // console.log('splashPage.value', splashPage.value);
     }
 }
 

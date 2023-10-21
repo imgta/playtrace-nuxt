@@ -9,12 +9,29 @@ const { formBg } = useTheme(pageTheme);
 
 const { myId, token, userData, loginData, signupData, popLogin, popSignup, popRef, popModal, getUser, onDemo, onLogout, onLogin, onRegister } = useAuth();
 
-const loginTheme = ref('');
-const signupTheme = ref('');
+const loginTheme = computed(() => pageTheme === 'corporate' ? 'logincorp auth-modal' : 'login auth-modal');
+const signupTheme = computed(() => pageTheme === 'corporate' ? 'signupcorp auth-modal' : 'signup auth-modal');
 
+let updateScreenSize: () => void;
+const isMediumScreen = ref<boolean>(true);
 // ----------------------------------------------------------------
+// Screensize Event Listeners for mobile/desktop v-if layout toggling
+onMounted(() => {
+    updateScreenSize = () => {
+        isMediumScreen.value = window.innerWidth >= 768;
+    };
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+});
+onUnmounted(() => {
+    if (updateScreenSize) {
+        window.removeEventListener('resize', updateScreenSize);
+    }
+});
+
 onMounted(() => {
     if (token) {
+        //  Note: watchEffects are automatically stopped when component is unmounted
         watchEffect(() => {
             getUser(myId);
         });
@@ -38,30 +55,11 @@ watch(() => popLogin.value, () => {
         toast.error('Please login or register.', { timeout: 1500 });
     }
 });
-watchEffect(() => {
-    if (pageTheme === 'corporate') {
-        loginTheme.value = 'logincorp auth-modal';
-        signupTheme.value = 'signupcorp auth-modal';
-    } else {
-        loginTheme.value = 'login auth-modal';
-        signupTheme.value = 'signup auth-modal';
-    }
-});
 
 // ----------------------------------------------------------------
 function toggleSide() {
     popRef.drawer = !popRef.drawer;
 }
-function navHome() {
-    navigateTo('/');
-}
-function navEvents() {
-    navigateTo('/events');
-}
-function navNewEvent() {
-    navigateTo('/events/new');
-}
-
 // ----------------------------------------------------------------
 </script>
 
@@ -225,15 +223,15 @@ function navNewEvent() {
             </div>
 
             <div v-if="userData.id && userData.id !== null">
-                <div class="hidden md:inline-flex">
-                    <NuxtLink to="/events/new">
+                <div v-if="isMediumScreen" class="inline-flex">
+                    <NuxtLink :to="{ name: 'events-new' }">
                         <button
                             class="btn btn-primary btn-xs text-primary bg-transparent hover:text-neutral-content border-none font-medium normal-case md:btn-sm">
                             <span>Create</span>
                         </button>
                     </NuxtLink>
 
-                    <NuxtLink to="/events">
+                    <NuxtLink :to="{ name: 'events' }">
                         <button
                             class="btn btn-primary btn-xs text-primary bg-transparent hover:text-neutral-content border-none font-medium normal-case md:btn-sm">
                             <span>Events</span>
@@ -339,36 +337,45 @@ function navNewEvent() {
 
         </div>
         <!-- BOTTOM NAV BAR -->
-        <div class="btm-nav text-sm font-medium z-30 md:hidden">
-            <button
-                :class="(route.path === '/') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'"
-                @click="navHome">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
-                    <path
-                        d="M221.56,100.85,141.61,25.38l-.16-.15a19.93,19.93,0,0,0-26.91,0l-.17.15L34.44,100.85A20.07,20.07,0,0,0,28,115.55V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V164h24v44a20,20,0,0,0,20,20h48a20,20,0,0,0,20-20V115.55A20.07,20.07,0,0,0,221.56,100.85ZM204,204H164V160a20,20,0,0,0-20-20H112a20,20,0,0,0-20,20v44H52V117.28l76-71.75,76,71.75Z" />
-                </svg>
-                <span class="btm-nav-label">Home</span>
-            </button>
+        <div v-if="!isMediumScreen" class="btm-nav text-sm font-medium p-0 z-30">
+            <NuxtLink to="/">
+                <button
+                    :class="(route.path === '/') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'">
+                    <div class="flex justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
+                            <path
+                                d="M221.56,100.85,141.61,25.38l-.16-.15a19.93,19.93,0,0,0-26.91,0l-.17.15L34.44,100.85A20.07,20.07,0,0,0,28,115.55V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V164h24v44a20,20,0,0,0,20,20h48a20,20,0,0,0,20-20V115.55A20.07,20.07,0,0,0,221.56,100.85ZM204,204H164V160a20,20,0,0,0-20-20H112a20,20,0,0,0-20,20v44H52V117.28l76-71.75,76,71.75Z" />
+                        </svg>
+                    </div>
+                    <span class="btm-nav-label">Home</span>
+                </button>
+            </NuxtLink>
 
-            <button
-                :class="(route.path === '/events/new') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'"
-                @click="navNewEvent">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
-                    <path
+            <NuxtLink to="/events/new">
+                <button
+                    :class="(route.path === '/events/new') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'">
+                <div class="flex justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
+                        <path
                         d="M208,28H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28Zm-4,176H52V52H204ZM76,128a12,12,0,0,1,12-12h28V88a12,12,0,0,1,24,0v28h28a12,12,0,0,1,0,24H140v28a12,12,0,0,1-24,0V140H88A12,12,0,0,1,76,128Z" />
-                </svg>
-                <span class="btm-nav-label">New Event</span>
-            </button>
+                    </svg>
+                </div>
+                    <span class="btm-nav-label">New Event</span>
+                </button>
+            </NuxtLink>
 
-            <button
-                :class="(route.path === '/events') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'"
-                @click="navEvents">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
-                    <path
-                        d="M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM68,52a12,12,0,0,0,24,0h72a12,12,0,0,0,24,0h16V76H52V52ZM52,204V100H204V204Zm120.49-84.49a12,12,0,0,1,0,17l-48,48a12,12,0,0,1-17,0l-24-24a12,12,0,0,1,17-17L116,159l39.51-39.52A12,12,0,0,1,172.49,119.51Z" />
-                </svg>
-            <span class="btm-nav-label">Your Events</span>
-        </button>
+            <NuxtLink to="/events">
+                <button
+                    :class="(route.path === '/events') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'">
+                    <div class="flex justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
+                            <path
+                            d="M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM68,52a12,12,0,0,0,24,0h72a12,12,0,0,0,24,0h16V76H52V52ZM52,204V100H204V204Zm120.49-84.49a12,12,0,0,1,0,17l-48,48a12,12,0,0,1-17,0l-24-24a12,12,0,0,1,17-17L116,159l39.51-39.52A12,12,0,0,1,172.49,119.51Z" />
+                        </svg>
+                    </div>
+                        <span class="btm-nav-label">Your Events</span>
+            </button>
+            </NuxtLink>
     </div>
 </div>
 </template>
