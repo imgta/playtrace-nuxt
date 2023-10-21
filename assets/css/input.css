@@ -74,7 +74,7 @@ img:not([src]) {
     color: transparent;
 }
 .form-input::placeholder, .invite-search::placeholder {
-    color: hsl(var(--nc) / 0.8);
+    color: hsl(var(--bc) / 0.8);
     font-size: small;
 }
 .form-input:focus, .auth-input:focus, .invite-search:focus {

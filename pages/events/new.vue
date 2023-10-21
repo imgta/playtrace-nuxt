@@ -10,26 +10,62 @@ const user = useStrapiUser().value;
 
 const themeCookie = useCookie('selectedTheme');
 const eventBtnClass = ref('');
-const showModal = ref(false);
+const showModal = ref<boolean>(false);
+
+let updateScreenSize: () => void;
+const isLargeScreen = ref<boolean>(true);
 
 const createEventAPI = ref<boolean>(false);
 const createInviteAPI = ref<boolean>(false);
 
+const autocomplete: any = ref(null);
 const autoResult: any = ref(null);
 const locationAddress = ref('');
 const partyCap = ref<string>() as any;
 const coverDmg = ref<string>() as any;
 
 // ----------------------------------------------------------------
+// Screensize Event Listeners for mobile/desktop v-if layout toggling
+onMounted(() => {
+    updateScreenSize = () => {
+        isLargeScreen.value = window.innerWidth >= 1024;
+    };
+    updateScreenSize();
+    window.addEventListener('resize', updateScreenSize);
+});
+onUnmounted(() => {
+    if (updateScreenSize) {
+        window.removeEventListener('resize', updateScreenSize);
+    }
+});
+
 onMounted(() => {
     // @ts-expect-error idk
-    const autocomplete = new google.maps.places.Autocomplete(document.getElementById('autocomplete'));
-    autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        autoResult.value = place;
-        locationInput();
-    });
+    autocomplete.value = new google.maps.places.Autocomplete(document.getElementById('autocomplete'));
+    autocomplete.value.addListener('place_changed', handlePlaceChange);
 });
+onUnmounted(() => {
+    if (autocomplete.value) {
+        // @ts-expect-error Remove all listeners from autocomplete.value instance
+        google.maps.event.clearInstanceListeners(autocomplete.value);
+    }
+});
+
+function handlePlaceChange() {
+    const place = autocomplete.value.getPlace();
+    autoResult.value = place;
+    locationInput();
+}
+
+// onMounted(() => {
+//     // @ts-expect-error idk
+//     const autocomplete = new google.maps.places.Autocomplete(document.getElementById('autocomplete'));
+//     autocomplete.addListener('place_changed', () => {
+//         const place = autocomplete.getPlace();
+//         autoResult.value = place;
+//         locationInput();
+//     });
+// });
 
 watchEffect(() => {
     if (themeCookie.value === 'corporate') {
@@ -118,8 +154,12 @@ function chargeBlur() {
     try {
         // eslint-disable-next-line unicorn/prefer-number-properties
         if (isNaN(coverDmg.value)) {
-            toast.error('Cover charge must be a valid number!', { timeout: 1500 });
-            coverDmg.value = '';
+            if (coverDmg.value[0] === '$') {
+                return coverDmg.value;
+            } else {
+                toast.error('Cover charge must be a valid number!', { timeout: 1500 });
+                coverDmg.value = '';
+            }
             // eslint-disable-next-line unicorn/prefer-number-properties
         } else if (!isNaN(coverDmg.value)) {
             const floatVal = Number.parseFloat(coverDmg.value).toFixed(2);
@@ -225,33 +265,10 @@ async function createInvites(eventRes: any) {
 
     try {
         await Promise.allSettled(invitePromises);
+        createInviteAPI.value = false;
     } catch (error) {
         console.error('Error sending invites:', error);
-    } finally {
-        createInviteAPI.value = false;
     }
-
-    // for (const user of eventData.newInvites) {
-    //     const inviteForm = new FormData();
-    //     const inviteObj = {
-    //         users_permissions_user: user,
-    //         collection: 'event',
-    //         event: eventRes,
-    //         eventStatus: 'invited',
-    //     };
-    //     inviteForm.append('data', JSON.stringify(inviteObj));
-
-    //     try {
-    //         const inviteRes: Record<string, any> = client(`${appHost}api/invited-users`, {
-    //             method: 'POST',
-    //             body: inviteForm,
-    //         });
-    //         const inviteData = inviteRes.data;
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // }
-    // createInviteAPI.value = false;
 }
 
 async function createEvent(e: Event) {
@@ -372,7 +389,7 @@ async function createEvent(e: Event) {
                                 class="input input-bordered form-input" />
                         </div>
 
-                        <div class="lg:hidden">
+                        <div v-if="!isLargeScreen">
                             <div @click="toggleModal">
                                 <button v-if="!showModal && !eventData.eventPic"
                                     class="edit edit-primary min-w-[100%] lg:min-w-[80%] h-full lg:h-[90%]">
@@ -432,8 +449,8 @@ async function createEvent(e: Event) {
                                 class="textarea text-bordered textarea-neutral form-input h-20 resize whitespace-normal" />
                         </div>
 
-                        <div class="lg:hidden">
-                            <input v-model="userSearch" placeholder="Invite by username" name="title" type="text"
+                        <div v-if="!isLargeScreen">
+                            <input v-model="userSearch" placeholder="Invite by username" name="title" type="search"
                                 :class="validInvite" @keyup.enter="inviteUser" @input="debouncedUserSearch" />
 
                             <ul v-if="matchingUsers.length > 0" class="menu w-full rounded-box py-0 pt-1">
@@ -460,9 +477,9 @@ async function createEvent(e: Event) {
                     </div>
                 </div>
 
-                <div class="hidden md:block w-full h-full pt-8 px-8 lg:px-0">
+                <div v-if="isLargeScreen" class="w-full h-full pt-8 px-8 lg:px-0">
 
-                    <div class="justify-center content-center self-center items-center max-h-full hidden lg:block">
+                    <div class="justify-center content-center self-center items-center max-h-full">
                         <div @click="toggleModal">
                             <button v-if="!showModal && !eventData.eventPic"
                                 class="edit edit-primary min-w-[100%] lg:min-w-[80%] h-full lg:h-[90%]">
@@ -486,7 +503,7 @@ async function createEvent(e: Event) {
                             <div class="hint lg:pt-3">
                                 <p>Invite Friends</p>
                             </div>
-                            <input v-model="userSearch" placeholder="Invite by username" name="title" type="text"
+                            <input v-model="userSearch" placeholder="Invite by username" name="title" type="search"
                                 :class="validInvite" @keyup.enter="inviteUser" @input="debouncedUserSearch" />
                         </div>
 
@@ -510,11 +527,6 @@ async function createEvent(e: Event) {
                             </div>
                         </div>
                     </div>
-
-                    <!-- <div
-                        class="absolute top-32 sm:top-60 lg:right-36 md:right-32 sm:right-32 max-sm:-translate-x-full max-sm:left-14 pointer-events-none z-0">
-                        <Bubbles />
-                    </div> -->
 
                 </div>
 
