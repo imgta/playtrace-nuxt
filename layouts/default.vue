@@ -7,13 +7,14 @@ const themeCookie = useCookie('selectedTheme');
 const pageTheme = ref(themeCookie).value;
 const { formBg } = useTheme(pageTheme);
 
-const { myId, token, userData, loginData, signupData, popLogin, popSignup, popRef, popModal, getUser, onDemo, onLogout, onLogin, onRegister } = useAuth();
+const { myId, isAuth, token, userData, loginData, signupData, popLogin, popSignup, popRef, popModal, getUser, onDemo, onLogout, onLogin, onRegister } = useAuth();
 
 const loginTheme = computed(() => pageTheme === 'corporate' ? 'logincorp auth-modal' : 'login auth-modal');
 const signupTheme = computed(() => pageTheme === 'corporate' ? 'signupcorp auth-modal' : 'signup auth-modal');
 
 let updateScreenSize: () => void;
 const isMediumScreen = ref<boolean>(true);
+
 // ----------------------------------------------------------------
 // Screensize Event Listeners for mobile/desktop v-if layout toggling
 onMounted(() => {
@@ -33,7 +34,7 @@ onMounted(() => {
     if (token) {
         //  Note: watchEffects are automatically stopped when component is unmounted
         watchEffect(() => {
-            getUser(myId);
+            getUser(userData.id);
         });
     }
 });
@@ -295,10 +296,12 @@ function toggleSide() {
                                         <svg xmlns="http://www.w3.org/2000/svg" class="fill-primary w-4 h-4" viewBox="0 0 256 256"><path d="M234.38,210a123.36,123.36,0,0,0-60.78-53.23,76,76,0,1,0-91.2,0A123.36,123.36,0,0,0,21.62,210a12,12,0,1,0,20.77,12c18.12-31.32,50.12-50,85.61-50s67.49,18.69,85.61,50a12,12,0,0,0,20.77-12ZM76,96a52,52,0,1,1,52,52A52.06,52.06,0,0,1,76,96Z"></path></svg>Profile
                                     </NuxtLink>
                                 </li>
-                                <li><span class="hover:text-primary link link-hover hover:bg-transparent"
+                                <li>
+                                    <span class="hover:text-primary link link-hover hover:bg-transparent"
                                         @click="onLogout">
                                         Logout
-                                    </span></li>
+                                    </span>
+                                </li>
 
                             </ul>
                         </div>

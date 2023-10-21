@@ -327,7 +327,7 @@ async function createEvent(e: Event) {
         const eventRes: Record<string, any> = await $fetch(`${appHost}api/events`, {
             method: 'POST',
             body: formData,
-        });
+        }) as any;
         const eventResult = eventRes.data;
 
         // (2) Create 'going' invite for event host (initiator)
@@ -352,7 +352,7 @@ async function createEvent(e: Event) {
         toast.success('New event created!', { timeout: 1500 });
         setTimeout(() => {
             navigateTo('/events');
-        }, 2000);
+        }, 1200);
     } catch (error: any) {
         console.error(error);
     }
