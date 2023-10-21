@@ -22,6 +22,7 @@ export default function () {
             }
         }
     });
+
     const userData = reactive({
         id: myId,
         username: '',
@@ -82,21 +83,24 @@ export default function () {
             const userRes: Record<string, any> = await client(`${appHost}api/users/${userId}?populate=*`, {
                 method: 'GET'
             });
+            const { username, fullName, avatar } = userRes;
 
-            const { username, fullName } = userRes;
-            userData.avatar = userRes?.avatar?.formats?.thumbnail?.url;
             userData.username = username;
             userData.fullName = fullName;
+            if (avatar) {
+                userData.avatar = avatar?.formats?.thumbnail?.url;
+            }
             userData.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
             userData.profileUrl = `/${userData.username}`;
+            userCookie.value = userData;
         } catch (error) {
             console.error(error);
-        } finally {
-            userCookie.value = userData;
         }
     }
 
     function onDemo() {
+        popLogin.value.close();
+        popSignup.value.close();
         loginData.username = 'demo';
         loginData.password = 'demo123';
         try {
@@ -107,77 +111,88 @@ export default function () {
     }
 
     async function onLogin() {
-        if (!loginData.username) {
-            toast.error('Username required!', { timeout: 1700 });
-            return;
-        } else if (!loginData.password) {
-            toast.error('Password required!', { timeout: 1700 });
-            return;
+        const validLogin = [
+            { condition: !loginData.username, message: 'Username required!' },
+            { condition: !loginData.password, message: 'Password required!' },
+        ];
+        for (const valid of validLogin) {
+            if (valid.condition) {
+                toast.error(valid.message, { timeout: 1700 });
+                return;
+            }
         }
+
+        const { username, password } = loginData;
         try {
-            const loginRes = await login({ identifier: loginData.username, password: loginData.password });
-            const newUserId = loginRes.user.value?.id;
-            userData.id = newUserId;
+            const loginRes = await login({ identifier: username, password: password });
+            userData.id = loginRes.user.value?.id;
+
+            popModal('close', 'login');
+            toast.success('User logged in!', { timeout: 1500 });
+            setTimeout(() => {
+                navigateTo('/events');
+            }, 1250);
         } catch (error: any) {
             toast.error((error.error.message as string), { timeout: 2000 });
             console.error(error);
-        } finally {
-            popModal('close', 'login');
-            navigateTo('/events');
-            toast.success('User logged in!', { timeout: 2000 });
         }
     }
 
-    function isFullName(fullName: string) {
+    function isFullName(fullName: string): boolean {
         const bothNames = fullName.split(' ');
         return bothNames.length >= 2;
     }
+    function isValidEmail(email: string): boolean {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
 
     async function onRegister() {
-        if (!signupData.fullName) {
-            toast.error('Full Name required!', { timeout: 1700 });
-            return;
-        } else if (!isFullName(signupData.fullName)) {
-            toast.error('First and last name required!', { timeout: 1700 });
-            return;
-        } else if (!signupData.email) {
-            toast.error('Email required!', { timeout: 1700 });
-            return;
-        } else if (!signupData.username) {
-            toast.error('Username required!', { timeout: 1700 });
-            return;
-        } else if (!signupData.password) {
-            toast.error('Password required!', { timeout: 1700 });
-            return;
+        const validRegister = [
+            { condition: !signupData.fullName, message: 'Full Name required!' },
+            { condition: !isFullName(signupData.fullName), message: 'First and last name required!' },
+            { condition: !signupData.email, message: 'Email required!' },
+            { condition: !isValidEmail(signupData.email), message: 'Invalid email format!' },
+            { condition: !signupData.username, message: 'Username required!' },
+            { condition: !signupData.password, message: 'Password required!' }
+        ];
+        for (const valid of validRegister) {
+            if (valid.condition) {
+                toast.error(valid.message, { timeout: 1700 });
+                return;
+            }
         }
+
+        const { fullName, email, username, password } = signupData;
         try {
-            const signupRes = await register({ username: signupData.username, email: signupData.email, fullName: signupData.fullName, password: signupData.password, });
-            const newUserId = signupRes.user.value?.id;
-            userData.id = newUserId;
-        } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
-            console.error(error);
-        } finally {
-            signupData.fullName = '';
-            signupData.email = '';
-            signupData.username = '';
-            signupData.password = '';
-            navigateTo('/events');
+            const signupRes = await register({ username: username, email: email, fullName: fullName, password: password, });
+            userData.id = signupRes.user.value?.id;
+
+            // Clear signupData input fields
+            Object.keys(signupData).forEach(key => signupData[key] = '');
+
             popModal('close', 'signup');
-            toast.success('User registered!', { timeout: 2000 });
+            toast.success('User registered!', { timeout: 1500 });
+            setTimeout(() => {
+                navigateTo('/events');
+            }, 1250);
+        } catch (error: any) {
+            toast.error((error.error.message as string), { timeout: 1500 });
+            console.error(error);
         }
     }
 
-    async function onLogout() {
+    function onLogout() {
         try {
             logout();
-        } catch (error) {
-            console.error(error);
-        } finally {
             userData.id = null;
             popRef.drawer = false;
-            await navigateTo('/');
-            toast.info('User logged out.', { timeout: 1500 });
+            toast.info('User logged out.', { timeout: 1000 });
+            setTimeout(() => {
+                navigateTo('/');
+            }, 1250);
+        } catch (error) {
+            console.error(error);
         }
     }
 

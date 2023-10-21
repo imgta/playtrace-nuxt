@@ -121,7 +121,7 @@ async function getGiphy(query: string, offset: number, limit: number): Promise<s
     loadingAPI.value = true;
     try {
         const { giphyAPI } = useRuntimeConfig().public;
-        const giphyRes: any = (await $fetch(`https://api.giphy.com/v1/gifs/search?q=${query}&api_key=${giphyAPI}&limit=${limit}&offset=${offset}&bundle=clips_grid_picker`));
+        const giphyRes: any = await $fetch(`https://api.giphy.com/v1/gifs/search?q=${query}&api_key=${giphyAPI}&limit=${limit}&offset=${offset}&bundle=clips_grid_picker`);
         // Transform image URLs to remove hover elements
         // Note: fetching .webp images breaks when query = 'cats'
         const gifUrls: string[] = giphyRes.data.map((gif: any) => {
@@ -140,33 +140,16 @@ async function getGiphy(query: string, offset: number, limit: number): Promise<s
         giphyOffset.value += giphyLimit;
         countAPI.value += 1;
         loadingAPI.value = false;
-        console.log('countAPI.value', countAPI.value);
-        console.log('giphyOffset.value', giphyOffset.value);
+        // console.log('countAPI.value', countAPI.value);
+        // console.log('giphyOffset.value', giphyOffset.value);
     }
-}
-async function giphyMore() {
-    loadingAPI.value = true;
-    try {
-        const moreGifs: any = await getGiphy(storedQuery.giphy, giphyOffset.value, giphyLimit);
-        // Note: Masonry wall requires new items to be added this way, (non-reactive to .push(item))
-        gifs.value = [...gifs.value, ...moreGifs];
-
-        // Pseudo-refresh so Masonry wall renders without column gaps
-        clickAPI.value = '';
-        clickAPI.value = 'giphy';
-    } catch (error) {
-        console.error(error);
-    } finally {
-        loadingAPI.value = false;
-    }
-    return false;
 }
 
 async function unSplash(query: string, page: number, perPage: number): Promise<string[]> {
     loadingAPI.value = true;
     try {
         const { unSplashAPI } = useRuntimeConfig().public;
-        const splashRes: any = (await $fetch(`https://api.unsplash.com/search/photos?client_id=${unSplashAPI}&query=${query}&page=${page}&per_page=${perPage}`));
+        const splashRes: any = await $fetch(`https://api.unsplash.com/search/photos?client_id=${unSplashAPI}&query=${query}&page=${page}&per_page=${perPage}`);
         const splashImgs: string[] = splashRes.results.map((photo: any) => {
             const rawImg = photo.urls.raw;
             // Convert + resize raw images
@@ -185,6 +168,24 @@ async function unSplash(query: string, page: number, perPage: number): Promise<s
         // console.log('splashPage.value', splashPage.value);
     }
 }
+
+async function giphyMore() {
+    loadingAPI.value = true;
+    try {
+        const moreGifs: any = await getGiphy(storedQuery.giphy, giphyOffset.value, giphyLimit);
+        // Note: Masonry wall requires new items to be added this way, (non-reactive to .push(item))
+        gifs.value = [...gifs.value, ...moreGifs];
+
+        // Pseudo-refresh so Masonry wall renders without column gaps
+        clickAPI.value = '';
+        clickAPI.value = 'giphy';
+    } catch (error) {
+        console.error(error);
+    } finally {
+        loadingAPI.value = false;
+    }
+    return false;
+}
 async function unSplashMore() {
     loadingAPI.value = true;
     try {
@@ -202,7 +203,7 @@ async function unSplashMore() {
     return false;
 }
 
-async function selectCover(img: string, pop: boolean) {
+function selectCover(img: string, pop: boolean) {
     const subString = '&crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=70&w=600';
     const rawImg = img.replace(subString, '');
     coverSelect.value = rawImg;
@@ -240,19 +241,34 @@ function giphyClick() {
 
         <div class="radio-tile-group pl-3">
             <div class="input-container cursor-pointer mx-5">
-                <input id="photos" class="radio-button h-full w-full cursor-pointer" type="radio" name="radio-pic" :checked="clickAPI === 'splash'" @click="unSplashClick" />
+                <input id="photos" class="radio-button h-full w-full cursor-pointer" type="radio" name="radio-pic"
+                    :checked="clickAPI === 'splash'" @click="unSplashClick" />
                 <div class="radio-tile">
                     <div class="icon photos-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" class="group-hover:fill-primary pt-1 pl-0.5" viewBox="0 0 26 26"><path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" class="group-hover:fill-primary pt-1 pl-0.5"
+                            viewBox="0 0 26 26">
+                            <path d="M7.5 6.75V0h9v6.75h-9zm9 3.75H24V24H0V10.5h7.5v6.75h9V10.5z" />
+                        </svg>
                     </div>
                     <label for="photos" class="radio-tile-label cursor-pointer pt-1">Photo</label>
                 </div>
             </div>
             <div class="input-container cursor-pointer mx-5">
-                <input id="gifs" class="radio-button h-full w-full cursor-pointer" type="radio" name="radio-gif" :checked="clickAPI === 'giphy'" @click="giphyClick" />
+                <input id="gifs" class="radio-button h-full w-full cursor-pointer" type="radio" name="radio-gif"
+                    :checked="clickAPI === 'giphy'" @click="giphyClick" />
                 <div class="radio-tile">
                     <div class="icon gifs-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 31 34" class="group-hover:fill-base-content pt-1"><g fill-rule="evenodd" clip-rule="evenodd"><path fill="#00ff99" d="M0 3h4v29H0z"></path><path fill="#9933ff" d="M24 11h4v21h-4z"></path><path fill="#00ccff" d="M0 31h28v4H0z"></path><path fill="#fff35c" d="M0 0h16v4H0z"></path><path fill="#ff6666" d="M24 8V4h-4V0h-4v12h12V8"></path><path fill="#121212" opacity="0.4" d="M24 16v-4h4M16 0v4h-4"></path></g></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 31 34"
+                            class="group-hover:fill-base-content pt-1">
+                            <g fill-rule="evenodd" clip-rule="evenodd">
+                                <path fill="#00ff99" d="M0 3h4v29H0z"></path>
+                                <path fill="#9933ff" d="M24 11h4v21h-4z"></path>
+                                <path fill="#00ccff" d="M0 31h28v4H0z"></path>
+                                <path fill="#fff35c" d="M0 0h16v4H0z"></path>
+                                <path fill="#ff6666" d="M24 8V4h-4V0h-4v12h12V8"></path>
+                                <path fill="#121212" opacity="0.4" d="M24 16v-4h4M16 0v4h-4"></path>
+                            </g>
+                        </svg>
                     </div>
                     <label for="gifs" class="radio-tile-label cursor-pointer pt-1">GIPHY</label>
                 </div>

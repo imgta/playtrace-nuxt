@@ -19,7 +19,7 @@ function handleUploadFile() {
     }
 }
 function handleImgUrl() {
-    console.log('imgUrl.value', imgUrl.value);
+    // console.log('imgUrl.value', imgUrl.value);
 }
 
 async function updateAvatar(event: Event) {
@@ -116,7 +116,7 @@ async function updateAvatar(event: Event) {
 
         <div class="grid justify-center pb-3">
             <div class="flex justify-start py-1">
-                <input v-model="imgUrl" placeholder="Enter image URL" type="text" class="input input-bordered form-input search h-10"
+                <input v-model="imgUrl" placeholder="Enter image URL" type="text" class="input input-bordered search form-input h-10"
                     @blur="handleImgUrl" />
             </div>
             <div class="flex justify-start py-1">
