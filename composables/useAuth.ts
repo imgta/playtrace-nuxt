@@ -23,6 +23,7 @@ export default function () {
         }
     });
 
+    const isAuth = ref<boolean>(false);
     const userData = reactive({
         id: myId,
         username: '',
@@ -93,6 +94,7 @@ export default function () {
             userData.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
             userData.profileUrl = `/${userData.username}`;
             userCookie.value = userData;
+            isAuth.value = true;
         } catch (error) {
             console.error(error);
         }
@@ -125,15 +127,16 @@ export default function () {
         const { username, password } = loginData;
         try {
             const loginRes = await login({ identifier: username, password: password });
-            userData.id = loginRes.user.value?.id;
+            userData.id = loginRes.user?.value?.id;
 
             popModal('close', 'login');
+            getUser(userData.id);
             toast.success('User logged in!', { timeout: 1500 });
             setTimeout(() => {
                 navigateTo('/events');
-            }, 1250);
+            }, 750);
         } catch (error: any) {
-            toast.error((error.error.message as string), { timeout: 2000 });
+            toast.error((error.error.message as string), { timeout: 1750 });
             console.error(error);
         }
     }
@@ -168,14 +171,14 @@ export default function () {
             const signupRes = await register({ username: username, email: email, fullName: fullName, password: password, });
             userData.id = signupRes.user?.value?.id;
 
+            getUser(userData.id);
+            popModal('close', 'signup');
             // Clear signupData input fields
             Object.keys(signupData).forEach(key => signupData[key] = '');
-
-            popModal('close', 'signup');
             toast.success('User registered!', { timeout: 1500 });
             setTimeout(() => {
                 navigateTo('/events');
-            }, 1250);
+            }, 750);
         } catch (error: any) {
             toast.error((error.error.message as string), { timeout: 1500 });
             console.error(error);
@@ -185,18 +188,21 @@ export default function () {
     function onLogout() {
         try {
             logout();
+
             userData.id = null;
+            isAuth.value = false;
             popRef.drawer = false;
             toast.info('User logged out.', { timeout: 1000 });
             setTimeout(() => {
                 navigateTo('/');
-            }, 1250);
+            }, 750);
         } catch (error) {
             console.error(error);
         }
     }
 
     return {
+        isAuth,
         myId,
         token,
         appHost,
