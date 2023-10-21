@@ -3,8 +3,12 @@ definePageMeta({
     middleware: ['auth'],
 });
 const route = useRoute();
-const { toast } = useMisc();
 const { userByUsername, profile, socials } = useProfile();
+
+const themeCookie = useCookie('selectedTheme');
+const pageTheme = ref(themeCookie).value;
+const { formBg } = useTheme(pageTheme);
+
 const popAvatar = ref<any | null>(null);
 const pageUsername = route.params.username as string;
 const { myUsername } = useAuth();
@@ -16,15 +20,11 @@ onMounted(() => {
 watchEffect(() => {
     // console.log('pageUsername', pageUsername);
     // console.log('myUsername', myUsername);
-    //
 });
 // ----------------------------------------------------------------
 function openAvatar() {
     if (myUsername === pageUsername) {
         popAvatar.value.showModal();
-    } else {
-
-        // toast.error('Invalid user.', { timeout: 1500 });
     }
 }
 
@@ -139,7 +139,7 @@ function openAvatar() {
     </div>
 
     <dialog ref="popAvatar" class="modal">
-        <div class="modal-box bg-base-200/90 grid justify-center">
+        <div :class="formBg" class="modal-box shadow-none grid justify-center">
             <ProfileModal />
         </div>
         <form method="dialog" class="modal-backdrop">

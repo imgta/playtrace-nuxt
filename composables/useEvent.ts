@@ -33,11 +33,11 @@ export default function () {
         spots: '',
     }) as any;
 
-    const invData = reactive({
-        id: '',
-        rsvp: '',
-        eventObj: null,
-    }) as any;
+    // const invData = reactive({
+    //     id: '',
+    //     rsvp: '',
+    //     eventObj: null,
+    // }) as any;
 
     const userRsvp = ref();
     const inviteId = ref();
@@ -59,7 +59,7 @@ export default function () {
     }
 
     async function getEvent(eventId: number) {
-        const isLoading = ref<boolean>(true);
+        isLoading.value = true;
         try {
             const eventRes: Record<string, any> = await client(`${appHost}api/events/${eventId}?populate[0]=initiator.avatar&populate[1]=initiator.wallets&populate[2]=eventPic&populate[3]=location&populate[4]=eventReceipt.receiptItem&populate[5]=invited_users.users_permissions_user`, {
                 method: 'GET'
@@ -85,7 +85,7 @@ export default function () {
             eventData.eventInvites = invites;
             eventData.receipts.value = eventReceipt;
 
-            eventData.hostAvatar = await eventRes.data.attributes.initiator.data.attributes.avatar?.data?.attributes?.url;
+            eventData.hostAvatar = eventRes?.data?.attributes?.initiator?.data?.attributes?.avatar?.data?.attributes?.url;
 
             const [hostFirstName, ...rest] = hostName.split(/\s+/);
             const hostLastName = rest.join(' ');
@@ -108,10 +108,9 @@ export default function () {
             eventData.spots = eventData.partySize - going;
 
             eventData.categories?.push(eventData.location[0]?.category?.split(', '));
+            isLoading.value = false;
         } catch (error) {
             console.error(error);
-        } finally {
-            isLoading.value = false;
         }
     }
 
@@ -122,15 +121,12 @@ export default function () {
         };
         rsvpForm.append('data', JSON.stringify(rsvpObj));
         try {
-            const rsvpRes: Record<string, any> = await client(`${appHost}api/invited-users/${inviteId}`, {
+            await client(`${appHost}api/invited-users/${inviteId}`, {
                 method: 'PUT',
                 body: rsvpForm,
             });
-            const rsvpData = await rsvpRes.data;
             closeRsvp();
-        } catch (error) {
-            console.error(error);
-        } finally {
+
             if (rsvp === 'going') {
                 toast.info('RSVP: Going!', { timeout: 1500 });
             } else if (rsvp === 'maybe') {
@@ -138,7 +134,9 @@ export default function () {
             } else if (rsvp === 'noGo') {
                 toast.error('RSVP: Not going.', { timeout: 1500 });
             }
-            await getInvite(eventId, myId);
+            getInvite(eventId, myId);
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -155,10 +153,10 @@ export default function () {
             inviteId.value = id;
             userRsvp.value = eventStatus;
             eventObj.value = event.data;
+
+            isLoading.value = false;
         } catch (error) {
             console.error(error);
-        } finally {
-            isLoading.value = false;
         }
     }
 
@@ -177,45 +175,43 @@ export default function () {
 
             // (2a) Delete upload media file for eventPic (Strapi + AWS S3)
             try {
-                const delEventPicRes: any = await client(`${appHost}api/upload/files/${delEventPicId}`, {
+                await client(`${appHost}api/upload/files/${delEventPicId}`, {
                     method: 'DELETE',
                 });
+                // toast.info('Event picture deleted!', { timeout: 1500 });
             } catch (error) {
                 console.error(error);
-            } finally {
-                toast.info('Event picture deleted!', { timeout: 1500 });
             }
 
             // (2b) Delete each invitedUser relational instance for target event
             try {
                 const delInviteRequests = delInviteIds.map(async (id: number) => {
-                    const delInvitesRes: any = await client(`${appHost}api/invited-users/${id}`, {
+                    await client(`${appHost}api/invited-users/${id}`, {
                         method: 'DELETE',
                     });
-                    const delInviteResult = await delInvitesRes.data;
                 });
-                await Promise.all(delInviteRequests);
+                await Promise.allSettled(delInviteRequests);
+                // toast.info('All event invites deleted!', { timeout: 1500 });
             } catch (error) {
                 console.error(error);
-            } finally {
-                toast.info('All event invites deleted!', { timeout: 1500 });
             }
 
             // (2c) Finally, delete target event
             try {
-                const delEventRes: any = await client(`${appHost}api/events/${delEventId}`, {
+                await client(`${appHost}api/events/${delEventId}`, {
                     method: 'DELETE',
                 });
-                const delEventResult = await delEventRes.data;
             } catch (error) {
                 console.error(error);
             }
+
+            getInvite(eventId, myId);
+            toast.info('Event deleted!', { timeout: 1500 });
+            setTimeout(() => {
+                navigateTo('/events');
+            }, 300);
         } catch (error) {
             console.error(error);
-        } finally {
-            toast.info('Event deleted!', { timeout: 1500 });
-            getInvite(eventId, myId);
-            await navigateTo('/events');
         }
     }
 
@@ -321,19 +317,18 @@ export default function () {
                     method: 'POST',
                     body: inviteForm,
                 });
-                const inviteData = await inviteRes.data;
+                await inviteRes.data;
 
                 // Update invitedUsers array to include newly invited users
                 eventData.invitedUsers.push({ 'username': inviteUser.username });
-            } catch (error) {
-                console.error(error);
-            } finally {
+
                 // Reset user invite search and matchingUsers array
                 userSearch.value = '';
                 matchingUsers.value = [];
-
-                createInviteAPI.value = false;
                 toast.info(`${inviteUser.username} invited!`, { timeout: 1200 });
+                createInviteAPI.value = false;
+            } catch (error) {
+                console.error(error);
             }
         }
 

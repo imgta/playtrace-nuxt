@@ -3,9 +3,9 @@ definePageMeta({
     middleware: ['auth'],
 });
 
-const { myId, appHost, client } = useAuth();
+const { myId } = useAuth();
 const { shortDate } = useDateTime();
-const { isLoading, createInviteAPI, popDelete, popRsvp, openRsvp, closeRsvp, rsvpModal, getEvent, eventData, getInvite, rsvpEvent, deleteEvent, openDelete, closeDelete, userRsvp, inviteId, eventObj, createInvites, inviteUser, removeInvite, userSearch, usernameSearch, selectInviteUser, matchingUsers } = useEvent();
+const { isLoading, createInviteAPI, popDelete, getEvent, eventData, getInvite, rsvpEvent, deleteEvent, openDelete, closeDelete, userRsvp, inviteId, eventObj, createInvites, inviteUser, removeInvite, userSearch, selectInviteUser, matchingUsers, debouncedUserSearch } = useEvent();
 
 const themeCookie = useCookie('selectedTheme');
 const pageTheme = ref(themeCookie).value as any;
@@ -362,7 +362,7 @@ function googleMaps(address: string) {
                             <div class="flex justify-center h-full pb-0.5">
                                 <input v-model="userSearch" class="input input-bordered invite-search text-center h-10"
                                     placeholder="Send more invites" name="invites" type="text" :class="inputValid"
-                                    @keyup.enter="inviteUser" @input="usernameSearch" />
+                                    @keyup.enter="inviteUser" @input="debouncedUserSearch" />
                             </div>
                             <ul v-if="matchingUsers.length > 0" class="menu w-fit rounded-box py-0 pt-1.5">
                                 <li v-for="username in matchingUsers" :key="username" class="text-accent"

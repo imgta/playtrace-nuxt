@@ -14,7 +14,7 @@ const myArr = ['Nuxt 3', 'Strapi', 'Vue.js'];
                     <span class="mb-0 font-bold text-2xl text-base-content">Your New Social Catalyst</span>
                     <p class="text-sm text-opacity-90 m-0">{{ articleDate(new Date()) }}</p>
                     <p class="text-justify text-sm sm:text-base">
-                        Welcome to playTrace--a new social events hosting app that will help you embolden relationships, electrify social circles, and explore communities, candidly.
+                        Welcome to playTrace: a new social events hosting app that will help you embolden relationships, electrify social circles, and explore communities, candidly.
                     </p>
                     <span class="tracking-widest font-medium">Plan, play,
                     <NuxtLink to="/events/new" class="tracer pl-[0.2rem] tracking-wider">
