@@ -239,6 +239,19 @@ export default function () {
         }
     }
 
+    function debounce<T extends (...args: any[]) => any>(func: T, delay: number): (...funcArgs: Parameters<T>) => void {
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
+        return (...args: Parameters<T>) => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            timeoutId = setTimeout(() => {
+                func(...args);
+            }, delay);
+        };
+    }
+    const debouncedUserSearch = debounce(usernameSearch, 300);
+
     function selectInviteUser(username: string) {
         try {
             const inviteQuery = userSearch.value;
@@ -328,5 +341,5 @@ export default function () {
         eventData.newInvites = eventData.newInvites.filter((inviteUser: Record<string, any>) => !eventData.invitedUsers.some((user: Record<string, any>) => user.username === inviteUser.username));
     }
 
-    return { myUsername, isLoading, createInviteAPI, popDelete, popRsvp, openRsvp, closeRsvp, rsvpModal, userRsvp, inviteId, eventObj, rsvpEvent, getInvite, eventData, getEvent, deleteEvent, openDelete, closeDelete, createInvites, inviteUser, removeInvite, userSearch, usernameSearch, selectInviteUser, matchingUsers };
+    return { myUsername, isLoading, createInviteAPI, popDelete, popRsvp, openRsvp, closeRsvp, rsvpModal, userRsvp, inviteId, eventObj, rsvpEvent, getInvite, eventData, getEvent, deleteEvent, openDelete, closeDelete, createInvites, inviteUser, removeInvite, userSearch, usernameSearch, selectInviteUser, matchingUsers, debouncedUserSearch };
 }

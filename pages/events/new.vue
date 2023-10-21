@@ -5,7 +5,7 @@ definePageMeta({
 
 const { toast } = useMisc();
 const { appHost, client } = useAuth();
-const { eventData, userSearch, usernameSearch, matchingUsers, selectInviteUser, removeInvite, myUsername } = useEvent();
+const { eventData, userSearch, matchingUsers, selectInviteUser, removeInvite, myUsername, debouncedUserSearch } = useEvent();
 const user = useStrapiUser().value;
 
 const themeCookie = useCookie('selectedTheme');
@@ -177,6 +177,83 @@ function toggleModal() {
     showModal.value = !showModal.value;
 }
 
+function inviteUser() {
+    try {
+        const username = userSearch.value.trim();
+        // Check if user is in newInvites array (already invited)
+        // Note: invitation for initiator (host) will be created on event creation
+        if (eventData.newInvites.some((user: any) => user.username === username) || username === myUsername) {
+            toast.error('User is already on the invite list!', { timeout: 1700 });
+            userSearch.value = '';
+            return;
+        }
+
+        // Check if username exists in database
+        const userRes: Record<string, any> = client(`${appHost}api/users?filters[username][$eq]=${username}`, {
+            method: 'GET'
+        });
+        const user = userRes[0];
+        if (userRes && user) {
+            eventData.newInvites.push(user);
+        } else {
+            toast.error('User not found!', { timeout: 1700 });
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function createInvites(eventRes: any) {
+    createInviteAPI.value = true;
+
+    // Create an array of promises for each invitation
+    const invitePromises = eventData.newInvites.map((user: any) => {
+        const inviteForm = new FormData();
+        const inviteObj = {
+            users_permissions_user: user,
+            collection: 'event',
+            event: eventRes,
+            eventStatus: 'invited',
+        };
+        inviteForm.append('data', JSON.stringify(inviteObj));
+
+        return client(`${appHost}api/invited-users`, {
+            method: 'POST',
+            body: inviteForm,
+        });
+    });
+
+    try {
+        const allInvitesRes = await Promise.allSettled(invitePromises);
+    } catch (error) {
+        console.error('Error sending invites:', error);
+    } finally {
+        createInviteAPI.value = false;
+    }
+
+    // for (const user of eventData.newInvites) {
+    //     const inviteForm = new FormData();
+    //     const inviteObj = {
+    //         users_permissions_user: user,
+    //         collection: 'event',
+    //         event: eventRes,
+    //         eventStatus: 'invited',
+    //     };
+    //     inviteForm.append('data', JSON.stringify(inviteObj));
+
+    //     try {
+    //         const inviteRes: Record<string, any> = client(`${appHost}api/invited-users`, {
+    //             method: 'POST',
+    //             body: inviteForm,
+    //         });
+    //         const inviteData = inviteRes.data;
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // }
+    // createInviteAPI.value = false;
+}
+
 async function createEvent(e: Event) {
     e.preventDefault();
     try {
@@ -250,67 +327,17 @@ async function createEvent(e: Event) {
         });
         const hostInviteData = await hostInviteRes.data;
 
-        createEventAPI.value = false;
-
         // (3) Create 'invited' invitate for each user in newInvites array
         createInvites(eventResult);
     } catch (error: any) {
         console.error(error);
     } finally {
+        createEventAPI.value = false;
         toast.success('New event created!', { timeout: 1500 });
-        navigateTo('/events');
+        setTimeout(() => {
+            navigateTo('/events');
+        }, 2000);
     }
-}
-
-function inviteUser() {
-    try {
-        const username = userSearch.value.trim();
-        // Check if user is in newInvites array (already invited)
-        // Note: invitation for initiator (host) will be created on event creation
-        if (eventData.newInvites.some((user: any) => user.username === username) || username === myUsername) {
-            toast.error('User is already on the invite list!', { timeout: 1700 });
-            userSearch.value = '';
-            return;
-        }
-
-        // Check if username exists in database
-        const userRes: Record<string, any> = client(`${appHost}api/users?filters[username][$eq]=${username}`, {
-            method: 'GET'
-        });
-        const user = userRes[0];
-        if (userRes && user) {
-            eventData.newInvites.push(user);
-        } else {
-            toast.error('User not found!', { timeout: 1700 });
-        }
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-function createInvites(eventRes: any) {
-    createInviteAPI.value = true;
-    for (const user of eventData.newInvites) {
-        const inviteForm = new FormData();
-        const inviteObj = {
-            users_permissions_user: user,
-            collection: 'event',
-            event: eventRes,
-            eventStatus: 'invited',
-        };
-        inviteForm.append('data', JSON.stringify(inviteObj));
-
-        try {
-            const inviteRes: Record<string, any> = client(`${appHost}api/invited-users`, {
-                method: 'POST',
-                body: inviteForm,
-            });
-            const inviteData = inviteRes.data;
-        } catch (error) {
-            console.error(error);
-        }
-    }
-    createInviteAPI.value = false;
 }
 
 // ----------------------------------------------------------------
@@ -406,7 +433,7 @@ function createInvites(eventRes: any) {
 
                         <div class="lg:hidden">
                             <input v-model="userSearch" placeholder="Invite by username" name="title" type="text"
-                                :class="validInvite" @keyup.enter="inviteUser" @input="usernameSearch" />
+                                :class="validInvite" @keyup.enter="inviteUser" @input="debouncedUserSearch" />
 
                             <ul v-if="matchingUsers.length > 0" class="menu w-full rounded-box py-0 pt-1">
                                 <li v-for="username in matchingUsers" :key="username" class="text-accent py-0 my-0"
@@ -459,7 +486,7 @@ function createInvites(eventRes: any) {
                                 <p>Invite Friends</p>
                             </div>
                             <input v-model="userSearch" placeholder="Invite by username" name="title" type="text"
-                                :class="validInvite" @keyup.enter="inviteUser" @input="usernameSearch" />
+                                :class="validInvite" @keyup.enter="inviteUser" @input="debouncedUserSearch" />
                         </div>
 
                         <ul v-if="matchingUsers.length > 0" class="menu w-fit rounded-box">
