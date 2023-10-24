@@ -301,39 +301,44 @@ export default function () {
     }
 
     async function createInvites(eventObj: Record<string, any>) {
-        for (const inviteUser of eventData.newInvites) {
-            const inviteForm = new FormData();
-            const inviteObj = {
-                users_permissions_user: inviteUser,
-                collection: 'event',
-                event: eventObj,
-                eventStatus: 'invited',
-            };
-            inviteForm.append('data', JSON.stringify(inviteObj));
-
-            try {
-                createInviteAPI.value = true;
-                const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
-                    method: 'POST',
-                    body: inviteForm,
-                });
-                await inviteRes.data;
+        try {
+            createInviteAPI.value = true;
+            for (const inviteUser of eventData.newInvites) {
+                const inviteForm = new FormData();
+                const inviteObj = {
+                    users_permissions_user: inviteUser,
+                    collection: 'event',
+                    event: eventObj,
+                    eventStatus: 'invited',
+                };
+                inviteForm.append('data', JSON.stringify(inviteObj));
 
                 // Update invitedUsers array to include newly invited users
                 eventData.invitedUsers.push({ 'username': inviteUser.username });
+                try {
+                    await client(`${appHost}api/invited-users`, {
+                        method: 'POST',
+                        body: inviteForm,
+                    });
+                    // const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
+                    //     method: 'POST',
+                    //     body: inviteForm,
+                    // });
 
-                // Reset user invite search and matchingUsers array
-                userSearch.value = '';
-                matchingUsers.value = [];
-                toast.info(`${inviteUser.username} invited!`, { timeout: 1200 });
-                createInviteAPI.value = false;
-            } catch (error) {
-                console.error(error);
+                    // Reset user invite search and matchingUsers array
+                    // userSearch.value = '';
+                    // matchingUsers.value = [];
+                    // toast.info(`${inviteUser.username} invited!`, { timeout: 1200 });
+                } catch (error) {
+                    console.error(error);
+                }
             }
+            createInviteAPI.value = false;
+            // Remove users that were just invited from eventData.newInvites array
+            eventData.newInvites = eventData.newInvites.filter((inviteUser: Record<string, any>) => !eventData.invitedUsers.some((user: Record<string, any>) => user.username === inviteUser.username));
+        } catch (error) {
+            console.error(error);
         }
-
-        // Remove users that were just invited from eventData.newInvites array
-        eventData.newInvites = eventData.newInvites.filter((inviteUser: Record<string, any>) => !eventData.invitedUsers.some((user: Record<string, any>) => user.username === inviteUser.username));
     }
 
     return { myUsername, isLoading, createInviteAPI, popDelete, popRsvp, openRsvp, closeRsvp, rsvpModal, userRsvp, inviteId, eventObj, rsvpEvent, getInvite, eventData, getEvent, deleteEvent, openDelete, closeDelete, createInvites, inviteUser, removeInvite, userSearch, usernameSearch, selectInviteUser, matchingUsers, debouncedUserSearch };
