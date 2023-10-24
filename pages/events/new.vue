@@ -335,8 +335,7 @@ async function createEvent(e: Event) {
         const imgName = `${eventData.title}_eventPic`;
 
         // Fetch img URL, convert response to blob
-        // const imgRes: any = await fetch(eventData.eventPic!);
-        const imgRes: any = await fetch('https://i.imgur.com/t74dEjI.jpg'); // 546 KB
+        const imgRes: any = await fetch(eventData.eventPic!);
         console.log('event pic fetched');
 
         const imgBlob = await imgRes.blob();
