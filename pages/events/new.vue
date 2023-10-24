@@ -271,6 +271,21 @@ async function createInvites(eventRes: any) {
     }
 }
 
+function createHostInvite(eventRes: any): Promise<any> {
+    const hostInviteForm = new FormData();
+    hostInviteForm.append('data', JSON.stringify({
+        users_permissions_user: user,
+        collection: 'event',
+        event: eventRes,
+        eventStatus: 'going',
+    }));
+
+    return $fetch(`${appHost}api/invited-users`, {
+        method: 'POST',
+        body: hostInviteForm,
+    });
+}
+
 async function createEvent(e: Event) {
     e.preventDefault();
     try {
@@ -300,9 +315,11 @@ async function createEvent(e: Event) {
     } catch (error) {
         console.error(error);
     }
+    console.log('validation complete');
 
     try {
         createEventAPI.value = true;
+
         // (1) Create new event
         const formData = new FormData();
         const form = {
@@ -315,38 +332,40 @@ async function createEvent(e: Event) {
             info: eventData.info,
         };
 
-        // Fetch img URL, convert response to blob
-        const imgRes: any = await fetch(eventData.eventPic);
-        const imgBlob = await imgRes.blob();
         const imgName = `${eventData.title}_eventPic`;
+
+        // Fetch img URL, convert response to blob
+        const imgRes: any = await fetch(eventData.eventPic!);
+        console.log('event pic fetched');
+
+        const imgBlob = imgRes.blob();
+        console.log('image to blob complete');
 
         // Append event input fields and cover image
         formData.append('data', JSON.stringify(form));
         formData.append('files.eventPic', imgBlob, imgName);
 
+        console.log('formData inputs appended');
+
         const eventRes: Record<string, any> = await $fetch(`${appHost}api/events`, {
             method: 'POST',
             body: formData,
         }) as any;
+
+        console.log('event created');
         const eventResult = eventRes.data;
 
-        // (2) Create 'going' invite for event host (initiator)
-        const hostInviteForm = new FormData();
-        const hostInviteObj = {
-            users_permissions_user: user,
-            collection: 'event',
-            event: eventResult,
-            eventStatus: 'going',
-        };
-        hostInviteForm.append('data', JSON.stringify(hostInviteObj));
+        // (2) Generate all event invites
+        // Create 'going' invitation for event host
+        const hostInvitePromise = createHostInvite(eventResult);
+        console.log('inviting host');
 
-        $fetch(`${appHost}api/invited-users`, {
-            method: 'POST',
-            body: hostInviteForm,
-        });
+        // Create 'invited' invitation for each user in newInvites array
+        const invitesPromise = createInvites(eventResult);
+        console.log('creating invites');
 
-        // (3) Create 'invited' invitation for each user in newInvites array
-        createInvites(eventResult);
+        await Promise.all([hostInvitePromise, invitesPromise]);
+        console.log('all invites sent');
 
         createEventAPI.value = false;
         toast.success('New event created!', { timeout: 1500 });
