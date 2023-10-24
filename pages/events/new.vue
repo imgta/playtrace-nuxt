@@ -343,7 +343,7 @@ async function createEvent(e: Event) {
 
         // Append event input fields and cover image
         formData.append('data', JSON.stringify(form));
-        formData.append('files.eventPic', imgBlob, imgName);
+        // formData.append('files.eventPic', imgBlob, imgName);
 
         console.log('formData inputs appended');
 
@@ -351,8 +351,8 @@ async function createEvent(e: Event) {
             method: 'POST',
             body: formData,
         }) as any;
-
         console.log('event created');
+
         const eventResult = eventRes.data;
         createEventAPI.value = false;
 
