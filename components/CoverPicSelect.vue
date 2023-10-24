@@ -194,8 +194,11 @@ async function unSplashMore() {
 }
 
 function selectCover(img: string, pop: boolean) {
-    const subString = '&crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=70&w=600';
-    const rawImg = img.replace(subString, '');
+    const oldSplashStr = '&crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=70&w=600';
+    const newSplashStr = '&crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=100&w=800';
+    const oldGiphyStr = 'giphy.gif';
+    const newGiphyStr = 'giphy.webp';
+    const rawImg = img.replace(oldSplashStr, newSplashStr).replace(oldGiphyStr, newGiphyStr);
     coverSelect.value = rawImg;
     emit('coverPicInput', rawImg);
     emit('modalState', pop);
