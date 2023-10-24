@@ -338,7 +338,7 @@ async function createEvent(e: Event) {
         const imgRes: any = await fetch(eventData.eventPic!);
         console.log('event pic fetched');
 
-        const imgBlob = imgRes.blob();
+        const imgBlob = await imgRes.blob();
         console.log('image to blob complete');
 
         // Append event input fields and cover image
@@ -354,6 +354,7 @@ async function createEvent(e: Event) {
 
         console.log('event created');
         const eventResult = eventRes.data;
+        createEventAPI.value = false;
 
         // (2) Generate all event invites
         // Create 'going' invitation for event host
@@ -367,7 +368,6 @@ async function createEvent(e: Event) {
         await Promise.all([hostInvitePromise, invitesPromise]);
         console.log('all invites sent');
 
-        createEventAPI.value = false;
         toast.success('New event created!', { timeout: 1500 });
         setTimeout(() => {
             navigateTo('/events');
