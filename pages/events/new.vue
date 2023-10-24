@@ -315,7 +315,6 @@ async function createEvent(e: Event) {
     } catch (error) {
         console.error(error);
     }
-    console.log('validation complete');
 
     try {
         createEventAPI.value = true;
@@ -332,26 +331,19 @@ async function createEvent(e: Event) {
             info: eventData.info,
         };
 
-        const imgName = `${eventData.title}_eventPic`;
-
         // Fetch img URL, convert response to blob
+        const imgName = `${eventData.title}_eventPic`;
         const imgRes: any = await fetch(eventData.eventPic!);
-        console.log('event pic fetched');
-
         const imgBlob = await imgRes.blob();
-        console.log('image to blob complete');
 
         // Append event input fields and cover image
         formData.append('data', JSON.stringify(form));
         formData.append('files.eventPic', imgBlob, imgName);
 
-        console.log('formData inputs appended');
-
         const eventRes: Record<string, any> = await $fetch(`${appHost}api/events`, {
             method: 'POST',
             body: formData,
         }) as any;
-        console.log('event created');
 
         const eventResult = eventRes.data;
         createEventAPI.value = false;
@@ -359,14 +351,10 @@ async function createEvent(e: Event) {
         // (2) Generate all event invites
         // Create 'going' invitation for event host
         const hostInvitePromise = createHostInvite(eventResult);
-        console.log('inviting host');
 
         // Create 'invited' invitation for each user in newInvites array
         const invitesPromise = createInvites(eventResult);
-        console.log('creating invites');
-
         await Promise.all([hostInvitePromise, invitesPromise]);
-        console.log('all invites sent');
 
         toast.success('New event created!', { timeout: 1500 });
         setTimeout(() => {
