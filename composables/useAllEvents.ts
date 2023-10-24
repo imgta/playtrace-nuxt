@@ -55,11 +55,12 @@ export default function () {
                                 }
                             }
                         },
-                        eventPic: { data: { attributes: { url: coverUrl } } },
+                        // eventPic: { data: { attributes: { url: coverUrl } } },
                         invited_users: { data: invites },
                         location: [{ zipcode }],
                     }
                 } = event;
+                const coverUrl = event.attributes.eventPic?.data?.attributes?.url;
                 const hostAvatar = event.attributes.initiator.data.attributes?.avatar?.data?.attributes?.formats?.thumbnail?.url;
                 // Event host details
                 const [hostFirstName, ...rest] = hostName.split(/\s+/);

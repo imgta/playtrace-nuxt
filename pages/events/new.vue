@@ -335,7 +335,8 @@ async function createEvent(e: Event) {
         const imgName = `${eventData.title}_eventPic`;
 
         // Fetch img URL, convert response to blob
-        const imgRes: any = await fetch(eventData.eventPic!);
+        // const imgRes: any = await fetch(eventData.eventPic!);
+        const imgRes: any = await fetch('https://i.imgur.com/t74dEjI.jpg'); // 546 KB
         console.log('event pic fetched');
 
         const imgBlob = await imgRes.blob();
@@ -343,7 +344,7 @@ async function createEvent(e: Event) {
 
         // Append event input fields and cover image
         formData.append('data', JSON.stringify(form));
-        // formData.append('files.eventPic', imgBlob, imgName);
+        formData.append('files.eventPic', imgBlob, imgName);
 
         console.log('formData inputs appended');
 
