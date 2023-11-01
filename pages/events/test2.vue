@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import draggable from 'vuedraggable';
+
 const { toast } = useMisc();
 const start = ref();
 const nearbyData: any = ref([]);
@@ -6,7 +8,7 @@ const textSearchData: any = ref([]);
 
 const traceStep = ref<number>(0);
 
-const startAddress = ref('85 Seaport Blvd');
+const startAddress = ref('');
 const textQuery = ref<string>('');
 const queryPool = ref<string[]>([]);
 const queryCount = ref<number>(0);
@@ -14,27 +16,33 @@ const circuit: any = ref([]);
 const travelTime: any = ref([]);
 const idPool = ref<string[]>([]);
 
-const aType = [''];
+// @ts-expect-error googleAPI
+let allMarkers: google.maps.Marker[] = [];
+// @ts-expect-error googleAPI
+const selectMarkers: google.maps.Marker[] = [];
 
 // ----------------------------------------------------------------
 watchEffect(() => {
-    console.log('circuit.value', circuit.value);
-    console.log('queryPool.value.length', queryPool.value.length);
+    // console.log('circuit.value', circuit.value);
+    // console.log('queryPool.value.length', queryPool.value.length);
     console.log('queryCount.value', queryCount.value);
-    console.log('traceStep.value', traceStep.value);
-    console.log('travelTime.value', travelTime.value);
+    console.log('allMarkers', allMarkers);
+    console.log('selectMarkers', selectMarkers);
 });
 // ----------------------------------------------------------------
-function getLatLong(data: Record<string, any>) {
-    const { Ua: lat, Ia: long } = data.geometry?.viewport;
-    const avgLat = (lat.lo + lat.hi) / 2;
-    const avgLng = (long.lo + long.hi) / 2;
-    return { lat: avgLat, lng: avgLng };
+function getLatLong(response: Record<string, any>) {
+    const geoLoc = response.geometry?.location;
+    const geoLat = geoLoc.lat();
+    const geoLng = geoLoc.lng();
+    return { lat: geoLat, lng: geoLng };
+    // Updates on Google Maps' viewport object make coordinate fetching inconsistent
+    // const { mb: lat, Oa: long } = response.geometry?.viewport;
+    // const avgLat = (lat.lo + lat.hi) / 2;
+    // const avgLng = (long.lo + long.hi) / 2;
+    // return { lat: avgLat, lng: avgLng };
 }
-// function getDistance(init: Record<string, number>, next: Record<string, number>) {
-//     const distance = ((next.lat - init.lat) ** 2 + (next.lng - init.lng) ** 2) ** 0.5;
-//     return distance;
-// }
+
+// Haversine formula to account for arc length of Earth's surface
 function getDistance(start: Record<string, number>, end: Record<string, number>) {
     const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
     const earthRadius = 6371000; // Radius of the Earth in meters
@@ -67,7 +75,7 @@ function pushToCircuit(venue: Record<string, any>) {
     }
 }
 
-// 1) GEOCODE: lat/long coordinates of given address
+// 1) GEOCODE: lat/long coordinates of given start address
 let map: any;
 async function getStart(address: string) {
     // @ts-expect-error googleAPI
@@ -113,8 +121,8 @@ async function getStart(address: string) {
     }
 }
 
-// // 2) NEARBY SEARCH: for places of given ['type'] and 'radius'
-// async function nearby(radius: number, type: string | string[]) {
+// // NEARBY SEARCH: for places of given ['type'] and 'radius'
+// async function mapNearby(type: string | string[], radius: number) {
 //     // @ts-expect-error googleAPI
 //     const { AdvancedMarkerElement: Marker } = await google.maps.importLibrary('marker') as google.maps.MarkerLibrary;
 //     // @ts-expect-error googleAPI
@@ -184,13 +192,10 @@ async function getStart(address: string) {
 //     );
 // }
 
-// 2) TEXT SEARCH: query is more versatile than providing strict 'types'
-// @ts-expect-error googleAPI
-let allMarkers: Record<string, google.maps.Marker[]> = {};
-// @ts-expect-error googleAPI
-const selectMarkers: Record<string, google.maps.Marker[]> = {};
+// TEXT SEARCH: query is more versatile than providing strict 'types'
+// formatted_address property is only returned for Text Search
 // TODO: On 1st query added, remove query(1) markers, populate query(2) markers... etc
-async function textSearch(query: string, radius: number) {
+async function mapText(query: string, radius: number) {
     // @ts-expect-error googleAPI
     const { AdvancedMarkerElement: Marker } = await google.maps.importLibrary('marker') as google.maps.MarkerLibrary;
     // @ts-expect-error googleAPI
@@ -198,12 +203,16 @@ async function textSearch(query: string, radius: number) {
 
     traceStep.value++;
     const service = await new Places(document.getElementById('textsearch'));
+
+    const isPlural = query.split(' ').length === 1 && query.endsWith('s');
+    const type = isPlural ? query.slice(0, -1) : query;
+
     await service.textSearch(
         {
             location: start.value,
             radius: radius,
-            query: query,
-            // Note: Use 'or' operator | to construct more flexible queries
+            query: query, // Note: Use 'or' operator | to construct more flexible queries
+            type: type,
         },
         (results: Record<string, any>[]) => {
             console.log('results', results);
@@ -258,15 +267,15 @@ async function textSearch(query: string, radius: number) {
                 const marker = new Marker({
                     map,
                     position,
-                    title: `${i + 1}. ${name}`,
+                    title: `${name}`,
                     content: markerTag,
                 });
 
-                const query = queryPool.value[queryCount.value - 1];
+                const queryIdx: any = queryPool.value[queryCount.value - 1];
                 if (!(query in allMarkers)) {
-                    allMarkers[query] = [];
+                    allMarkers[queryIdx] = [];
                 }
-                allMarkers[query].push(marker);
+                allMarkers[queryIdx].push(marker);
 
                 // ADD button for circuit builds
                 const button = markerInfo.querySelector(`#toCircuit-${i}`);
@@ -274,25 +283,28 @@ async function textSearch(query: string, radius: number) {
                     button.addEventListener('click', () => {
                         // Initialize array for each marker-query
                         if (!(query in selectMarkers)) {
-                            selectMarkers[query] = [marker];
-                        // Push the marker if not already in the array
-                        } else if (!selectMarkers[query].includes(marker)) {
-                            selectMarkers[query].push(marker);
+                            selectMarkers[queryIdx] = [marker];
                         }
-                        console.log('selectMarkers', selectMarkers);
+
+                        // Push the marker if not already in the array
+                        if (!selectMarkers[queryIdx].includes(marker)) {
+                            selectMarkers[queryIdx].push(marker);
+                        }
 
                         pushToCircuit(textSearchData.value[i]);
                         if (infoWindow) {
                             infoWindow.close();
                         }
-                        // Hide all markers except for selected one
-                        hideMarkers();
 
                         console.log('queryCount.value', queryCount.value);
                         console.log('queryPool.value', queryPool.value);
-                        // Continue Text Search for next query in queue
+
                         if (queryCount.value < queryPool.value.length) {
-                            textSearch(queryPool.value[queryCount.value], 1610);
+                            // Clear all markers
+                            hideMarkers();
+
+                            // Continue Text Search for next query in queue
+                            mapText(queryPool.value[queryCount.value], 1610);
                         } else if (queryCount.value === queryPool.value.length) {
                             trace(circuit.value);
                         }
@@ -314,12 +326,15 @@ async function textSearch(query: string, radius: number) {
 
 // @ts-expect-error googleAPI
 function setSelectMarkers(map: google.maps.Map | null) {
-    const query = queryPool.value[queryCount.value - 1];
-    allMarkers[query].forEach(marker => {
-        if (!selectMarkers[query].includes(marker)) {
-            marker.setMap(map);
-        }
-    });
+    for (let i = 0; i < selectMarkers.length; i++) {
+        selectMarkers[i].setMap(map);
+    }
+    // const query = queryPool.value[queryCount.value - 1];
+    // allMarkers[query].forEach((marker: any) => {
+    //     if (!selectMarkers[query].includes(marker)) {
+    //         marker.setMap(map);
+    //     }
+    // });
 }
 function hideMarkers(): void {
     setSelectMarkers(null);
@@ -327,15 +342,17 @@ function hideMarkers(): void {
 function showMarkers(): void {
     setSelectMarkers(map);
 }
-function unSelectMarkers() {
-    const query = queryPool.value[queryCount.value - 1];
-    for (const marker of allMarkers[query]) {
-        marker.setMap(null);
-    }
-}
-function deleteUnselected(): void {
+
+function deleteMarkers(): void {
     hideMarkers();
-    allMarkers = {};
+    allMarkers = [];
+}
+
+function clearOverlays() {
+    for (let i = 0; i < allMarkers.length; i++) {
+        allMarkers[i].setMap(null);
+    }
+    allMarkers.length = 0;
 }
 
 async function trace(venues: Record<string, any>[]) {
@@ -417,6 +434,7 @@ function buildTag(types: string[], rating: number): string {
 function toQueryQueue(query: string) {
     if (!queryPool.value.includes(query)) {
         queryPool.value.push(query);
+        console.log('queryPool.value', queryPool.value);
         toast.success(`Search for ${query} added!`, { timeout: 1200 });
     } else {
         toast.error(`${query} already in queue!`, { timeout: 1200 });
@@ -429,6 +447,10 @@ function removeQuery(delQuery: string, queryIdx: number) {
     toast.info(`${delQuery} removed!`, { timeout: 1200 });
 }
 
+function retrace() {
+    clearOverlays();
+    trace(circuit.value);
+}
 // ----------------------------------------------------------------
 </script>
 
@@ -443,6 +465,7 @@ function removeQuery(delQuery: string, queryIdx: number) {
     </div>
 
     <div id="textsearch" class="flex justify-center">
+    <!-- <div id="nearby" class="flex justify-center"> -->
 
         <div v-if="traceStep < 1">
             <div class="flex justify-center py-2">
@@ -466,17 +489,9 @@ function removeQuery(delQuery: string, queryIdx: number) {
             <div class="grid">
                 <input v-model="textQuery" type="text" name="textQuery" placeholder="Cafe, museum, clubs..."
                     class="form-control input input-bordered form-input mb-2" @keyup.enter="toQueryQueue(textQuery)" />
-                <button v-if="queryPool.length > 0" class="btn btn-sm btn-primary" @click="textSearch(queryPool[0], 1610)">Start Search</button>
+                <button v-if="queryPool.length > 0" class="btn btn-sm btn-primary" @click="mapText(queryPool[0], 2000)">Start Search</button>
+                <!-- <button v-if="queryPool.length > 0" class="btn btn-sm btn-primary" @click="mapNearby([queryPool[0]], 1610)">Start Search</button> -->
             </div>
-        </div>
-
-        <div>
-            <div class="flex justify-center py-2">
-                <h1 class="text-primary text-2xl">
-                    Trace.
-                </h1>
-            </div>
-            <button class="btn btn-sm btn-primary" @click="trace(circuit)">Trace</button>
         </div>
 
     </div>
@@ -488,7 +503,7 @@ function removeQuery(delQuery: string, queryIdx: number) {
             <h1 class="text-primary text-xl">Queries:</h1>
 
             <div v-for="(query, index) in queryPool" id="checklist" :key="index">
-                <input :id="`0${index + 1}`" :checked="Object.keys(selectMarkers).length > index" :value="index + 1" type="checkbox" />
+                <input :id="`0${index + 1}`" :checked="selectMarkers[0]?.length >= index" :value="index + 1" type="checkbox" />
                 <label :for="`0${index + 1}`">
                     <span class="whitespace-nowrap">{{ `${index + 1}. ${query}` }}
                     </span>
@@ -496,13 +511,23 @@ function removeQuery(delQuery: string, queryIdx: number) {
             </div>
 
             <h1 class="text-primary text-xl">Circuit:</h1>
-            <ul>
+            <!-- <ul>
                 <li v-for="(venue, index) in circuit" :key="index" class="text-sm">
                     <span class="font-semibold leading-relaxed tracking-wide">{{ `${index + 1}. ${venue.name}` }}
                         <span v-if="travelTime[index]">({{ travelTime[index] }})</span>
                     </span>
                 </li>
-            </ul>
+            </ul> -->
+            <draggable :list="circuit" tag="ul" item-key="id">
+                <template #item="{ element: venue, index }">
+                    <li>
+                        {{ index + 1 }}. {{ venue.name }}
+                        <span v-if="travelTime[index]">({{ travelTime[index] }})</span>
+                    </li>
+
+                </template>
+            </draggable>
+            <button class="btn btn-sm btn-primary" @click="retrace">Retrace</button>
         </div>
     </div>
 </template>

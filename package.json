@@ -17,7 +17,8 @@
         "nuxt": "3.7.0",
         "v-calendar": "3.0.3",
         "vue": "^3.3.4",
-        "vue-toastification": "^2.0.0-rc.5"
+        "vue-toastification": "^2.0.0-rc.5",
+        "vuedraggable": "^4.1.0"
     },
     "devDependencies": {
         "@antfu/eslint-config": "^0.41.0",
