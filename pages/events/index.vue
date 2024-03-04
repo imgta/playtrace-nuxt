@@ -3,12 +3,11 @@ definePageMeta({
     middleware: ['auth'],
 });
 
-const { shortDate } = useDateTime();
 const { myId, isLoading, eventTab, inviteCount, pastEventCheck, getMyEvents, eventDisplay, mapEventsDestruct } = useAllEvents();
 
 // ----------------------------------------------------------------
 onMounted(() => {
-    getMyEvents(myId);
+    getMyEvents(myId as number);
 });
 // ----------------------------------------------------------------
 // async function getWeather(event: any) {
@@ -24,12 +23,8 @@ onMounted(() => {
 //     return forecast;
 // }
 
-function clickEventPage(eventId: number) {
-    navigateTo(`/events/${eventId}`);
-}
-function clickEventDisplay(type: string) {
-    eventTab.value = type;
-}
+function clickEventPage(eventId: number) { return navigateTo(`/events/${eventId}`); }
+function clickEventDisplay(type: string) { eventTab.value = type; }
 // ----------------------------------------------------------------
 </script>
 
@@ -77,7 +72,6 @@ function clickEventDisplay(type: string) {
                     @click="clickEventPage(ev.eventId)">
 
                     <img :src="ev.coverUrl" class="h-[200px] lg:h-[225px] w-full object-cover" />
-                    <!-- <span class="absolute top-2 right-4 text-xl font-medium text-accent" :class="ev.eventStatus === 'invited' ? '' : 'hidden'">Invited</span> -->
 
                 </figure>
 
@@ -149,6 +143,7 @@ function clickEventDisplay(type: string) {
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </template>

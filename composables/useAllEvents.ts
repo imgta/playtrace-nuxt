@@ -11,6 +11,7 @@ export default function () {
         const eventStart = new Date(startDate);
         return eventStart <= currentTime;
     }
+
     function eventDisplay(event: any) {
         return eventTab.value === 'isHost'
             ? (myId === event.hostId && !pastEventCheck(event.startDate))
@@ -24,24 +25,22 @@ export default function () {
     async function getMyEvents(userId: number) {
         isLoading.value = true;
         try {
-            const myEventsRes: Record<string, any> = await client(`${appHost}api/events?populate[0]=initiator.avatar&populate[1]=initiator.wallets&populate[2]=eventPic.url&populate[3]=invited_users.users_permissions_user&populate[4]=eventReceipt.receiptItem&populate[5]=location.zipcode&filters[invited_users][users_permissions_user][id][$in][0]=${userId}&sort=startDate`, {
+            const myEventsRes = await client(`${appHost}api/events?populate[0]=initiator.avatar&populate[1]=initiator.wallets&populate[2]=eventPic.url&populate[3]=invited_users.users_permissions_user&populate[4]=eventReceipt.receiptItem&populate[5]=location.zipcode&filters[invited_users][users_permissions_user][id][$in][0]=${userId}&sort=startDate`, {
                 method: 'GET'
-            });
+            }) as Record<string, any>;
 
-            myEvents.value = await myEventsRes.data;
+            myEvents.value = myEventsRes.data;
 
             inviteCount.value = myEvents.value.filter((event: Record<string, any>) => {
                 return (event.attributes.initiator.data.id !== userId) && !pastEventCheck(event.attributes.startDate);
             }).length;
-        } catch (error) {
-            console.error(error);
-        }
+        } catch (error) { console.error(error); }
         isLoading.value = false;
     }
 
     function mapEventsDestruct(userId: number) {
         try {
-            return myEvents.value.map((event: any) => {
+            return myEvents.value.map((event: Record<string, any>) => {
                 const {
                     id: eventId,
                     attributes: {
@@ -77,9 +76,7 @@ export default function () {
 
                 return { eventId, eventStatus, title, host, hostName, hostFirstName, hostLastName, hostInitials, hostId, hostAvatar, hostUrl, startDate, coverUrl, partySize, goingCount, zipcode };
             });
-        } catch (error) {
-            console.error(error);
-        }
+        } catch (error) { console.error(error); }
     }
 
     return { myId, isLoading, eventTab, inviteCount, myEvents, eventDisplay, pastEventCheck, getMyEvents, mapEventsDestruct };

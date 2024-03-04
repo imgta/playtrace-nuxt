@@ -31,13 +31,7 @@ export default function () {
         newInvites: [],
         receipts: [],
         spots: '',
-    }) as any;
-
-    // const invData = reactive({
-    //     id: '',
-    //     rsvp: '',
-    //     eventObj: null,
-    // }) as any;
+    }) as Record<string, any>;
 
     const userRsvp = ref();
     const inviteId = ref();
@@ -134,7 +128,7 @@ export default function () {
             } else if (rsvp === 'noGo') {
                 toast.error('RSVP: Not going.', { timeout: 1500 });
             }
-            getInvite(eventId, myId);
+            await getInvite(eventId, myId as number);
         } catch (error) {
             console.error(error);
         }
@@ -205,7 +199,7 @@ export default function () {
                 console.error(error);
             }
 
-            getInvite(eventId, myId);
+            getInvite(eventId, myId as number);
             toast.info('Event deleted!', { timeout: 1500 });
             setTimeout(() => {
                 navigateTo('/events');
@@ -320,15 +314,6 @@ export default function () {
                         method: 'POST',
                         body: inviteForm,
                     });
-                    // const inviteRes: Record<string, any> = await client(`${appHost}api/invited-users`, {
-                    //     method: 'POST',
-                    //     body: inviteForm,
-                    // });
-
-                    // Reset user invite search and matchingUsers array
-                    // userSearch.value = '';
-                    // matchingUsers.value = [];
-                    // toast.info(`${inviteUser.username} invited!`, { timeout: 1200 });
                 } catch (error) {
                     console.error(error);
                 }

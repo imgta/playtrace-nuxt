@@ -4,40 +4,22 @@ definePageMeta({
 });
 
 const { toast } = useMisc();
-const { appHost, client } = useAuth();
+const { appHost, client, user } = useAuth();
 const { eventData, userSearch, matchingUsers, selectInviteUser, removeInvite, myUsername, debouncedUserSearch } = useEvent();
-const user = useStrapiUser().value;
+const { themeCookie } = useTheme();
 
-const themeCookie = useCookie('selectedTheme');
-const eventBtnClass = ref('');
 const showModal = ref<boolean>(false);
-
-let updateScreenSize: () => void;
-const isLargeScreen = ref<boolean>(true);
 
 const createEventAPI = ref<boolean>(false);
 const createInviteAPI = ref<boolean>(false);
 
-const autocomplete: any = ref(null);
-const autoResult: any = ref(null);
+const autocomplete = ref();
+const autoResult = ref();
 const locationAddress = ref('');
-const partyCap = ref<string>() as any;
-const coverDmg = ref<string>() as any;
+const partyCap = ref();
+const coverDmg = ref();
 
 // ----------------------------------------------------------------
-// Screensize Event Listeners for mobile/desktop v-if layout toggling
-onMounted(() => {
-    updateScreenSize = () => {
-        isLargeScreen.value = window.innerWidth >= 1024;
-    };
-    updateScreenSize();
-    window.addEventListener('resize', updateScreenSize);
-});
-onUnmounted(() => {
-    if (updateScreenSize) {
-        window.removeEventListener('resize', updateScreenSize);
-    }
-});
 
 onMounted(() => {
     // @ts-expect-error idk
@@ -56,24 +38,6 @@ function handlePlaceChange() {
     autoResult.value = place;
     locationInput();
 }
-
-// onMounted(() => {
-//     // @ts-expect-error idk
-//     const autocomplete = new google.maps.places.Autocomplete(document.getElementById('autocomplete'));
-//     autocomplete.addListener('place_changed', () => {
-//         const place = autocomplete.getPlace();
-//         autoResult.value = place;
-//         locationInput();
-//     });
-// });
-
-watchEffect(() => {
-    if (themeCookie.value === 'corporate') {
-        eventBtnClass.value = 'before:rounded-none';
-    } else {
-        eventBtnClass.value = 'before:rounded-[100rem]';
-    }
-});
 
 const validInvite = computed(() => {
     const username = userSearch.value.trim();
@@ -396,7 +360,7 @@ async function createEvent(e: Event) {
                                 class="input input-bordered form-input" />
                         </div>
 
-                        <div v-if="!isLargeScreen">
+                        <div class="lg:hidden">
                             <div @click="toggleModal">
                                 <button v-if="!showModal && !eventData.eventPic"
                                     class="edit edit-primary min-w-[100%] lg:min-w-[80%] h-full lg:h-[90%]">
@@ -456,7 +420,7 @@ async function createEvent(e: Event) {
                                 class="textarea text-bordered textarea-neutral form-input h-20 resize whitespace-normal" />
                         </div>
 
-                        <div v-if="!isLargeScreen">
+                        <div class="lg:hidden">
                             <input v-model="userSearch" placeholder="Invite by username" name="title" type="search"
                                 :class="validInvite" @keyup.enter="inviteUser" @input="debouncedUserSearch" />
 
@@ -484,7 +448,7 @@ async function createEvent(e: Event) {
                     </div>
                 </div>
 
-                <div v-if="isLargeScreen" class="w-full h-full pt-8 px-8 lg:px-0">
+                <div class="hidden lg:block w-full h-full pt-8 px-8 lg:px-0">
 
                     <div class="justify-center content-center self-center items-center max-h-full">
                         <div @click="toggleModal">
@@ -550,7 +514,7 @@ async function createEvent(e: Event) {
         <div class="sm:px-24 pb-10 lg:pl-0">
 
             <div class="flex items-center justify-center place-content-center">
-                <button v-if="!createEventAPI && !createInviteAPI" class="event-create" :class="eventBtnClass" type="submit"
+                <button v-if="!createEventAPI && !createInviteAPI" class="event-create" :class="themeCookie === 'corporate' ? 'before:rounded-none' : 'before:rounded-[100rem]'" type="submit"
                     @click="createEvent">
                     <span>Create</span>
                     <svg viewBox="0 0 13 10" class="h-2.5 w-3.5">
