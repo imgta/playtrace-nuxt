@@ -4,7 +4,6 @@ export default function () {
     const { toast } = useMisc();
     const { logout, login, register } = useStrapiAuth();
     const client = useStrapiClient();
-    const token = useStrapiToken();
     const { url: appHost } = useRuntimeConfig().public.strapi;
 
     const expiry = new Date(Date.now() + 86400000); // expiry set to +1 day
@@ -77,26 +76,26 @@ export default function () {
 
             userData.username = username;
             userData.fullName = fullName;
-            if (avatar) {
-                userData.avatar = avatar?.formats?.thumbnail?.url;
-            }
+            if (avatar) { userData.avatar = avatar?.formats?.thumbnail?.url; }
             userData.initials = fullName.split(' ').map((name: string) => name[0].toUpperCase()).join('');
             userData.profileUrl = `/${userData.username}`;
             userCookie.value = userData;
             isAuth.value = true;
-        } catch (error) {
-            console.error(error);
-        }
+        } catch (error) { console.error(error); }
     }
 
     async function onDemo() {
-        popLogin.value.close();
-        popSignup.value.close();
-        loginData.username = 'demo';
-        loginData.password = 'demo123';
-        try { await onLogin(); } catch (error) {
-            console.error(error);
-        }
+        try {
+            popLogin.value.close();
+            popSignup.value.close();
+            const loginRes = await login({ identifier: 'demo', password: 'demo123' });
+            userData.id = loginRes.user?.value?.id;
+
+            await getUser(userData.id as number);
+            await navigateTo('/events');
+
+            toast.success('User logged in!', { timeout: 1500 });
+        } catch (error) { console.error(error); }
     }
 
     async function onLogin() {
@@ -111,14 +110,15 @@ export default function () {
             }
         }
 
-        const { username, password } = loginData;
         try {
-            const loginRes = await login({ identifier: username, password: password });
+            const loginRes = await login({ identifier: loginData.username, password: loginData.password });
             userData.id = loginRes.user?.value?.id;
 
             popModal('close', 'login');
+
             await getUser(userData.id as number);
             await navigateTo('/events');
+
             toast.success('User logged in!', { timeout: 1500 });
         } catch (error: any) {
             toast.error((error.error.message as string), { timeout: 1750 });
@@ -155,8 +155,10 @@ export default function () {
 
             await getUser(userData.id as number);
             popModal('close', 'signup');
+
             // Clear signupData input fields
             Object.keys(signupData).forEach((key: string) => signupData[key as keyof typeof signupData] = '');
+
             await navigateTo('/events');
             toast.success('User registered!', { timeout: 1500 });
         } catch (error: any) {
@@ -174,9 +176,7 @@ export default function () {
             popRef.drawer = false;
             await navigateTo('/');
             toast.info('User logged out.', { timeout: 1000 });
-        } catch (error) {
-            console.error(error);
-        }
+        } catch (error) { console.error(error); }
     }
 
     return {

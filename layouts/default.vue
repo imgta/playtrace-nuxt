@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { StrapiUser } from '@nuxtjs/strapi/dist/runtime/types';
 
-const { toast } = useMisc();
 const route = useRoute();
+const { toast } = useMisc();
 
 const { formBg, themeCookie, selectTheme } = useTheme();
 
 const user = useStrapiUser() as Ref<StrapiUser>;
-const myId = computed(() => { return user?.value?.id; }).value;
+const myId = computed(() => { return user?.value?.id; });
 
 const { userData, loginData, signupData, popLogin, popSignup, popRef, popModal, getUser, onDemo, onLogout, onLogin, onRegister } = useAuth();
 
@@ -44,8 +44,8 @@ const bottomNav = [
 
 // ----------------------------------------------------------------
 
-watch(user, async () => {
-    if (user.value) { await getUser(myId as number); }
+watch(myId, async () => {
+    if (myId.value) { await getUser(myId.value); }
 }, { immediate: true });
 
 watch(() => route.path, () => { popRef.drawer = false; });
