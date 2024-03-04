@@ -1,55 +1,55 @@
 <script setup lang="ts">
-const route = useRoute();
+import type { StrapiUser } from '@nuxtjs/strapi/dist/runtime/types';
+
 const { toast } = useMisc();
+const route = useRoute();
 
-const targetText = '▶_trace.';
-const themeCookie = useCookie('selectedTheme');
-const pageTheme = ref(themeCookie).value;
-const { formBg } = useTheme(pageTheme);
+const { formBg, themeCookie, selectTheme } = useTheme();
 
-const { myId, isAuth, token, userData, loginData, signupData, popLogin, popSignup, popRef, popModal, getUser, onDemo, onLogout, onLogin, onRegister } = useAuth();
+const user = useStrapiUser() as Ref<StrapiUser>;
+const myId = computed(() => { return user?.value?.id; }).value;
 
-const loginTheme = computed(() => pageTheme === 'corporate' ? 'logincorp auth-modal' : 'login auth-modal');
-const signupTheme = computed(() => pageTheme === 'corporate' ? 'signupcorp auth-modal' : 'signup auth-modal');
+const { userData, loginData, signupData, popLogin, popSignup, popRef, popModal, getUser, onDemo, onLogout, onLogin, onRegister } = useAuth();
 
-let updateScreenSize: () => void;
-const isMediumScreen = ref<boolean>(true);
+const loginTheme = computed(() => selectTheme === 'corporate' ? 'logincorp auth-modal' : 'login auth-modal');
+const signupTheme = computed(() => selectTheme === 'corporate' ? 'signupcorp auth-modal' : 'signup auth-modal');
+
+const topNav = [
+    {
+        label: 'Create',
+        link: '/events/new',
+    },
+    {
+        label: 'Events',
+        link: '/events',
+    }
+];
+const bottomNav = [
+    {
+        label: 'Home',
+        link: '/',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256"><path d="M221.56,100.85,141.61,25.38l-.16-.15a19.93,19.93,0,0,0-26.91,0l-.17.15L34.44,100.85A20.07,20.07,0,0,0,28,115.55V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V164h24v44a20,20,0,0,0,20,20h48a20,20,0,0,0,20-20V115.55A20.07,20.07,0,0,0,221.56,100.85ZM204,204H164V160a20,20,0,0,0-20-20H112a20,20,0,0,0-20,20v44H52V117.28l76-71.75,76,71.75Z" /></svg>',
+    },
+    {
+        label: 'New Event',
+        link: '/events/new',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256"><path d="M208,28H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28Zm-4,176H52V52H204ZM76,128a12,12,0,0,1,12-12h28V88a12,12,0,0,1,24,0v28h28a12,12,0,0,1,0,24H140v28a12,12,0,0,1-24,0V140H88A12,12,0,0,1,76,128Z" /></svg>',
+    },
+    {
+        label: 'Your Events',
+        link: '/events',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256"><path d="M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM68,52a12,12,0,0,0,24,0h72a12,12,0,0,0,24,0h16V76H52V52ZM52,204V100H204V204Zm120.49-84.49a12,12,0,0,1,0,17l-48,48a12,12,0,0,1-17,0l-24-24a12,12,0,0,1,17-17L116,159l39.51-39.52A12,12,0,0,1,172.49,119.51Z" /></svg>',
+    },
+];
 
 // ----------------------------------------------------------------
-// Screensize Event Listeners for mobile/desktop v-if layout toggling
-onMounted(() => {
-    updateScreenSize = () => {
-        isMediumScreen.value = window.innerWidth >= 768;
-    };
-    updateScreenSize();
-    window.addEventListener('resize', updateScreenSize);
-});
-onUnmounted(() => {
-    if (updateScreenSize) {
-        window.removeEventListener('resize', updateScreenSize);
-    }
-});
 
-onMounted(() => {
-    if (token) {
-        //  Note: watchEffects are automatically stopped when component is unmounted
-        watchEffect(() => {
-            getUser(userData.id);
-        });
-    }
-});
-watch(() => route.path, () => {
-    popRef.drawer = false;
-});
-watch(() => userData.id, () => {
-    if (userData.id !== null) {
-        try {
-            getUser(userData.id);
-        } catch (error) {
-            console.error(error);
-        }
-    }
-});
+watch(user, async () => {
+    if (user.value) { await getUser(myId as number); }
+}, { immediate: true });
+
+watch(() => route.path, () => { popRef.drawer = false; });
+
 watch(() => popLogin.value, () => {
     if (route.fullPath.includes('?redirect')) {
         popModal('open', 'login');
@@ -58,29 +58,24 @@ watch(() => popLogin.value, () => {
 });
 
 // ----------------------------------------------------------------
-function toggleSide() {
-    popRef.drawer = !popRef.drawer;
+
+function activeNav(link: string) {
+    return route.path === link ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active';
 }
-// ----------------------------------------------------------------
 </script>
 
 <template>
     <div :data-theme="themeCookie" class="flex flex-col min-h-screen bg-base-200">
         <div class="navbar bg-base-200 px-5">
 
-            <!-- <Loading :my-loading="loading" />
-            <button @click="loading = true">
-                test
-            </button> -->
-
             <div class="flex-1">
                 <NuxtLink to="/">
-                    <ScrambleFx :target-text="targetText" />
+                    <ScrambleFx target-text="▶_trace." />
                 </NuxtLink>
             </div>
             <ThemeSwitch />
-            <div v-if="!userData.id">
 
+            <div v-if="!userData.id">
                 <button class="btn-primary font-normal btn-outline btn-sm normal-case mt-0" @click="popModal('open', 'login')">
                     <span class="hover:text-neutral-content w-full h-full flex items-center">
                         Login
@@ -88,7 +83,6 @@ function toggleSide() {
                 </button>
 
                 <dialog ref="popLogin" class="modal">
-
                     <div :class="formBg" method="dialog"
                         class="modal-box w-auto max-fit px-9 pb-3 shadow-none">
                         <h1 class="text-primary text-4xl text-center pt-4 pb-0.5">
@@ -111,15 +105,9 @@ function toggleSide() {
                                     @keyup.enter="onLogin" />
                                 <label class="label">
                                     <span class="label-text-alt"></span>
-                                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.25]"
-                                        @click="onDemo">
+                                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.25]" @click="onDemo">
                                         Demo?
-                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                                            viewBox="0 0 152.9 43.4" style="enable-background:new 0 0 152.9 43.4;"
-                                            xml:space="preserve">
-                                            <path
-                                                d="M151.9,13.6c0,0,3.3-9.5-85-8.3c-97,1.3-58.3,29-58.3,29s9.7,8.1,69.7,8.1c68.3,0,69.3-23.1,69.3-23.1 s1.7-10.5-14.7-18.4" />
+                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 152.9 43.4" style="enable-background:new 0 0 152.9 43.4;" xml:space="preserve"><path d="M151.9,13.6c0,0,3.3-9.5-85-8.3c-97,1.3-58.3,29-58.3,29s9.7,8.1,69.7,8.1c68.3,0,69.3-23.1,69.3-23.1 s1.7-10.5-14.7-18.4" />
                                         </svg>
                                     </span>
                                 </label>
@@ -182,8 +170,7 @@ function toggleSide() {
                                     @keyup.enter="onRegister" />
                                 <label class="label">
                                     <span class="label-text-alt"></span>
-                                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.25]"
-                                        @click="onDemo">
+                                    <span class="label-text-alt link link-primary font-semibold tracer brightness-[1.25]" @click="onDemo">
                                         Demo?
                                         <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
                                             xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -220,22 +207,13 @@ function toggleSide() {
                         <button>close</button>
                     </form>
                 </dialog>
-
             </div>
 
-            <div v-if="userData.id && userData.id !== null">
-                <div v-if="isMediumScreen" class="inline-flex">
-                    <NuxtLink :to="{ name: 'events-new' }">
-                        <button
-                            class="btn btn-primary btn-xs text-primary bg-transparent hover:text-neutral-content border-none font-medium normal-case md:btn-sm">
-                            <span>Create</span>
-                        </button>
-                    </NuxtLink>
-
-                    <NuxtLink :to="{ name: 'events' }">
-                        <button
-                            class="btn btn-primary btn-xs text-primary bg-transparent hover:text-neutral-content border-none font-medium normal-case md:btn-sm">
-                            <span>Events</span>
+            <div v-if="userData.id">
+                <div class="hidden md:inline-flex">
+                    <NuxtLink v-for="item in topNav" :key="item.label" :to="item.link">
+                        <button class="btn btn-primary btn-xs text-primary bg-transparent hover:text-neutral-content border-none font-medium normal-case md:btn-sm">
+                            <span>{{ item.label }}</span>
                         </button>
                     </NuxtLink>
                 </div>
@@ -243,7 +221,7 @@ function toggleSide() {
                 <div class="navbar-center flex">
                     <div class="drawer drawer-end">
                         <input id="my-drawer-4" type="checkbox" class="drawer-toggle" :checked="popRef.drawer"
-                            @click="toggleSide()" />
+                            @click="popRef.drawer = !popRef.drawer" />
                         <div class="drawer-content px-1">
                             <label for="my-drawer-4"
                                 class="btn bg-transparent drawer-button normal-case border-none hover:bg-transparent hover:border-none px-0 pl-1">
@@ -263,18 +241,16 @@ function toggleSide() {
                                 <div v-if="!userData.avatar && userData.avatar !== null" class="flex">
                                     <div class="avatar placeholder max-h-[34px]">
                                         <div v-if="popRef.drawer" class="bg-secondary rounded-l-full min-w-[3.65rem] text-sm">
-                                            <span class="text-white self-center justify-center">{{ userData.initials
-                                            }}</span>
+                                            <span class="text-white self-center justify-center">
+                                                {{ userData.initials }}
+                                            </span>
                                         </div>
                                         <div v-if="!popRef.drawer" class="bg-secondary rounded-full w-8 text-xs">
-                                            <span class="text-white self-center justify-center">{{ userData.initials
-                                            }}</span>
+                                            <span class="text-white self-center justify-center">
+                                                {{ userData.initials }}
+                                            </span>
                                         </div>
-                                        <!-- <div class="bg-secondary"
-                                            :class="pop.drawer ? 'rounded-l-full min-w-[3.65rem] text-sm' : 'rounded-full w-8 text-xs'">
-                                            <span class="text-white self-center justify-center">{{ userData.initials
-                                            }}</span>
-                                        </div> -->
+
                                     </div>
                                     <div
                                         class="flex bg-transparent font-medium text-primary text-xs md:text-sm max-h-[34px] w-full">
@@ -293,7 +269,7 @@ function toggleSide() {
                                 <!-- Sidebar content here -->
                                 <li>
                                     <NuxtLink :to="userData.profileUrl" class="hover:text-primary link link-hover hover:bg-transparent">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="fill-primary w-4 h-4" viewBox="0 0 256 256"><path d="M234.38,210a123.36,123.36,0,0,0-60.78-53.23,76,76,0,1,0-91.2,0A123.36,123.36,0,0,0,21.62,210a12,12,0,1,0,20.77,12c18.12-31.32,50.12-50,85.61-50s67.49,18.69,85.61,50a12,12,0,0,0,20.77-12ZM76,96a52,52,0,1,1,52,52A52.06,52.06,0,0,1,76,96Z"></path></svg>Profile
+                                        Profile
                                     </NuxtLink>
                                 </li>
                                 <li>
@@ -323,7 +299,7 @@ function toggleSide() {
                     </svg>
                 </div>
                 <div class="flex-auto text-sm">
-                    <span>Copyright © 2023 - All right reserved</span>
+                    <span>Copyright © {{ new Date().getFullYear() }} - All right reserved</span>
                 </div>
 
                 <a href="https://github.com/imgta/playtrace-nuxt">
@@ -339,45 +315,16 @@ function toggleSide() {
             </footer>
 
         </div>
+
         <!-- BOTTOM NAV BAR -->
-        <div v-if="!isMediumScreen" class="btm-nav text-sm font-medium p-0 z-30">
-            <NuxtLink to="/">
-                <button
-                    :class="(route.path === '/') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'">
+        <div class="md:hidden btm-nav text-sm font-medium p-0 z-30">
+            <NuxtLink v-for="item in bottomNav" :key="item.label" :to="item.link">
+                <button :class="activeNav(item.link)">
                     <div class="flex justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
-                            <path
-                                d="M221.56,100.85,141.61,25.38l-.16-.15a19.93,19.93,0,0,0-26.91,0l-.17.15L34.44,100.85A20.07,20.07,0,0,0,28,115.55V208a20,20,0,0,0,20,20H96a20,20,0,0,0,20-20V164h24v44a20,20,0,0,0,20,20h48a20,20,0,0,0,20-20V115.55A20.07,20.07,0,0,0,221.56,100.85ZM204,204H164V160a20,20,0,0,0-20-20H112a20,20,0,0,0-20,20v44H52V117.28l76-71.75,76,71.75Z" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256" v-html="item.icon"></svg>
                     </div>
-                    <span class="btm-nav-label">Home</span>
+                    <span class="btm-nav-label">{{ item.label }}</span>
                 </button>
-            </NuxtLink>
-
-            <NuxtLink to="/events/new">
-                <button
-                    :class="(route.path === '/events/new') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'">
-                <div class="flex justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
-                        <path
-                        d="M208,28H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28Zm-4,176H52V52H204ZM76,128a12,12,0,0,1,12-12h28V88a12,12,0,0,1,24,0v28h28a12,12,0,0,1,0,24H140v28a12,12,0,0,1-24,0V140H88A12,12,0,0,1,76,128Z" />
-                    </svg>
-                </div>
-                    <span class="btm-nav-label">New Event</span>
-                </button>
-            </NuxtLink>
-
-            <NuxtLink to="/events">
-                <button
-                    :class="(route.path === '/events') ? 'fill-primary text-primary active font-semibold' : 'fill-base-content text-base-content hover:fill-primary hover:text-primary hover:active'">
-                    <div class="flex justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 256 256">
-                            <path
-                            d="M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM68,52a12,12,0,0,0,24,0h72a12,12,0,0,0,24,0h16V76H52V52ZM52,204V100H204V204Zm120.49-84.49a12,12,0,0,1,0,17l-48,48a12,12,0,0,1-17,0l-24-24a12,12,0,0,1,17-17L116,159l39.51-39.52A12,12,0,0,1,172.49,119.51Z" />
-                        </svg>
-                    </div>
-                        <span class="btm-nav-label">Your Events</span>
-            </button>
             </NuxtLink>
     </div>
 </div>

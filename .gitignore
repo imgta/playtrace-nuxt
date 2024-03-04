@@ -11,3 +11,6 @@ dist
 !*.secret
 test.http
 .env.prod
+.vscode
+pages/events/test
+pages/forms

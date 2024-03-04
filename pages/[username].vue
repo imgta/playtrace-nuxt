@@ -5,30 +5,18 @@ definePageMeta({
 const route = useRoute();
 const { userByUsername, profile, socials } = useProfile();
 
-const themeCookie = useCookie('selectedTheme');
-const pageTheme = ref(themeCookie).value;
-const { formBg } = useTheme(pageTheme);
+const { formBg } = useTheme();
 
 const popAvatar = ref<any | null>(null);
 const pageUsername = route.params.username as string;
 const { myUsername } = useAuth();
 const showEdit = ref(false);
 // ----------------------------------------------------------------
-onMounted(() => {
-    userByUsername(pageUsername); ;
-});
-watchEffect(() => {
-    // console.log('pageUsername', pageUsername);
-    // console.log('myUsername', myUsername);
-});
+onMounted(() => { userByUsername(pageUsername); });
 // ----------------------------------------------------------------
 function openAvatar() {
-    if (myUsername === pageUsername) {
-        popAvatar.value.showModal();
-    }
+    if (myUsername === pageUsername) { popAvatar.value.showModal(); }
 }
-
-// ----------------------------------------------------------------
 </script>
 
 <template>

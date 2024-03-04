@@ -1,6 +1,4 @@
 <script setup lang="ts">
-const { articleDate } = useDateTime();
-
 const myArr = ['Nuxt 3', 'Strapi', 'Vue.js'];
 </script>
 

@@ -1,27 +1,18 @@
+import type { StrapiUser } from '@nuxtjs/strapi/dist/runtime/types';
+
 export default function () {
     const { toast } = useMisc();
     const { logout, login, register } = useStrapiAuth();
     const client = useStrapiClient();
-    const { strapi: { url: appHost }, weatherAPI } = useRuntimeConfig().public;
-    const expiry = new Date(Date.now() + 86400000); // expiry set to +1 day
-    const userCookie: any = useCookie('userCookie', { expires: expiry });
-    const { value: token } = computed(() => {
-        const token = useStrapiToken().value;
-        return token;
-    });
-    const user = useStrapiUser();
-    const myUsername = user.value?.username;
+    const token = useStrapiToken();
+    const { url: appHost } = useRuntimeConfig().public.strapi;
 
-    const { value: myId } = computed(() => {
-        if (token) {
-            try {
-                const { id } = useStrapiUser().value as any;
-                return id;
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    });
+    const expiry = new Date(Date.now() + 86400000); // expiry set to +1 day
+    const userCookie = useCookie('userCookie', { expires: expiry }) as Record<string, any>;
+
+    const user = useStrapiUser() as Ref<StrapiUser>;
+    const myId = computed(() => { return user?.value?.id as number | undefined; }).value;
+    const myUsername = computed(() => { return user?.value?.username; }).value;
 
     const isAuth = ref<boolean>(false);
     const userData = reactive({
@@ -31,26 +22,26 @@ export default function () {
         initials: '',
         avatar: '',
         profileUrl: '',
-    }) as Record<string, any>;
+    });
 
     const loginData = reactive({
         username: '',
         password: '',
-    }) as Record<string, any>;
+    });
 
     const signupData = reactive({
         fullName: '',
         email: '',
         username: '',
         password: '',
-    }) as Record<string, any>;
+    });
 
     const popLogin = ref();
     const popSignup = ref();
     const popRef = reactive({
         switch: '',
         drawer: false,
-    }) as Record<string, any>;
+    });
 
     function popModal(action: 'open' | 'close', form: 'login' | 'signup' | 'both') {
         if (action === 'open') {
@@ -81,9 +72,7 @@ export default function () {
 
     async function getUser(userId: number) {
         try {
-            const userRes: Record<string, any> = await client(`${appHost}api/users/${userId}?populate=*`, {
-                method: 'GET'
-            });
+            const userRes = await client(`${appHost}api/users/${userId}?populate=*`, { method: 'GET' }) as Record<string, any>;
             const { username, fullName, avatar } = userRes;
 
             userData.username = username;
@@ -91,7 +80,7 @@ export default function () {
             if (avatar) {
                 userData.avatar = avatar?.formats?.thumbnail?.url;
             }
-            userData.initials = fullName.split(' ').map((name: any) => name[0].toUpperCase()).join('');
+            userData.initials = fullName.split(' ').map((name: string) => name[0].toUpperCase()).join('');
             userData.profileUrl = `/${userData.username}`;
             userCookie.value = userData;
             isAuth.value = true;
@@ -100,14 +89,12 @@ export default function () {
         }
     }
 
-    function onDemo() {
+    async function onDemo() {
         popLogin.value.close();
         popSignup.value.close();
         loginData.username = 'demo';
         loginData.password = 'demo123';
-        try {
-            onLogin();
-        } catch (error) {
+        try { await onLogin(); } catch (error) {
             console.error(error);
         }
     }
@@ -130,21 +117,16 @@ export default function () {
             userData.id = loginRes.user?.value?.id;
 
             popModal('close', 'login');
-            getUser(userData.id);
+            await getUser(userData.id as number);
+            await navigateTo('/events');
             toast.success('User logged in!', { timeout: 1500 });
-            setTimeout(() => {
-                navigateTo('/events');
-            }, 750);
         } catch (error: any) {
             toast.error((error.error.message as string), { timeout: 1750 });
             console.error(error);
         }
     }
 
-    function isFullName(fullName: string): boolean {
-        const bothNames = fullName.split(' ');
-        return bothNames.length >= 2;
-    }
+    function isFullName(fullName: string): boolean { return fullName.split(' ').length >= 2; }
     function isValidEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
@@ -168,34 +150,30 @@ export default function () {
 
         const { fullName, email, username, password } = signupData;
         try {
-            const signupRes = await register({ username: username, email: email, fullName: fullName, password: password, });
-            userData.id = signupRes.user?.value?.id;
+            const signupRes = await register({ username, email, fullName, password });
+            userData.id = signupRes.user?.value?.id as number;
 
-            getUser(userData.id);
+            await getUser(userData.id as number);
             popModal('close', 'signup');
             // Clear signupData input fields
-            Object.keys(signupData).forEach(key => signupData[key] = '');
+            Object.keys(signupData).forEach((key: string) => signupData[key as keyof typeof signupData] = '');
+            await navigateTo('/events');
             toast.success('User registered!', { timeout: 1500 });
-            setTimeout(() => {
-                navigateTo('/events');
-            }, 750);
         } catch (error: any) {
             toast.error((error.error.message as string), { timeout: 1500 });
             console.error(error);
         }
     }
 
-    function onLogout() {
+    async function onLogout() {
         try {
             logout();
 
-            userData.id = null;
+            userData.id = undefined;
             isAuth.value = false;
             popRef.drawer = false;
+            await navigateTo('/');
             toast.info('User logged out.', { timeout: 1000 });
-            setTimeout(() => {
-                navigateTo('/');
-            }, 750);
         } catch (error) {
             console.error(error);
         }
@@ -203,8 +181,8 @@ export default function () {
 
     return {
         isAuth,
+        user,
         myId,
-        token,
         appHost,
         client,
         userData,

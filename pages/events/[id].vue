@@ -4,12 +4,10 @@ definePageMeta({
 });
 
 const { myId } = useAuth();
-const { shortDate } = useDateTime();
 const { isLoading, createInviteAPI, popDelete, getEvent, eventData, getInvite, rsvpEvent, deleteEvent, openDelete, closeDelete, userRsvp, inviteId, eventObj, createInvites, inviteUser, removeInvite, userSearch, selectInviteUser, matchingUsers, debouncedUserSearch } = useEvent();
 
-const themeCookie = useCookie('selectedTheme');
-const pageTheme = ref(themeCookie).value as any;
-const { formBg } = useTheme(pageTheme);
+const { formBg, themeCookie } = useTheme();
+
 const eventBtnClass = ref('');
 const inputClass = ref('w-[10rem]');
 
@@ -17,7 +15,7 @@ const eventId = Number(useRoute().params.id);
 // ----------------------------------------------------------------
 onMounted(() => {
     getEvent(eventId);
-    getInvite(eventId, myId);
+    getInvite(eventId, myId as number);
 });
 watchEffect(() => {
     if (themeCookie.value === 'corporate') {
